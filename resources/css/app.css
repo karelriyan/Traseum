@@ -1,4 +1,5 @@
 @import 'tailwindcss';
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700;800&display=swap');
 
 @plugin 'tailwindcss-animate';
 
@@ -9,7 +10,7 @@
 
 @theme {
     --font-sans:
-        'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        'Poppins', 'Instrument Sans', ui-sans-serif, system-ui, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 
     --radius-lg: var(--radius);
     --radius-md: calc(var(--radius) - 2px);
@@ -156,4 +157,31 @@
     body {
         @apply bg-background text-foreground;
     }
+}
+
+/* Custom Poppins Font Classes for Loading Page */
+.font-poppins {
+    font-family: 'Poppins', sans-serif;
+}
+
+.loading-title {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 700;
+    letter-spacing: 0.1em;
+}
+
+.loading-subtitle {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 500;
+    letter-spacing: 0.05em;
+}
+
+.loading-message {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
+}
+
+.loading-footer {
+    font-family: 'Poppins', sans-serif;
+    font-weight: 400;
 }
