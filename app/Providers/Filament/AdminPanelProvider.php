@@ -24,7 +24,7 @@ class AdminPanelProvider extends PanelProvider
     {
         return $panel
             ->default()
-            ->id('admin') 
+            ->id('admin')
             ->path('admin')
             ->login()
             ->colors([
@@ -53,6 +53,12 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->authMiddleware([
                 Authenticate::class,
+
+
             ]);
+    }
+    public function boot(): void
+    {
+        app()->setLocale('id');
     }
 }
