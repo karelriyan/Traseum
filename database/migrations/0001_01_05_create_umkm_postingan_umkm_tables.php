@@ -18,9 +18,11 @@ return new class extends Migration
                 ->unique()
                 ->index()
                 ->name('fk_umkm_nasabah');
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
             $table->string('nama_umkm', 255);
             $table->text('deskripsi');
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('postingan_umkm', function (Blueprint $table) {
@@ -31,7 +33,9 @@ return new class extends Migration
                 ->name('fk_postingan_umkm_umkm');
             $table->string('judul_postingan', 255);
             $table->decimal('harga', 15, 2)->nullable();
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 

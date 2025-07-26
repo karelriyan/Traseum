@@ -17,10 +17,12 @@ return new class extends Migration
                 ->constrained('sampah')
                 ->index()
                 ->name('fk_sampah_summaries_sampah');
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
             $table->date('tanggal_summary')->index();
             $table->decimal('total_berat_masuk', 15, 2);
             $table->decimal('total_berat_keluar', 15, 2);
             $table->unique(['sampah_id', 'tanggal_summary']);
+            $table->softDeletes();
         });
     }
 

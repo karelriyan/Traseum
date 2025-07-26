@@ -16,11 +16,13 @@ return new class extends Migration {
                 ->constrained('rekening')
                 ->index()
                 ->name('fk_saldo_transactions_rekening');
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
             $table->decimal('amount', 15, 2);
             $table->string('transactable_type', 255)->index();
             $table->ulid('transactable_id')->index();
             $table->string('description', 255);
             $table->timestamps();
+            $table->softDeletes();
         });
 
         Schema::create('poin_transactions', function (Blueprint $table) {
@@ -29,11 +31,13 @@ return new class extends Migration {
                 ->constrained('rekening')
                 ->index()
                 ->name('fk_poin_transactions_rekening');
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
             $table->bigInteger('amount');
             $table->string('transactable_type', 255)->index();
             $table->ulid('transactable_id')->index();
             $table->string('description', 255);
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
