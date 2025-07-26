@@ -18,7 +18,7 @@ return new class extends Migration
                 ->unique()
                 ->index()
                 ->name('fk_umkm_nasabah');
-            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_umkm_user');
             $table->string('nama_umkm', 255);
             $table->text('deskripsi');
             $table->timestamps();
@@ -33,7 +33,7 @@ return new class extends Migration
                 ->name('fk_postingan_umkm_umkm');
             $table->string('judul_postingan', 255);
             $table->decimal('harga', 15, 2)->nullable();
-            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_positngan_umkm_user');
             $table->timestamps();
             $table->softDeletes();
         });

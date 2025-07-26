@@ -13,7 +13,7 @@ return new class extends Migration {
         Schema::create('sampah', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->string('jenis_sampah', 255)->unique();
-            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_sampah_user');
             $table->decimal('saldo_per_kg', 15, 2);
             $table->integer('poin_per_kg');
             $table->timestamps();
@@ -26,7 +26,7 @@ return new class extends Migration {
                 ->constrained('rekening')
                 ->index()
                 ->name('fk_setor_sampah_rekening');
-            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_setor_sampah_user');
             $table->decimal('total_saldo_dihasilkan', 15, 2);
             $table->bigInteger('total_poin_dihasilkan');
             $table->timestamps();
@@ -44,7 +44,7 @@ return new class extends Migration {
                 ->index()
                 ->name('fk_detail_setor_sampah_sampah');
             $table->decimal('berat', 8, 2);
-            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_detail_setor_sampah_user');
             $table->softDeletes();
         });
 
@@ -54,7 +54,7 @@ return new class extends Migration {
                 ->constrained('sampah')
                 ->index()
                 ->name('fk_sampah_keluar_sampah');
-            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_sampah_keluar_user');
             $table->decimal('berat_keluar', 15, 2);
             $table->date('tanggal_keluar')->index();
             $table->text('keterangan')->nullable();

@@ -16,7 +16,7 @@ return new class extends Migration {
                 ->constrained('rekening')
                 ->index()
                 ->name('fk_saldo_transactions_rekening');
-            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_saldo_transactions_user');
             $table->decimal('amount', 15, 2);
             $table->string('transactable_type', 255)->index();
             $table->ulid('transactable_id')->index();
@@ -31,7 +31,7 @@ return new class extends Migration {
                 ->constrained('rekening')
                 ->index()
                 ->name('fk_poin_transactions_rekening');
-            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index();
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_poin_transactions_rekening_user');
             $table->bigInteger('amount');
             $table->string('transactable_type', 255)->index();
             $table->ulid('transactable_id')->index();
