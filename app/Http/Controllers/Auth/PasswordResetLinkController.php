@@ -29,13 +29,21 @@ class PasswordResetLinkController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'email' => 'required|email',
+            'nik' => 'required|string|digits:16',
         ]);
 
-        Password::sendResetLink(
-            $request->only('email')
-        );
+        // Cari user berdasarkan NIK
+        $user = \App\Models\User::where('nik', $request->nik)->first();
+        
+        if (!$user) {
+            return back()->withErrors(['nik' => 'NIK tidak ditemukan dalam sistem.']);
+        }
 
-        return back()->with('status', __('A reset link will be sent if the account exists.'));
+        // Kirim reset link ke email user
+        $status = Password::sendResetLink(['email' => $user->email]);
+
+        return $status == Password::RESET_LINK_SENT
+            ? back()->with('status', 'Link reset password telah dikirim ke email yang terdaftar.')
+            : back()->withErrors(['nik' => 'Terjadi kesalahan dalam mengirim link reset password.']);
     }
 }
