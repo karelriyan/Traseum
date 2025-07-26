@@ -15,6 +15,8 @@ class SampahSummaryResource extends Resource
 {
     protected static ?string $model = SampahSummary::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $navigationIcon = 'heroicon-o-chart-bar';
 
     protected static ?string $navigationGroup = 'Modul Komunitas & Optimasi';

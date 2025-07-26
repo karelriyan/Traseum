@@ -26,6 +26,11 @@ class SetorSampah extends Model
         return $this->hasMany(DetailSetorSampah::class);
     }
 
+    public function sampah()
+    {
+        return $this->belongsTo(Sampah::class);
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

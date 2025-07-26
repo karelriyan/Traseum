@@ -7,6 +7,7 @@ use App\Models\Sampah;
 use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Resources\Forms\Form;
+use Filament\Support\RawJs;
 use Filament\Resources\Tables\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -17,27 +18,33 @@ class SampahResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-trash';
 
+    protected static ?string $label = 'Kategori Sampah';
+
     protected static ?string $navigationGroup = 'Modul Operasional Bank Sampah';
 
-    protected static ?int $navigationSort = 1;
+    protected static ?int $navigationSort = 2;
 
     public static function form(Forms\Form $form): Forms\Form
     {
         return $form
             ->schema([
                 Forms\Components\TextInput::make('jenis_sampah')
-                    ->label('Jenis Sampah')
+                    ->label('Nama Jenis Sampah')
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('saldo_per_kg')
-                    ->label('Saldo per Kg')
+                    ->label('Saldo per-Kg atau Liter')
+                    ->prefix('Rp')
+                    ->mask(RawJs::make('$money($input)'))
+                    ->stripCharacters(',')
                     ->numeric()
                     ->required(),
                 Forms\Components\TextInput::make('poin_per_kg')
-                    ->label('Poin per Kg')
+                    ->label('Poin per-Kg atau Liter')
+                    ->postfix('Poin')
                     ->numeric()
                     ->required(),
-            ]);
+            ])->columns(1);
     }
 
     public static function table(Tables\Table $table): Tables\Table
@@ -45,11 +52,9 @@ class SampahResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('jenis_sampah')->label('Jenis Sampah')->sortable()->searchable(),
-                TextColumn::make('saldo_per_kg')->label('Saldo per Kg')->sortable(),
-                TextColumn::make('poin_per_kg')->label('Poin per Kg')->sortable(),
-                TextColumn::make('user.name')->label('User')->sortable()->searchable(),
-                TextColumn::make('created_at')->dateTime()->label('Dibuat'),
-                TextColumn::make('updated_at')->dateTime()->label('Diubah'),
+                TextColumn::make('saldo_per_kg')->label('Saldo per-Kg atau Liter')->sortable()->money('IDR'),
+                TextColumn::make('poin_per_kg')->label('Poin per-Kg atau Liter')->sortable(),
+                TextColumn::make('user.name')->label('Pembuat Data')->sortable()->searchable(),
             ])
             ->filters([
                 //

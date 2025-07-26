@@ -15,6 +15,8 @@ class PostinganUmkmResource extends Resource
 {
     protected static ?string $model = PostinganUmkm::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $navigationIcon = 'heroicon-o-arrow-up-on-square-stack';
 
     protected static ?string $navigationGroup = 'Modul Komunitas & Optimasi';

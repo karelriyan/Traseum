@@ -12,6 +12,9 @@ class Sampah extends Model
 {
     use HasUlids, SoftDeletes, HasFactory;
 
+    public $incrementing = false;
+    protected $keyType = 'string';
+
     protected $table = 'sampah';
 
     protected $guarded = [];
