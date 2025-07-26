@@ -73,7 +73,7 @@ class KartuKeluargaResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListKartuKeluarga::route('/'),
+            'index' => Pages\ListKartuKeluargas::route('/'),
             'create' => Pages\CreateKartuKeluarga::route('/create'),
             'edit' => Pages\EditKartuKeluarga::route('/{record}/edit'),
         ];

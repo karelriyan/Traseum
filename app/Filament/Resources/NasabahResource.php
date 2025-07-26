@@ -81,7 +81,7 @@ class NasabahResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListNasabah::route('/'),
+            'index' => Pages\ListNasabahs::route('/'),
             'create' => Pages\CreateNasabah::route('/create'),
             'edit' => Pages\EditNasabah::route('/{record}/edit'),
         ];

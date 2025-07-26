@@ -15,7 +15,7 @@ class DetailSetorSampahResource extends Resource
 {
     protected static ?string $model = DetailSetorSampah::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-collection';
+    protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
     protected static ?string $navigationGroup = 'Modul Operasional Bank Sampah';
 
@@ -82,7 +82,7 @@ class DetailSetorSampahResource extends Resource
     public static function getPages(): array
     {
         return [
-            'index' => Pages\ListDetailSetorSampah::route('/'),
+            'index' => Pages\ListDetailSetorSampahs::route('/'),
             'create' => Pages\CreateDetailSetorSampah::route('/create'),
             'edit' => Pages\EditDetailSetorSampah::route('/{record}/edit'),
         ];
