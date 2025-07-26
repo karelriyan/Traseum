@@ -12,6 +12,8 @@ class SampahKeluar extends Model
 {
     use HasUlids, SoftDeletes, HasFactory;
 
+    protected $table = 'sampah_keluar';
+
     protected $guarded = [];
 
     public function sampah()

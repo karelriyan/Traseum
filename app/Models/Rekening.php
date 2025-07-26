@@ -12,6 +12,7 @@ class Rekening extends Model
 {
     use HasUlids, SoftDeletes, HasFactory;
 
+    protected $table = 'rekening';
     protected $guarded = [];
 
     public function kartuKeluarga()

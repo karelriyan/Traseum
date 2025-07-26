@@ -11,6 +11,7 @@ class DetailSetorSampah extends Model
 {
     use SoftDeletes, HasFactory;
 
+    protected $table = 'detail_setor_sampah';
     protected $guarded = [];
 
     public function setorSampah()

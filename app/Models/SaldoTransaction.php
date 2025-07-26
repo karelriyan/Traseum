@@ -12,22 +12,7 @@ class SaldoTransaction extends Model
 {
     use HasUlids, SoftDeletes, HasFactory;
 
-    protected $guarded = [];
-
-    public function rekening()
-    {
-        return $this->belongsTo(Rekening::class);
-    }
-
-    public function user()
-    {
-        return $this->belongsTo(User::class);
-    }
-}
-
-class PoinTransaction extends Model
-{
-    use HasUlids, SoftDeletes, HasFactory;
+    protected $table = 'saldo_transactions';
 
     protected $guarded = [];
 
@@ -50,4 +35,5 @@ class PoinTransaction extends Model
         });
     }
 }
+
 

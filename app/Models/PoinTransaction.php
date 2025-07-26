@@ -8,21 +8,17 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 
-class KartuKeluarga extends Model
+class PoinTransaction extends Model
 {
     use HasUlids, SoftDeletes, HasFactory;
 
-    protected $table = 'kartu_keluarga';
-    protected $guarded = [];
+    protected $table = 'poin_transactions';
 
-    public function nasabah()
-    {
-        return $this->hasMany(Nasabah::class);
-    }
+    protected $guarded = [];
 
     public function rekening()
     {
-        return $this->hasOne(Rekening::class);
+        return $this->belongsTo(Rekening::class);
     }
 
     public function user()
@@ -32,9 +28,9 @@ class KartuKeluarga extends Model
 
     protected static function booted(): void
     {
-        static::creating(function ($KartuKeluarga) {
-            if (!$KartuKeluarga->user_id && Auth::check()) {
-                $KartuKeluarga->user_id = Auth::id();
+        static::creating(function ($SaldoTransaction) {
+            if (!$SaldoTransaction->user_id && Auth::check()) {
+                $SaldoTransaction->user_id = Auth::id();
             }
         });
     }

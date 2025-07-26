@@ -12,6 +12,8 @@ class SetorSampah extends Model
 {
     use HasUlids, SoftDeletes, HasFactory;
 
+    protected $table = 'setor_sampah';
+
     protected $guarded = [];
 
     public function rekening()

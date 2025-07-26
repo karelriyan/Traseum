@@ -12,6 +12,8 @@ class Umkm extends Model
 {
     use HasUlids, SoftDeletes, HasFactory;
 
+    protected $table = 'umkm';
+
     protected $guarded = [];
 
     public function nasabah()

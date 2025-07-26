@@ -12,6 +12,8 @@ class PostinganUmkm extends Model
 {
     use HasUlids, SoftDeletes, HasFactory;
 
+    protected $table = 'postingan_umkm';
+
     protected $guarded = [];
 
     public function umkm()

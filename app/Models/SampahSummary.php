@@ -11,6 +11,8 @@ class SampahSummary extends Model
 {
     use SoftDeletes, HasFactory;
 
+    protected $table = 'sampah_summaries';
+
     protected $guarded = [];
 
     public function sampah()

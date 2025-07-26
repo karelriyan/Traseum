@@ -12,6 +12,7 @@ class Nasabah extends Model
 {
     use HasUlids, SoftDeletes, HasFactory;
 
+    protected $table = 'nasabah';
     protected $guarded = [];
 
     public function kartuKeluarga()
