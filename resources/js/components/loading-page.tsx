@@ -39,7 +39,7 @@ export default function LoadingPage({ message, onComplete, duration = 3500 }: Lo
                 </h1>
 
                 {/* Subtitle */}
-                <p className="loading-subtitle text-lg md:text-xl font-semi-bold mb-8 tracking-wide animate-fadeIn leading-relaxed" style={{animationDelay: '0.5s'}}>
+                <p className="loading-subtitle text-lg md:text-xl font-medium mb-8 animate-fadeIn leading-relaxed" style={{animationDelay: '0.5s'}}>
                     Sistem Bank Sampah Digital<br />
                     Desa Muntang
                 </p>

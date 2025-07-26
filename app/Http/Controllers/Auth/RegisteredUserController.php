@@ -32,13 +32,14 @@ class RegisteredUserController extends Controller
     {
         $request->validate([
             'name' => 'required|string|max:255',
-            'email' => 'required|string|lowercase|email|max:255|unique:'.User::class,
+            'nik' => 'required|string|digits:16|unique:'.User::class,
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ]);
 
         $user = User::create([
             'name' => $request->name,
-            'email' => $request->email,
+            'nik' => $request->nik,
+            'email' => $request->nik . '@ciptamuri.local', // Generate dummy email dari NIK
             'password' => Hash::make($request->password),
         ]);
 
