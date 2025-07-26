@@ -37,13 +37,6 @@ class UmkmResource extends Resource
                 Forms\Components\Textarea::make('deskripsi')
                     ->label('Deskripsi')
                     ->required(),
-                Forms\Components\BelongsToSelect::make('user_id')
-                    ->relationship('user', 'name')
-                    ->label('User')
-                    ->searchable()
-                    ->nullable(),
-                Forms\Components\DateTimePicker::make('created_at')->disabled(),
-                Forms\Components\DateTimePicker::make('updated_at')->disabled(),
             ]);
     }
 

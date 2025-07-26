@@ -10,10 +10,14 @@ use Filament\Resources\Forms\Form;
 use Filament\Resources\Tables\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Components\Section;
+use Filament\Forms\Components\TextInput;
 
 class NasabahResource extends Resource
 {
     protected static ?string $model = Nasabah::class;
+
+    protected static bool $shouldRegisterNavigation = false;
 
     protected static ?string $navigationIcon = 'heroicon-o-user-group';
 
@@ -26,10 +30,11 @@ class NasabahResource extends Resource
         return $form
             ->schema([
                 Forms\Components\BelongsToSelect::make('kartu_keluarga_id')
-                    ->relationship('kartuKeluarga', 'nomor_kk')
+                    ->relationship('kartuKeluarga', 'no_kk')
                     ->label('Kartu Keluarga')
                     ->required()
-                    ->searchable(),
+                    ->searchable()
+                    ->createOptionForm(self::getKKForm()),
                 Forms\Components\TextInput::make('nama')
                     ->label('Nama Lengkap')
                     ->required()
@@ -38,14 +43,8 @@ class NasabahResource extends Resource
                     ->label('NIK')
                     ->required()
                     ->maxLength(50),
-                Forms\Components\BelongsToSelect::make('user_id')
-                    ->relationship('user', 'name')
-                    ->label('User')
-                    ->searchable()
-                    ->nullable(),
-                Forms\Components\DateTimePicker::make('created_at')->disabled(),
-                Forms\Components\DateTimePicker::make('updated_at')->disabled(),
             ]);
+
     }
 
     public static function table(Tables\Table $table): Tables\Table
@@ -54,7 +53,7 @@ class NasabahResource extends Resource
             ->columns([
                 TextColumn::make('nama')->label('Nama')->sortable()->searchable(),
                 TextColumn::make('nik')->label('NIK')->sortable()->searchable(),
-                TextColumn::make('kartuKeluarga.nomor_kk')->label('Nomor KK')->sortable()->searchable(),
+                TextColumn::make('kartuKeluarga.no_kk')->label('Nomor KK')->sortable()->searchable(),
                 TextColumn::make('user.name')->label('User')->sortable()->searchable(),
                 TextColumn::make('created_at')->dateTime()->label('Dibuat'),
                 TextColumn::make('updated_at')->dateTime()->label('Diubah'),
@@ -84,6 +83,24 @@ class NasabahResource extends Resource
             'index' => Pages\ListNasabahs::route('/'),
             'create' => Pages\CreateNasabah::route('/create'),
             'edit' => Pages\EditNasabah::route('/{record}/edit'),
+        ];
+    }
+
+    private static function getKKForm(): array
+    {
+        return [
+            Section::make('')
+                ->schema([
+                    TextInput::make('no_kk')
+                        ->label('Nomor KK (Kartu Keluarga)')
+                        ->required()
+                        ->unique()
+                        ->minLength(16)
+                        ->maxLength(16),
+                    TextInput::make('nama_kepala_keluarga')
+                        ->label('Nama Kepala Keluarga')
+                        ->required(),
+                ])->columns(1),
         ];
     }
 }

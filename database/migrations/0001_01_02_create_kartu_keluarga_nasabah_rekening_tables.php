@@ -12,7 +12,8 @@ return new class extends Migration {
     {
         Schema::create('kartu_keluarga', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->string('nomor_kk', 50)->unique()->index();
+            $table->string('no_kk', 16)->unique()->index();
+            $table->string('nama_kepala_keluarga', 100);
             $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_kartu_keluarga_user');
 
             $table->timestamps();

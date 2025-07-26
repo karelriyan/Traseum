@@ -44,13 +44,6 @@ class SaldoTransactionResource extends Resource
                 Forms\Components\TextInput::make('description')
                     ->label('Deskripsi')
                     ->maxLength(255),
-                Forms\Components\BelongsToSelect::make('user_id')
-                    ->relationship('user', 'name')
-                    ->label('User')
-                    ->searchable()
-                    ->nullable(),
-                Forms\Components\DateTimePicker::make('created_at')->disabled(),
-                Forms\Components\DateTimePicker::make('updated_at')->disabled(),
             ]);
     }
 

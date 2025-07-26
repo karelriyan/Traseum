@@ -18,6 +18,8 @@ class KartuKeluargaResource extends Resource
 {
     protected static ?string $model = KartuKeluarga::class;
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $navigationIcon = 'heroicon-o-home';
 
     protected static ?string $navigationGroup = 'Manajemen Pengguna & Keuangan';
