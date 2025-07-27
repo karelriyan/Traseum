@@ -27,7 +27,7 @@ class RekeningResource extends Resource
             ->schema([
                 Section::make('Informasi Kartu Keluarga')
                     ->schema([
-                        TextInput::make('kartu_keluarga_id')
+                        Select::make('kartu_keluarga_id')
                             ->relationship('kartuKeluarga', 'no_kk')
                             ->label('Nomor KK')
                             ->searchable()
