@@ -52,16 +52,17 @@ class RekeningResource extends Resource
                             TextInput::make('nama_kepala_keluarga')
                                 ->label('Nama Kepala Keluarga')
                                 ->required(),
+                            Select::make('gender_kepala_keluarga')
+                                ->label('Jenis Kelamin Kepala Keluarga')
                         ])
                         ->afterStateUpdated(function ($state, callable $set) {
-                            if ($state) {
-                                $kk = KartuKeluarga::find($state);
-                                $set('nama_kepala_keluarga_display', $kk?->nama_kepala_keluarga);
-                                $set('nik_kepala_keluarga_display', $kk?->nik_kepala_keluarga);
-                            } else {
-                                $set('nama_kepala_keluarga_display', null);
-                                $set('nik_kepala_keluarga_display', null);
-                            }
+                            fn($state, callable $set) => $state
+                                ? ($kk = KartuKeluarga::find($state)) &&
+                                $set('nama_kepala_keluarga_display', $kk?->nama_kepala_keluarga) &&
+                                $set('nik_kepala_keluarga_display', $kk?->nik_kepala_keluarga) &&
+                                $set('gender_kepala_keluarga_display', $kk?->gender_kepala_keluarga) &&
+                                $set('telepon_kepala_keluarga_display', $kk?->telepon_kepala_keluarga)
+                                : ($set('nama_kepala_keluarga_display', null) && $set('nik_kepala_keluarga_display', null));
                         }),
                     TextInput::make('nama_kepala_keluarga_display')
                         ->label('Nama Kepala Keluarga')
