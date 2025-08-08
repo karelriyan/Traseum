@@ -17,6 +17,8 @@ class DetailSetorSampahResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-clipboard-document-list';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $navigationGroup = 'Modul Operasional Bank Sampah';
 
     protected static ?int $navigationSort = 3;

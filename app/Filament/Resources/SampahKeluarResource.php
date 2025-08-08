@@ -19,6 +19,8 @@ class SampahKeluarResource extends Resource
 
     protected static ?string $navigationGroup = 'Modul Operasional Bank Sampah';
 
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?int $navigationSort = 4;
 
     public static function form(Forms\Form $form): Forms\Form

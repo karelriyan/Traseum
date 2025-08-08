@@ -26,6 +26,11 @@ class SaldoTransaction extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function transactable()
+    {
+        return $this->morphTo();
+    }
+
     protected static function booted(): void
     {
         static::creating(function ($SaldoTransaction) {
@@ -35,5 +40,3 @@ class SaldoTransaction extends Model
         });
     }
 }
-
-

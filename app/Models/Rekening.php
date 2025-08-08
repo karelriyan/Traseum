@@ -15,11 +15,6 @@ class Rekening extends Model
     protected $table = 'rekening';
     protected $guarded = [];
 
-    public function kartuKeluarga()
-    {
-        return $this->belongsTo(KartuKeluarga::class);
-    }
-
     public function saldoTransactions()
     {
         return $this->hasMany(SaldoTransaction::class);
@@ -38,6 +33,38 @@ class Rekening extends Model
     public function user()
     {
         return $this->belongsTo(User::class);
+    }
+
+    /**
+     * Menghitung saldo saat ini berdasarkan transaksi
+     */
+    public function getCurrentBalanceAttribute()
+    {
+        $credits = $this->saldoTransactions()
+            ->where('type', 'credit')
+            ->sum('amount');
+            
+        $debits = $this->saldoTransactions()
+            ->where('type', 'debit')
+            ->sum('amount');
+            
+        return $credits - $debits;
+    }
+
+    /**
+     * Memeriksa apakah saldo mencukupi untuk penarikan
+     */
+    public function hasSufficientBalance($amount)
+    {
+        return $this->current_balance >= $amount;
+    }
+
+    /**
+     * Mendapatkan saldo dalam format rupiah
+     */
+    public function getFormattedBalanceAttribute()
+    {
+        return 'Rp ' . number_format($this->current_balance, 0, ',', '.');
     }
 
     protected static function booted(): void

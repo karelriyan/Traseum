@@ -4,14 +4,15 @@ namespace App\Filament\Resources;
 
 use App\Filament\Resources\SetorSampahResource\Pages;
 use App\Models\SetorSampah;
+use App\Models\Rekening;
 use Filament\Forms;
-use Filament\Resources\Resource;
-use Filament\Resources\Forms\Form;
-use Filament\Resources\Tables\Table;
-use Filament\Tables;
-use Filament\Tables\Columns\TextColumn;
+use Filament\Forms\Form;
 use Filament\Forms\Components\Section;
-use Illuminate\Database\Eloquent\Model; // Import Model
+use Filament\Forms\Components\Actions\Action;
+use Filament\Resources\Resource;
+use Filament\Tables;
+use Filament\Tables\Table;
+use Filament\Tables\Columns\TextColumn;
 
 class SetorSampahResource extends Resource
 {
@@ -19,133 +20,136 @@ class SetorSampahResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-archive-box';
 
-    protected static ?string $navigationGroup = 'Modul Operasional Bank Sampah';
+    protected static ?string $navigationGroup = 'Operasional Bank Sampah';
 
     protected static ?int $navigationSort = 1;
 
-    public static function form(Forms\Form $form): Forms\Form
+    public static function form(Form $form): Form
     {
         return $form
             ->schema([
                 Section::make('Informasi Sampah Masuk')
                     ->schema([
-                        Forms\Components\Select::make('rekening_id') // Changed to Select for better UX
-                            ->relationship('rekening', 'id')
-                            ->label('Rekening')
+                        Forms\Components\Select::make('rekening_id')
+                            ->label('Pilih Rekening')
                             ->required()
-                            ->searchable()
-                            ->preload(),
-                        Forms\Components\Select::make('sampah_id') // Changed to Select
-                            ->relationship('sampah', 'jenis_sampah') // Display jenis_sampah
+                            ->validationMessages([
+                                'required' => 'Rekening tidak boleh kosong'
+                            ])
+                            ->options(function () {
+                                return Rekening::query()
+                                    ->select('id', 'nama', 'nik')
+                                    ->get()
+                                    ->mapWithKeys(fn($rekening) => [$rekening->id => "{$rekening->nama} - {$rekening->nik}"]);
+                            }),
+                        Forms\Components\Select::make('sampah_id')
+                            ->relationship('sampah', 'jenis_sampah')
                             ->label('Jenis Sampah')
                             ->required()
                             ->preload()
                             ->searchable()
-                            ->reactive() // Make it reactive
-                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                $sampah = \App\Models\Sampah::find($state);
-                                $berat = (float) $get('berat'); // Get current berat value
-                    
-                                if ($sampah && $berat > 0) {
-                                    // Convert gram/mL to kg/liter (divide by 1000)
-                                    $berat_kg_liter = $berat / 1000;
-                                    $total_saldo = $sampah->saldo_per_kg * $berat_kg_liter;
-                                    $total_poin = $sampah->poin_per_kg * $berat_kg_liter;
-
-                                    $set('total_saldo_dihasilkan', $total_saldo);
-                                    $set('total_poin_dihasilkan', $total_poin);
-                                } else {
-                                    $set('total_saldo_dihasilkan', 0);
-                                    $set('total_poin_dihasilkan', 0);
-                                }
-                            }),
+                            ->reactive(),
                         Forms\Components\TextInput::make('berat')
                             ->label('Berat')
                             ->postfix('gram atau mL')
                             ->numeric()
                             ->required()
-                            ->reactive() // Make it reactive
-                            ->afterStateUpdated(function ($state, callable $set, callable $get) {
-                                $sampah_id = $get('sampah_id');
-                                $sampah = \App\Models\Sampah::find($sampah_id);
-                                $berat = (float) $state;
-
-                                if ($sampah && $berat > 0) {
-                                    // Convert gram/mL to kg/liter (divide by 1000)
-                                    $berat_kg_liter = $berat / 1000;
-                                    $total_saldo = $sampah->saldo_per_kg * $berat_kg_liter;
-                                    $total_poin = $sampah->poin_per_kg * $berat_kg_liter;
-
-                                    $set('total_saldo_dihasilkan', $total_saldo);
-                                    $set('total_poin_dihasilkan', $total_poin);
-                                } else {
-                                    $set('total_saldo_dihasilkan', 0);
-                                    $set('total_poin_dihasilkan', 0);
-                                }
+                            ->reactive()
+                            ->afterStateUpdated(function (callable $set) {
+                                $set('calculation_performed', false);
+                                $set('total_saldo_dihasilkan', 0);
+                                $set('total_poin_dihasilkan', 0);
                             }),
                     ]),
 
-                Section::make('Perhitungan Otomatis')
-                    ->Schema([
-                        Forms\Components\TextInput::make('total_saldo_dihasilkan')
-                            ->label('Total Saldo Dihasilkan')
-                            ->numeric()
-                            ->hidden() // Make it hidden
-                            ->dehydrated(true), // Ensure it's saved to DB
+                Section::make('Perhitungan Penambahan Saldo')
+                    ->schema([
+                        Forms\Components\Actions::make([
+                            Action::make('hitung')
+                                ->label('Hitung')
+                                ->action(function (callable $get, callable $set) {
+                                    $sampah_id = $get('sampah_id');
+                                    $berat = (float) $get('berat');
 
-                        Forms\Components\Placeholder::make('total_saldo_dihasilkan_display') // New placeholder for display
+                                    if (!$sampah_id || !$berat || $berat <= 0) {
+                                        $set('total_saldo_dihasilkan', 0);
+                                        $set('total_poin_dihasilkan', 0);
+                                        return;
+                                    }
+
+                                    $sampah = \App\Models\Sampah::find($sampah_id);
+                                    if ($sampah) {
+                                        $berat_kg_liter = $berat / 1000;
+                                        $total_saldo = $sampah->saldo_per_kg * $berat_kg_liter;
+                                        $total_poin = $sampah->poin_per_kg * $berat_kg_liter;
+
+                                        $set('total_saldo_dihasilkan', $total_saldo);
+                                        $set('total_poin_dihasilkan', $total_poin);
+                                        $set('calculation_performed', true);
+                                    } else {
+                                        $set('total_saldo_dihasilkan', 0);
+                                        $set('total_poin_dihasilkan', 0);
+                                        $set('calculation_performed', false);
+                                    }
+                                })
+                                ->color('primary')
+                                ->icon('heroicon-o-calculator'),
+                        ]),
+
+                        Forms\Components\Hidden::make('calculation_performed')
+                            ->default(false),
+
+                        Forms\Components\Placeholder::make('total_saldo_placeholder')
                             ->label('Total Saldo Dihasilkan')
                             ->content(function (callable $get) {
-                                $value = $get('total_saldo_dihasilkan');
-                                return '+ Rp ' . number_format($value, 2, ',', '.');
+                                $total = $get('total_saldo_dihasilkan');
+                                return $total ? 'Rp ' . number_format($total, 0, ',', '.') : 'Rp 0';
                             }),
 
-                        Forms\Components\TextInput::make('total_poin_dihasilkan')
-                            ->label('Total Poin Dihasilkan')
-                            ->numeric()
-                            ->hidden() // Make it hidden
-                            ->dehydrated(true), // Ensure it's saved to DB
-
-                        Forms\Components\Placeholder::make('total_poin_dihasilkan_display') // New placeholder for display
+                        Forms\Components\Placeholder::make('total_poin_placeholder')
                             ->label('Total Poin Dihasilkan')
                             ->content(function (callable $get) {
-                                $value = $get('total_poin_dihasilkan');
-                                return '+ ' . number_format($value, 0, ',', '.') . ' Poin';
+                                $total = $get('total_poin_dihasilkan');
+                                return $total ? number_format($total, 0, ',', '.') . ' Poin' : '0 Poin';
                             }),
-                    ])
+
+                        Forms\Components\Hidden::make('total_saldo_dihasilkan')
+                            ->default(0),
+
+                        Forms\Components\Hidden::make('user_id')
+                            ->default(auth()->id()),
+                    ]),
             ]);
     }
 
-    public static function table(Tables\Table $table): Tables\Table
+    public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('rekening.id')->label('Rekening')->sortable()->searchable(),
-                TextColumn::make('sampah.jenis_sampah')->label('Jenis Sampah')->sortable()->searchable(), // Display jenis_sampah
+                TextColumn::make('rekening.nama')->label('Nasabah')->sortable()->searchable(),
+                TextColumn::make('rekening.no_kk')->label('Nomor KK')->sortable()->searchable(),
+                TextColumn::make('sampah.jenis_sampah')->label('Jenis Sampah')->sortable()->searchable(),
                 TextColumn::make('berat')->label('Berat (gram/mL)')->sortable(),
-                TextColumn::make('total_saldo_dihasilkan')->label('Total Saldo Dihasilkan')->sortable()->money('IDR'),
-                TextColumn::make('total_poin_dihasilkan')->label('Total Poin Dihasilkan')->sortable(),
-                TextColumn::make('user.name')->label('User')->sortable()->searchable(),
-                TextColumn::make('created_at')->dateTime()->label('Dibuat'),
-                TextColumn::make('updated_at')->dateTime()->label('Diubah'),
+                TextColumn::make('total_saldo_dihasilkan')->label('Saldo Didapatkan')->sortable()->money('IDR'),
+                TextColumn::make('total_poin_dihasilkan')->label('Poin Didapatkan')->sortable(),
+                TextColumn::make('user.name')->label('Penyetor')->sortable()->searchable(),
+                TextColumn::make('created_at')->dateTime()->label('Dibuat')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('updated_at')->dateTime()->label('Diubah')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\EditAction::make(),
                 Tables\Actions\DeleteAction::make(),
+                Tables\Actions\RestoreAction::make(),
+                Tables\Actions\ForceDeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\RestoreBulkAction::make(),
+                Tables\Actions\ForceDeleteBulkAction::make(),
             ]);
-    }
-
-    public static function getRelations(): array
-    {
-        return [
-            //
-        ];
     }
 
     public static function getPages(): array

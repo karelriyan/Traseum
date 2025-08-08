@@ -28,9 +28,10 @@ return new class extends Migration {
                 ->name('fk_setor_sampah_rekening');
             $table->foreignUlid('sampah_id')->constrained('sampah')->name('fk_setor_sampah_sampah');
             $table->integer('berat')->required();
+            $table->string('calculation_performed');
             $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_setor_sampah_user');
-            $table->decimal('total_saldo_dihasilkan', 15, 2);
-            $table->bigInteger('total_poin_dihasilkan');
+            $table->decimal('total_saldo_dihasilkan', 15, 2)->default(0);
+            $table->bigInteger('total_poin_dihasilkan')->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

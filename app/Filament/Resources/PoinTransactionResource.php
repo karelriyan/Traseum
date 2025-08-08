@@ -17,6 +17,10 @@ class PoinTransactionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-star';
 
+    protected static ?string $navigationLabel = 'Riwayat Transaksi Poin';
+
+    protected static bool $shouldRegisterNavigation = false;
+
     protected static ?string $navigationGroup = 'Manajemen Pengguna & Keuangan';
 
     protected static ?int $navigationSort = 5;

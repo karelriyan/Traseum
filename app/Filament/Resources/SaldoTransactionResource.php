@@ -17,9 +17,13 @@ class SaldoTransactionResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
 
+    protected static ?string $navigationLabel = 'Riwayat Transaksi Saldo';
+
     protected static ?string $navigationGroup = 'Manajemen Pengguna & Keuangan';
 
     protected static ?int $navigationSort = 4;
+
+    protected static bool $shouldRegisterNavigation = false;
 
     public static function form(Forms\Form $form): Forms\Form
     {

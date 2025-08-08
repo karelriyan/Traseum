@@ -18,11 +18,11 @@ class SampahResource extends Resource
 
     protected static ?string $navigationIcon = 'heroicon-o-trash';
 
-    protected static ?string $label = 'Kategori Sampah';
+    protected static ?string $label = 'Pendataan Sampah';
 
-    protected static ?string $navigationGroup = 'Modul Operasional Bank Sampah';
+    protected static ?string $navigationGroup = 'Operasional Bank Sampah';
 
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 3;
 
     public static function form(Forms\Form $form): Forms\Form
     {

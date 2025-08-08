@@ -16,6 +16,7 @@ return new class extends Migration {
                 ->constrained('rekening')
                 ->index()
                 ->name('fk_saldo_transactions_rekening');
+            $table->string('type')->nullable();
             $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_saldo_transactions_user');
             $table->decimal('amount', 15, 2);
             $table->string('transactable_type', 255)->index();
