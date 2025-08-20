@@ -12,15 +12,21 @@ return new class extends Migration {
     {
         Schema::create('rekening', function (Blueprint $table) {
             $table->ulid('id')->primary();
+            $table->string('nama', 255);
+            $table->string('dusun', 3);
+            $table->string('rt', 3);
+            $table->string('rw', 3);
+            $table->string('gender');
             $table->string('no_kk', 16)->unique()->index();
             $table->string('nik', 50)->unique()->index();
-            $table->string('nama', 255);
-            $table->string('gender');
+            $table->date('tanggal_lahir');
+            $table->string('pendidikan');
+            
             $table->string('telepon')->nullable();
-
-            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_rekening_user');
             $table->decimal('balance', 15, 2)->default(0);
             $table->bigInteger('points_balance')->default(0);
+
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_rekening_user');
             $table->timestamps();
             $table->softDeletes();
         });
