@@ -9,12 +9,12 @@ use Filament\Resources\Pages\ListRecords;
 class ListWithdrawRequests extends ListRecords
 {
     protected static string $resource = WithdrawRequestResource::class;
-
+    protected static ?string $title = 'Penarikan Saldo';
     protected function getHeaderActions(): array
     {
         return [
             Actions\CreateAction::make()
-                ->label('Tambah Permintaan Tarik Saldo')
+                ->label('Tambah Penarikan Saldo')
                 ->icon('heroicon-o-plus'),
         ];
     }

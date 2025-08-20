@@ -10,6 +10,13 @@ class EditWithdrawRequest extends EditRecord
 {
     protected static string $resource = WithdrawRequestResource::class;
 
+    protected function getHeaderActions(): array
+    {
+        return [
+            Actions\DeleteAction::make(),
+        ];
+    }
+
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');
@@ -17,6 +24,6 @@ class EditWithdrawRequest extends EditRecord
 
     protected function getSavedNotificationTitle(): ?string
     {
-        return 'Permintaan tarik saldo berhasil diperbarui';
+        return 'Penarikan saldo berhasil diperbarui';
     }
 }

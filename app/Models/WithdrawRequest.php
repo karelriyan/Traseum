@@ -19,6 +19,7 @@ class WithdrawRequest extends Model
         'user_id',
         'amount',
         'jenis',
+        'catatan',
         'bank_name',
         'account_number',
         'account_holder_name',

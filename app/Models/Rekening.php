@@ -15,6 +15,11 @@ class Rekening extends Model
     protected $table = 'rekening';
     protected $guarded = [];
 
+    /**
+     * The accessors to append to the model's array form.
+     */
+    protected $appends = ['current_balance', 'points_balance', 'formatted_balance'];
+
     public function saldoTransactions()
     {
         return $this->hasMany(SaldoTransaction::class);
@@ -49,6 +54,16 @@ class Rekening extends Model
             ->sum('amount');
             
         return $credits - $debits;
+    }
+
+    /**
+     * Menghitung saldo poin saat ini berdasarkan transaksi
+     * Catatan: Poin transactions tidak memiliki kolom 'type', 
+     * semua transaksi poin dianggap sebagai credit (penambahan)
+     */
+    public function getPointsBalanceAttribute()
+    {
+        return $this->poinTransactions()->sum('amount');
     }
 
     /**

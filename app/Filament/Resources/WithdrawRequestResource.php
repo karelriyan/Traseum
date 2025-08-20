@@ -23,7 +23,8 @@ use Filament\Support\RawJs;
 class WithdrawRequestResource extends Resource
 {
     protected static ?string $model = WithdrawRequest::class;
-
+    protected static ?string $title = 'Penarikan Saldo';
+    protected static ?string $pluralModelLabel = 'Penarikan Saldo';
     protected static ?string $navigationIcon = 'heroicon-o-arrow-down-on-square';
 
     protected static ?string $navigationLabel = 'Penarikan Saldo';
@@ -104,21 +105,40 @@ class WithdrawRequestResource extends Resource
                         Select::make('jenis')
                             ->label('Metode Penarikan')
                             ->required()
+                            ->live()
                             ->dehydrated(true)
                             ->options([
                                 "Cash" => "Cash",
                                 "Transfer" => "Transfer",
                             ]),
 
+                        TextInput::make('bank_name')
+                            ->label('Nama Bank')
+                            ->visible(fn (Forms\Get $get) => $get('jenis') === 'Transfer')
+                            ->required(fn (Forms\Get $get) => $get('jenis') === 'Transfer'),
+
+                        TextInput::make('account_number')
+                            ->label('Nomor Rekening')
+                            ->visible(fn (Forms\Get $get) => $get('jenis') === 'Transfer')
+                            ->required(fn (Forms\Get $get) => $get('jenis') === 'Transfer'),
+
+                        TextInput::make('account_holder_name')
+                            ->label('Nama Pemilik Rekening')
+                            ->visible(fn (Forms\Get $get) => $get('jenis') === 'Transfer')
+                            ->required(fn (Forms\Get $get) => $get('jenis') === 'Transfer'),
+
                         Textarea::make('catatan')
-                            ->label('Catatan Admin')
+                            ->label('Catatan Nasabah')
                             ->rows(3)
-                            ->placeholder('Catatan tambahan untuk permintaan ini'),
+                            ->placeholder('Catatan tambahan untuk penarikan saldo ini'),
                     ])
                     ->columns(2),
 
                 Hidden::make('user_id')
                     ->default(auth()->id()),
+
+                Hidden::make('status')
+                    ->default('pending'),
             ]);
     }
 
@@ -127,12 +147,12 @@ class WithdrawRequestResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('created_at')
-                    ->label('Waktu Penarikan')
+                    ->label('Tanggal')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
 
                 TextColumn::make('rekening.nama')
-                    ->label('Nama Nasabah')
+                    ->label('Nasabah')
                     ->searchable()
                     ->sortable(),
 
@@ -145,11 +165,46 @@ class WithdrawRequestResource extends Resource
                     ->label('Metode')
                     ->searchable(),
 
-                TextColumn::make('user.name')
+                BadgeColumn::make('status')
+                    ->label('Status')
+                    ->colors([
+                        'warning' => 'pending',
+                        'success' => 'approved',
+                        'danger' => 'rejected',
+                        'info' => 'processed',
+                    ])
+                    ->formatStateUsing(function ($state) {
+                        return match($state) {
+                            'pending' => 'Menunggu',
+                            'approved' => 'Disetujui',
+                            'rejected' => 'Ditolak',
+                            'processed' => 'Diproses',
+                            default => $state,
+                        };
+                    }),
+
+                TextColumn::make('processor.name')
                     ->label('Diproses Oleh')
+                    ->placeholder('-')
                     ->sortable(),
             ])
             ->filters([
+                Tables\Filters\SelectFilter::make('status')
+                    ->label('Status')
+                    ->options([
+                        'pending' => 'Menunggu Persetujuan',
+                        'approved' => 'Disetujui',
+                        'rejected' => 'Ditolak',
+                        'processed' => 'Diproses',
+                    ]),
+
+                Tables\Filters\SelectFilter::make('jenis')
+                    ->label('Metode')
+                    ->options([
+                        'Cash' => 'Cash',
+                        'Transfer' => 'Transfer',
+                    ]),
+
                 Tables\Filters\Filter::make('created_at')
                     ->form([
                         DatePicker::make('created_from')
@@ -171,6 +226,49 @@ class WithdrawRequestResource extends Resource
             ])
             ->defaultSort('created_at', 'desc')
             ->actions([
+                Tables\Actions\ViewAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn (WithdrawRequest $record): bool => $record->status === 'pending'),
+
+                Tables\Actions\Action::make('approve')
+                    ->label('Setujui')
+                    ->icon('heroicon-o-check')
+                    ->color('success')
+                    ->visible(fn (WithdrawRequest $record): bool => $record->status === 'pending')
+                    ->form([
+                        Textarea::make('notes')
+                            ->label('Catatan Admin (opsional)')
+                            ->rows(3),
+                    ])
+                    ->action(function (WithdrawRequest $record, array $data): void {
+                        $record->update([
+                            'status' => 'approved',
+                            'processed_by' => auth()->id(),
+                            'processed_at' => now(),
+                            'notes' => $data['notes'] ?? null,
+                        ]);
+                    }),
+
+                Tables\Actions\Action::make('reject')
+                    ->label('Tolak')
+                    ->icon('heroicon-o-x-mark')
+                    ->color('danger')
+                    ->visible(fn (WithdrawRequest $record): bool => $record->status === 'pending')
+                    ->form([
+                        Textarea::make('rejection_reason')
+                            ->label('Alasan Penolakan')
+                            ->required()
+                            ->rows(3),
+                    ])
+                    ->action(function (WithdrawRequest $record, array $data): void {
+                        $record->update([
+                            'status' => 'rejected',
+                            'processed_by' => auth()->id(),
+                            'processed_at' => now(),
+                            'rejection_reason' => $data['rejection_reason'],
+                        ]);
+                    }),
+
                 Tables\Actions\DeleteAction::make()
                     ->label('Hapus')
                     ->icon('heroicon-o-trash'),
