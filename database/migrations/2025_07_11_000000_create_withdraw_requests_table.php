@@ -25,6 +25,18 @@ return new class extends Migration {
             $table->decimal('amount', 15, 2);
             $table->string('jenis');
             $table->text('catatan')->nullable();
+            $table->string('bank_name')->nullable();
+            $table->string('account_number')->nullable();
+            $table->string('account_holder_name')->nullable();
+            $table->enum('status', ['pending', 'approved', 'rejected', 'processed'])->default('pending');
+            $table->text('notes')->nullable();
+            $table->foreignUlid('processed_by')->nullable()
+                ->constrained('users')
+                ->nullOnDelete()
+                ->index()
+                ->name('fk_withdraw_requests_processed_by');
+            $table->timestamp('processed_at')->nullable();
+            $table->text('rejection_reason')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
