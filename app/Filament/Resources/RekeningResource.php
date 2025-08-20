@@ -3,6 +3,7 @@
 namespace App\Filament\Resources;
 
 use App\Models\Rekening;
+use Filament\Forms\Components\DatePicker;
 use Filament\Resources\Resource;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -74,6 +75,75 @@ class RekeningResource extends Resource
                         ->validationMessages([
                             'required' => 'Jenis Kelamin tidak boleh kosong'
                         ]),
+                    DatePicker::make('tanggal_lahir')
+                        ->label('Tanggal Lahir')
+                        ->required()
+                        ->validationMessages([
+                            'required' => 'Tanggal Lahir tidak boleh kosong',
+                        ]),
+                    Select::make('pendidikan')
+                        ->label('Pendidikan Terakhir')
+                        ->options([
+                            'TIDAK/BELUM SEKOLAH' => 'TIDAK/BELUM SEKOLAH',
+                            'BELUM TAMAT SD/SEDERAJAT' => 'BELUM TAMAT SD/SEDERAJAT',
+                            'TAMAT SD/SEDERAJAT' => 'TAMAT SD/SEDERAJAT',
+                            'SLTP/SEDERAJAT' => 'SLTP/SEDERAJAT',
+                            'SLTA/SEDERAJAT' => 'SLTA/SEDERAJAT',
+                            'DIPLOMA I/II' => 'DIPLOMA I/II',
+                            'AKADEMI/DIPLOMA III/S. MUDA' => 'AKADEMI/DIPLOMA III/S. MUDA',
+                            'DIPLOMA IV/STRATA I' => 'DIPLOMA IV/STRATA I',
+                            'STRATA II' => 'STRATA II',
+                            'STRATA III' => 'STRATA III',
+                        ])
+                        ->required()
+                        ->validationMessages([
+                            'required' => 'Pendidikan tidak boleh kosong'
+                        ]),
+                ])
+                ->columns(1),
+            Section::make('Alamat')
+                ->schema([
+                    TextInput::make('dusun')
+                        ->label('Dusun')
+                        ->required()
+                        ->length(1)
+                        ->minValue(1)
+                        ->numeric()
+                        ->validationMessages([
+                            'required' => 'Dusun tidak boleh kosong',
+                            'regex' => 'Dusun hanya boleh berisi huruf dan angka',
+                            'digits' => 'Dusun harus 1 digit',
+                            'min_value' => 'Tidak voleh kurang dari 1',
+                        ]),
+                    TextInput::make('rw')
+                        ->label('RW')
+                        ->required()
+                        ->maxLength(2)
+                        ->minValue(1)
+                        ->numeric()
+                        ->rule('regex:/^[0-9]+$/')
+                        ->validationMessages([
+                            'required' => 'RW tidak boleh kosong',
+                            'regex' => 'RW hanya boleh berisi angka',
+                            'max_digits' => 'RW maksimal 2 digit',
+                            'min_value' => 'Tidak voleh kurang dari 1',
+                        ]),
+                    TextInput::make('rt')
+                        ->label('RT')
+                        ->required()
+                        ->maxLength(2)
+                        ->minValue(1)
+                        ->numeric()
+                        ->rule('regex:/^[0-9]+$/')
+                        ->validationMessages([
+                            'required' => 'RT tidak boleh kosong',
+                            'regex' => 'RT hanya boleh berisi angka',
+                            'max_digits' => 'RT maksimal 2 digit',
+                            'min_value' => 'Tidak voleh kurang dari 1',
+                        ]),
+                ])->columns(3),
+            Section::make('Informasi Kontak')
+                ->schema([
                     TextInput::make('telepon')
                         ->label('Telepon (Opsional)')
                         ->tel()
