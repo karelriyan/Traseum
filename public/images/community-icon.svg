@@ -1,0 +1,9 @@
+<!-- SVG Illustration for Community Program -->
+<svg width="100" height="100" viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <circle cx="50" cy="50" r="40" fill="#8B5CF6" opacity="0.1"/>
+    <circle cx="40" cy="40" r="8" fill="#8B5CF6"/>
+    <circle cx="60" cy="40" r="8" fill="#8B5CF6"/>
+    <circle cx="50" cy="60" r="8" fill="#8B5CF6"/>
+    <path d="M40 48 L60 48 L55 55 L45 55 Z" fill="#8B5CF6" opacity="0.6"/>
+    <text x="50" y="78" text-anchor="middle" fill="#8B5CF6" font-size="10" font-weight="bold">👥</text>
+</svg>

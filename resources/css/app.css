@@ -1,3 +1,58 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* Custom fonts */
+@layer base {
+    html {
+        font-family: 'Inter', 'Poppins', system-ui, sans-serif;
+        scroll-behavior: smooth;
+    }
+
+    h1,
+    h2,
+    h3,
+    h4,
+    h5,
+    h6 {
+        font-family: 'Poppins', system-ui, sans-serif;
+        font-weight: 700;
+    }
+}
+
+/* Brand colors */
+@layer base {
+    :root {
+        --color-primary: #16a34a; /* Green */
+        --color-accent: #facc15; /* Yellow */
+        --color-neutral-light: #f8fafc;
+        --color-neutral-dark: #0f172a;
+    }
+}
+
+/* Custom components */
+@layer components {
+    .btn-primary {
+        @apply rounded-lg bg-green-600 px-6 py-3 font-medium text-white transition-colors duration-200 hover:bg-green-700 focus:ring-4 focus:ring-green-500/20;
+    }
+
+    .btn-outline {
+        @apply rounded-lg border-2 border-green-600 px-6 py-3 font-medium text-green-600 transition-all duration-200 hover:bg-green-600 hover:text-white focus:ring-4 focus:ring-green-500/20;
+    }
+
+    .btn-ghost {
+        @apply rounded-lg px-4 py-2 font-medium text-green-600 transition-colors duration-200 hover:bg-green-50 focus:ring-4 focus:ring-green-500/20;
+    }
+
+    .section-padding {
+        @apply py-16 lg:py-24;
+    }
+
+    .container-custom {
+        @apply mx-auto max-w-7xl px-4 sm:px-6 lg:px-8;
+    }
+
+    .text-gradient {
+        @apply bg-gradient-to-r from-green-600 to-green-800 bg-clip-text text-transparent;
+    }
+}

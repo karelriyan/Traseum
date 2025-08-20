@@ -14,12 +14,21 @@ class UserSeeder extends Seeder
     {
         $names = ['Admin', 'Dzaki', 'Venna', 'Wulan', 'Devi', 'Vania', 'Karel', 'Romi', 'Denise', 'Nadya', 'Salwa', 'Kaila', 'Hildan', 'Naiya', 'Rifky'];
 
-        foreach ($names as $name) {
-            User::factory()->create([
+        foreach ($names as $index => $name) {
+            $user = User::factory()->create([
                 'name' => $name,
                 'email' => $name . '@ciptamuri.co.id',
                 'password' => '12345',
             ]);
+
+            // Assign roles based on user
+            if ($name === 'Admin') {
+                $user->assignRole('admin');
+            } elseif (in_array($name, ['Dzaki', 'Venna', 'Wulan'])) {
+                $user->assignRole('petugas');
+            } else {
+                $user->assignRole('viewer');
+            }
         }
     }
 }
