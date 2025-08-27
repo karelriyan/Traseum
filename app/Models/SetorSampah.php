@@ -45,7 +45,7 @@ class SetorSampah extends Model
 
             // Hitung total saldo dan poin berdasarkan sampah dan berat
             if ($SetorSampah->sampah && $SetorSampah->berat > 0) {
-                $berat_kg_liter = $SetorSampah->berat / 1000;
+                $berat_kg_liter = $SetorSampah->berat;
                 $SetorSampah->total_saldo_dihasilkan = $SetorSampah->sampah->saldo_per_kg * $berat_kg_liter;
                 $SetorSampah->total_poin_dihasilkan = $SetorSampah->sampah->poin_per_kg * $berat_kg_liter;
             }
@@ -56,7 +56,7 @@ class SetorSampah extends Model
             if ($SetorSampah->isDirty(['sampah_id', 'berat'])) {
                 $sampah = $SetorSampah->sampah;
                 if ($sampah && $SetorSampah->berat > 0) {
-                    $berat_kg_liter = $SetorSampah->berat / 1000;
+                    $berat_kg_liter = $SetorSampah->berat;
                     $SetorSampah->total_saldo_dihasilkan = $sampah->saldo_per_kg * $berat_kg_liter;
                     $SetorSampah->total_poin_dihasilkan = $sampah->poin_per_kg * $berat_kg_liter;
                 }
