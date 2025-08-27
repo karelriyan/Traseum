@@ -75,9 +75,10 @@ class WithdrawRequest extends Model
                     'rekening_id' => $rekening->id,
                     'amount' => $withdrawRequest->amount,
                     'type' => 'debit',
-                    'description' => 'Penarikan saldo',
+                    'description' => 'Penarikan Saldo',
                     'transactable_id' => $withdrawRequest->id,
                     'transactable_type' => 'tarik_saldo',
+                    'prosesor' => $withdrawRequest->user_id->name ?? 'System',
                 ]);
             }
         });

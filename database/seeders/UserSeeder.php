@@ -4,6 +4,8 @@ namespace Database\Seeders;
 
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Str;
+use Illuminate\Support\Facades\Hash;
 
 class UserSeeder extends Seeder
 {
@@ -12,13 +14,54 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        $names = ['Admin', 'Dzaki', 'Venna', 'Wulan', 'Devi', 'Vania', 'Karel', 'Romi', 'Denise', 'Nadya', 'Salwa', 'Kaila', 'Hildan', 'Naiya', 'Rifky'];
+        User::create([
+            'name' => 'Super Admin',
+            'email' => 'superadmin@ciptamuri.co.id',
+            'password' => Hash::make('123456789'),
+        ]);
+        
+        $names = [
+            // Nama Pelaksana
+            'Dzaki Zain',
+            'Venna Firena',
+            'Nurhaliza Tri Wulandari',
+            'Devi Mei Ningrum',
+            'Vania Anindita Hartomo',
+            'Karel Tsalasatir Riyan',
+            "Muhammad As'ad Al Quroimi",
+            'Denise Amanda',
+            'Nadya Ulya Prasetyani',
+            'Salwa An-Nida',
+            'Kaila Tahta Aurelia',
+            'Hildan Ardiansah',
+            'Naiya Amelia',
+            'Rifky Dwi Rahmat Prakoso',
+
+            // Nama Selain Pelaksana
+            'Netika Alifiyah',
+            'Anisah Fatmawati',
+            'Azzahra Nur Annisa',
+            'Puan Anindya',
+            'M. Kholid Ibrahim',
+        ];
 
         foreach ($names as $name) {
+            $parts = preg_split('/\s+/', $name); // pisahkan nama berdasarkan spasi
+            $firstName = Str::lower(preg_replace('/[^a-zA-Z]/', '', $parts[0]));
+            $lastName = Str::lower(preg_replace('/[^a-zA-Z]/', '', end($parts)));
+
+            // Email: namadepan.namabelakang@ciptamuri.co.id
+            $email = $firstName . '.' . $lastName . '@ciptamuri.co.id';
+
+            // Password: nama depan + huruf terakhir nama depan -> angka
+            $lastChar = substr($firstName, -1);
+            $charToNum = ord(strtolower($lastChar)) - 96; // a=1, b=2, ... z=26
+            $rawPassword = $firstName . $charToNum;
+
             User::factory()->create([
                 'name' => $name,
-                'email' => $name . '@ciptamuri.co.id',
-                'password' => '12345',
+                'email' => $email,
+                'password' => Hash::make($rawPassword),
             ]);
         }
     }

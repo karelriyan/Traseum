@@ -75,11 +75,20 @@ class SaldoTransactionRelationManager extends RelationManager
                 TextColumn::make('amount')
                     ->label('Jumlah')
                     ->money('IDR')
-                    ->sortable(),
-                TextColumn::make('description')
-                    ->label('Keterangan')
-                    ->limit(50)
-                    ->tooltip(fn($record) => $record->description),
+                    ->sortable()
+                    ->formatStateUsing(
+                        fn($state, $record) =>
+                        $record->type === 'debit'
+                        ? '- Rp' . number_format($state, 0, ',', '.')
+                        : '+ Rp'. number_format($state, 0, ',', '.')
+                    )
+                    ->color(fn($record) => match ($record->type) {
+                        'credit' => 'success', // hijau
+                        'debit' => 'danger',  // merah
+                        default => null,
+                    }),
+                TextColumn::make('description')->label('Keterangan')->limit(50)->tooltip(fn($record) => $record->description),
+                TextColumn::make('prosesor')->label('Diproses oleh'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')

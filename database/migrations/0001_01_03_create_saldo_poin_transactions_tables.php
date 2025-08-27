@@ -22,6 +22,7 @@ return new class extends Migration {
             $table->string('transactable_type', 255)->index();
             $table->ulid('transactable_id')->index();
             $table->string('description', 255);
+            $table->string('prosesor');
             $table->timestamps();
             $table->softDeletes();
         });
@@ -37,6 +38,7 @@ return new class extends Migration {
             $table->string('transactable_type', 255)->index();
             $table->ulid('transactable_id')->index();
             $table->string('description', 255);
+            $table->string('prosesor');
             $table->timestamps();
             $table->softDeletes();
         });

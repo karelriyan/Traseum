@@ -79,6 +79,7 @@ class SetorSampah extends Model
                     'description' => 'Penambahan saldo dari setor sampah',
                     'transactable_id' => $SetorSampah->id,
                     'transactable_type' => 'setor_sampah',
+                    'prosesor' => $withdrawRequest->user_id->name ?? 'System',
                 ]);
 
                 // Buat transaksi poin
@@ -88,6 +89,7 @@ class SetorSampah extends Model
                     'description' => 'Penambahan poin dari setor sampah',
                     'transactable_id' => $SetorSampah->id,
                     'transactable_type' => 'setor_sampah',
+                    'prosesor' => $withdrawRequest->user_id->name ?? 'System',
                 ]);
             }
         });

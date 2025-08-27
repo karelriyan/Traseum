@@ -164,8 +164,8 @@ class RekeningResource extends Resource
                 TextColumn::make('nama')->label('Nama Nasabah')->sortable()->searchable(),
                 TextColumn::make('no_kk')->label('Nomor KK')->sortable()->searchable(),
                 TextColumn::make('current_balance')->label('Saldo')->sortable()->money('IDR'),
-                TextColumn::make('points_balance')->label('Saldo Poin')->sortable()->numeric(),
-                TextColumn::make('user.name')->label('Pembuat Data')->sortable()->searchable(),
+                TextColumn::make('points_balance')->label('Poin')->sortable()->numeric()->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.')),
+                TextColumn::make('user.name')->label('Pembuat Rekening')->sortable()->searchable(),
                 TextColumn::make('created_at')->label('Waktu Dibuat')->dateTime()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')->label('Terakhir Diubah')->dateTime()->toggleable(isToggledHiddenByDefault: true),
             ])
