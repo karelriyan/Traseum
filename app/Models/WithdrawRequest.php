@@ -23,7 +23,6 @@ class WithdrawRequest extends Model
         'bank_name',
         'account_number',
         'account_holder_name',
-        'status',
         'notes',
         'processed_by',
         'processed_at',
@@ -63,27 +62,24 @@ class WithdrawRequest extends Model
                 $withdrawRequest->user_id = Auth::id();
             }
         });
-    }
 
-    public function getStatusColorAttribute()
-    {
-        return match($this->status) {
-            'pending' => 'warning',
-            'approved' => 'success',
-            'rejected' => 'danger',
-            'processed' => 'info',
-            default => 'gray',
-        };
-    }
+        static::created(function ($withdrawRequest) {
+            // Kurangi saldo dan poin ke rekening nasabah
+            if ($withdrawRequest->rekening && $withdrawRequest->amount > 0) {
+                $rekening = $withdrawRequest->rekening;
+                $rekening->balance -= $withdrawRequest->amount;
+                $rekening->save();
 
-    public function getStatusLabelAttribute()
-    {
-        return match($this->status) {
-            'pending' => 'Menunggu Persetujuan',
-            'approved' => 'Disetujui',
-            'rejected' => 'Ditolak',
-            'processed' => 'Diproses',
-            default => $this->status,
-        };
+                // Buat transaksi saldo
+                \App\Models\SaldoTransaction::create([
+                    'rekening_id' => $rekening->id,
+                    'amount' => $withdrawRequest->amount,
+                    'type' => 'debit',
+                    'description' => 'Penarikan saldo',
+                    'transactable_id' => $withdrawRequest->id,
+                    'transactable_type' => 'tarik_saldo',
+                ]);
+            }
+        });
     }
 }
