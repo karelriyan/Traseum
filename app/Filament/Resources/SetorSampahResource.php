@@ -115,6 +115,15 @@ class SetorSampahResource extends Resource
                             ->default(false),
 
                         Forms\Components\Placeholder::make('total_saldo_placeholder')
+                            ->label('Berat')
+                            ->visible(fn(callable $get): bool => (bool) $get('calculation_performed'))
+                            ->content(function (callable $get) {
+                                $total = $get('berat');
+                                return $total ? number_format($total, 0, ',', '.') . ' gram' : '0 gram';
+                            }),
+
+
+                        Forms\Components\Placeholder::make('total_saldo_placeholder')
                             ->label('Total Saldo Dihasilkan')
                             ->visible(fn(callable $get): bool => (bool) $get('calculation_performed'))
                             ->content(function (callable $get) {

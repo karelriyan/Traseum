@@ -80,7 +80,7 @@ class SaldoTransactionRelationManager extends RelationManager
                         fn($state, $record) =>
                         $record->type === 'debit'
                         ? '- Rp' . number_format($state, 0, ',', '.')
-                        : '+ Rp'. number_format($state, 0, ',', '.')
+                        : '+ Rp' . number_format($state, 0, ',', '.')
                     )
                     ->color(fn($record) => match ($record->type) {
                         'credit' => 'success', // hijau
@@ -88,7 +88,7 @@ class SaldoTransactionRelationManager extends RelationManager
                         default => null,
                     }),
                 TextColumn::make('description')->label('Keterangan')->limit(50)->tooltip(fn($record) => $record->description),
-                TextColumn::make('prosesor')->label('Diproses oleh'),
+                TextColumn::make('user.name')->label('Diproses oleh'),
             ])
             ->filters([
                 Tables\Filters\SelectFilter::make('type')

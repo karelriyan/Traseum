@@ -78,7 +78,6 @@ class WithdrawRequest extends Model
                     'description' => 'Penarikan Saldo',
                     'transactable_id' => $withdrawRequest->id,
                     'transactable_type' => 'tarik_saldo',
-                    'prosesor' => $withdrawRequest->user_id->name ?? 'System',
                 ]);
             }
         });
