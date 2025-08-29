@@ -1,8 +1,18 @@
 import { motion } from 'framer-motion';
 import * as Icons from 'lucide-react';
 
-const ProgramCard = ({ title, description, icon, image, color = 'green', delay = 0 }) => {
-    const IconComponent = Icons[icon] || Icons.Star;
+interface ProgramCardProps {
+    title: string;
+    description: string;
+    icon: string;
+    image?: string;
+    color?: 'green' | 'blue' | 'purple' | 'yellow';
+    delay?: number;
+    features?: string[];
+}
+
+const ProgramCard = ({ title, description, icon, image, color = 'green', delay = 0, features }: ProgramCardProps) => {
+    const IconComponent = (Icons as any)[icon] || Icons.Star;
 
     const colorVariants = {
         green: {
@@ -77,6 +87,23 @@ const ProgramCard = ({ title, description, icon, image, color = 'green', delay =
             >
                 {description}
             </motion.p>
+
+            {features && features.length > 0 && (
+                <motion.ul
+                    className="mt-4 space-y-2"
+                    initial={{ opacity: 0 }}
+                    whileInView={{ opacity: 1 }}
+                    transition={{ duration: 0.6, delay: delay + 0.5 }}
+                    viewport={{ once: true }}
+                >
+                    {features.map((feature, index) => (
+                        <li key={index} className="flex items-center text-sm text-gray-600">
+                            <Icons.CheckCircle size={16} className={`mr-2 ${variant.icon}`} />
+                            {feature}
+                        </li>
+                    ))}
+                </motion.ul>
+            )}
         </motion.div>
     );
 };

@@ -1,7 +1,17 @@
 import { motion } from 'framer-motion';
 import { Quote, Star } from 'lucide-react';
+import { SyntheticEvent } from 'react';
 
-const TestimonialItem = ({ name, role, content, avatar, rating = 5, delay = 0 }) => {
+interface TestimonialItemProps {
+    name: string;
+    role: string;
+    content: string;
+    avatar?: string;
+    rating?: number;
+    delay?: number;
+}
+
+const TestimonialItem = ({ name, role, content, avatar, rating = 5, delay = 0 }: TestimonialItemProps) => {
     return (
         <motion.div
             className="relative rounded-2xl border border-gray-100 bg-white p-8 shadow-lg"
@@ -88,10 +98,14 @@ const TestimonialItem = ({ name, role, content, avatar, rating = 5, delay = 0 })
                             src={avatar}
                             alt={name}
                             className="h-full w-full rounded-full object-cover"
-                            onError={(e) => {
+                            onError={(e: SyntheticEvent<HTMLImageElement>) => {
                                 // Fallback to initials if image fails
-                                e.target.style.display = 'none';
-                                e.target.nextSibling.style.display = 'flex';
+                                const target = e.target as HTMLImageElement;
+                                target.style.display = 'none';
+                                const nextElement = target.nextElementSibling as HTMLElement;
+                                if (nextElement) {
+                                    nextElement.style.display = 'flex';
+                                }
                             }}
                         />
                     ) : null}

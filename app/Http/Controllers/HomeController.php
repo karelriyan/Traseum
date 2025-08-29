@@ -12,7 +12,7 @@ use Illuminate\Support\Facades\Cache;
 
 class HomeController extends Controller
 {
-    /**
+        /**
      * Display the landing page with statistics and content
      */
     public function index()
@@ -28,43 +28,54 @@ class HomeController extends Controller
         // Mock data untuk programs
         $programs = [
             [
-                'id' => 1,
+                'icon' => 'GraduationCap',
                 'title' => 'Edukasi Lingkungan',
                 'description' => 'Workshop dan pelatihan tentang pengelolaan sampah yang baik dan ramah lingkungan.',
-                'icon' => 'GraduationCap',
-                'image' => '/images/recycle-icon.svg',
-                'color' => 'green'
+                'features' => [
+                    'Workshop rutin setiap minggu',
+                    'Materi edukatif terlengkap',
+                    'Sertifikat kelulusan',
+                    'Akses seumur hidup'
+                ]
             ],
             [
-                'id' => 2,
+                'icon' => 'CreditCard',
                 'title' => 'Tabungan Digital',
                 'description' => 'Sistem tabungan modern yang memudahkan anggota mengelola hasil dari sampah.',
-                'icon' => 'CreditCard',
-                'image' => '/images/savings-icon.svg',
-                'color' => 'blue'
+                'features' => [
+                    'Sistem digital terintegrasi',
+                    'Laporan transaksi real-time',
+                    'Keamanan data terjamin',
+                    'Akses 24/7'
+                ]
             ],
             [
-                'id' => 3,
+                'icon' => 'Smartphone',
                 'title' => 'Aplikasi Mobile',
                 'description' => 'Akses mudah melalui smartphone untuk monitoring dan transaksi kapan saja.',
-                'icon' => 'Smartphone',
-                'image' => '/images/community-icon.svg',
-                'color' => 'purple'
+                'features' => [
+                    'Interface user-friendly',
+                    'Notifikasi real-time',
+                    'Tracking otomatis',
+                    'Support multi-platform'
+                ]
             ],
             [
-                'id' => 4,
+                'icon' => 'Store',
                 'title' => 'Kemitraan UMKM',
                 'description' => 'Mendukung usaha mikro kecil menengah melalui hasil olahan sampah.',
-                'icon' => 'Store',
-                'image' => '/images/umkm-icon.svg',
-                'color' => 'yellow'
+                'features' => [
+                    'Jaringan UMKM luas',
+                    'Harga bersaing',
+                    'Kualitas terjamin',
+                    'Pembayaran tepat waktu'
+                ]
             ]
         ];
 
         // Mock data untuk testimonials
         $testimonials = [
             [
-                'id' => 1,
                 'name' => 'Ibu Sari Wijaya',
                 'role' => 'Anggota Bank Sampah',
                 'content' => 'Dengan Bank Sampah Cipta Muri, sampah rumah tangga saya bisa jadi tabungan. Sangat membantu ekonomi keluarga.',
@@ -72,7 +83,6 @@ class HomeController extends Controller
                 'rating' => 5
             ],
             [
-                'id' => 2,
                 'name' => 'Bapak Ahmad Fauzi',
                 'role' => 'Kepala RT 03',
                 'content' => 'Lingkungan RT kami jadi lebih bersih sejak ada Bank Sampah. Warga juga lebih sadar pentingnya daur ulang.',
@@ -80,7 +90,6 @@ class HomeController extends Controller
                 'rating' => 5
             ],
             [
-                'id' => 3,
                 'name' => 'Ibu Maya Sinta',
                 'role' => 'Pengusaha UMKM',
                 'content' => 'Kemitraan dengan Bank Sampah membantu saya mendapat bahan baku berkualitas untuk kerajinan daur ulang.',
@@ -88,7 +97,6 @@ class HomeController extends Controller
                 'rating' => 5
             ],
             [
-                'id' => 4,
                 'name' => 'Bapak Joko Susanto',
                 'role' => 'Petugas Pengangkut',
                 'content' => 'Sistem digital Bank Sampah memudahkan saya dalam mencatat setiap setoran sampah dari warga. Sangat efisien!',
@@ -96,7 +104,6 @@ class HomeController extends Controller
                 'rating' => 5
             ],
             [
-                'id' => 5,
                 'name' => 'Ibu Fitri Handayani',
                 'role' => 'Ibu Rumah Tangga',
                 'content' => 'Anak-anak jadi lebih peduli lingkungan sejak ikut program Bank Sampah. Kebiasaan baik untuk masa depan.',
@@ -104,7 +111,6 @@ class HomeController extends Controller
                 'rating' => 5
             ],
             [
-                'id' => 6,
                 'name' => 'Bapak Rudi Hartono',
                 'role' => 'Koordinator Lingkungan',
                 'content' => 'Bank Sampah Cipta Muri benar-benar mengubah paradigma masyarakat tentang sampah. Dari beban jadi berkah!',

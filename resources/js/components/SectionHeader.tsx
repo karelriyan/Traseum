@@ -1,7 +1,18 @@
 import { motion } from 'framer-motion';
 
-const SectionHeader = ({ title, subtitle, description, centered = true, className = '' }) => {
-    const alignment = centered ? 'text-center' : 'text-left';
+interface SectionHeaderProps {
+    title: string;
+    subtitle?: string;
+    description?: string;
+    center?: boolean;
+    centered?: boolean;
+    className?: string;
+}
+
+const SectionHeader = ({ title, subtitle, description, centered = true, center = true, className = '' }: SectionHeaderProps) => {
+    // Use center prop if provided, otherwise fall back to centered
+    const shouldCenter = center !== undefined ? center : centered;
+    const alignment = shouldCenter ? 'text-center' : 'text-left';
 
     return (
         <motion.div

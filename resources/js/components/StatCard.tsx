@@ -1,6 +1,16 @@
 import { motion } from 'framer-motion';
+import { ReactNode } from 'react';
 
-const StatCard = ({ value, label, suffix = '', prefix = '', icon, delay = 0 }) => {
+interface StatCardProps {
+    value: string | number;
+    label: string;
+    suffix?: string;
+    prefix?: string;
+    icon?: ReactNode;
+    delay?: number;
+}
+
+const StatCard = ({ value, label, suffix = '', prefix = '', icon, delay = 0 }: StatCardProps) => {
     return (
         <motion.div
             className="rounded-2xl border border-gray-100 bg-white p-6 text-center shadow-lg"

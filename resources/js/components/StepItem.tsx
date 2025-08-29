@@ -1,8 +1,17 @@
 import { motion } from 'framer-motion';
 import * as Icons from 'lucide-react';
 
-const StepItem = ({ number, title, description, icon, isLast = false, delay = 0 }) => {
-    const IconComponent = Icons[icon] || Icons.Circle;
+interface StepItemProps {
+    number: string;
+    title: string;
+    description: string;
+    icon?: string;
+    isLast?: boolean;
+    delay?: number;
+}
+
+const StepItem = ({ number, title, description, icon, isLast = false, delay = 0 }: StepItemProps) => {
+    const IconComponent = icon ? (Icons as any)[icon] : Icons.Circle;
 
     return (
         <div className="relative">
@@ -33,20 +42,22 @@ const StepItem = ({ number, title, description, icon, isLast = false, delay = 0 
                         </div>
 
                         {/* Icon overlay */}
-                        <motion.div
-                            className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400 shadow-md"
-                            initial={{ scale: 0, rotate: -90 }}
-                            whileInView={{ scale: 1, rotate: 0 }}
-                            transition={{
-                                duration: 0.6,
-                                delay: delay + 0.4,
-                                type: 'spring',
-                                stiffness: 200,
-                            }}
-                            viewport={{ once: true }}
-                        >
-                            <IconComponent size={16} className="text-white" />
-                        </motion.div>
+                        {icon && (
+                            <motion.div
+                                className="absolute -right-2 -top-2 flex h-8 w-8 items-center justify-center rounded-full bg-yellow-400 shadow-md"
+                                initial={{ scale: 0, rotate: -90 }}
+                                whileInView={{ scale: 1, rotate: 0 }}
+                                transition={{
+                                    duration: 0.6,
+                                    delay: delay + 0.4,
+                                    type: 'spring',
+                                    stiffness: 200,
+                                }}
+                                viewport={{ once: true }}
+                            >
+                                <IconComponent size={16} className="text-white" />
+                            </motion.div>
+                        )}
                     </motion.div>
 
                     {/* Connecting Line */}
