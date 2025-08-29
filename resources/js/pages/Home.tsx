@@ -673,7 +673,7 @@ export default function Home({ stats, programs, testimonials }: HomeProps) {
             </section>
 
             {/* Testimonials Section */}
-            <section className="section-padding bg-white">
+            <section id="testimoni" className="section-padding bg-white">
                 <div className="container-custom">
                     <SectionHeader
                         subtitle="Testimoni"
@@ -698,7 +698,7 @@ export default function Home({ stats, programs, testimonials }: HomeProps) {
             </section>
 
             {/* News & Publications Section */}
-            <section className="section-padding bg-gray-50">
+            <section id="berita-publikasi" className="section-padding bg-gray-50">
                 <div className="container-custom">
                     <SectionHeader
                         subtitle="Berita & Publikasi"

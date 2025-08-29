@@ -10,33 +10,44 @@ interface MainLayoutProps {
 export default function MainLayout({ children }: MainLayoutProps) {
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
     const [isScrolled, setIsScrolled] = useState(false);
+    const [activeSection, setActiveSection] = useState('home');
 
     const navigation = [
         { name: 'Home', href: '#home' },
         { name: 'Tentang', href: '#tentang' },
-        { name: 'Program', href: '#program' },
         { name: 'Cara Kerja', href: '#cara-kerja' },
+        { name: 'Program', href: '#program' },
+        { name: 'Testimoni', href: '#testimoni' },
+        { name: 'Berita & Publikasi', href: '#berita-publikasi' },
         { name: 'Lokasi', href: '#lokasi' },
         { name: 'Kontak', href: '#kontak' },
     ];
 
-    // Scroll detection effect
+    // Scroll detection effect & active section
     useEffect(() => {
         const handleScroll = () => {
             const scrollPosition = window.scrollY;
-            const heroSection = document.querySelector('#home') as HTMLElement;
+            const sectionIds = ['home', 'tentang', 'cara-kerja', 'program', 'testimoni', 'berita-publikasi', 'lokasi', 'kontak'];
+            let currentSection = 'home';
+            for (const id of sectionIds) {
+                const section = document.getElementById(id);
+                if (section) {
+                    const offsetTop = section.offsetTop - 80; // adjust for navbar height
+                    if (scrollPosition >= offsetTop) {
+                        currentSection = id;
+                    }
+                }
+            }
+            setActiveSection(currentSection);
 
+            const heroSection = document.querySelector('#home') as HTMLElement;
             if (heroSection) {
                 const heroHeight = heroSection.offsetHeight;
-                setIsScrolled(scrollPosition > heroHeight * 0.1); // Change when scrolled 10% of hero height
+                setIsScrolled(scrollPosition > heroHeight * 0.1);
             }
         };
-
         window.addEventListener('scroll', handleScroll);
-
-        // Initial check
         handleScroll();
-
         return () => {
             window.removeEventListener('scroll', handleScroll);
         };
@@ -88,8 +99,12 @@ export default function MainLayout({ children }: MainLayoutProps) {
                                 <button
                                     key={item.name}
                                     onClick={() => scrollToSection(item.href)}
-                                    className={`transition-colors duration-300 ${
-                                        isScrolled ? 'text-gray-700 hover:text-green-600' : 'text-white hover:text-green-300'
+                                    className={`relative transition-colors duration-300 ${
+                                        activeSection === item.href.replace('#', '')
+                                            ? 'text-green-500'
+                                            : isScrolled
+                                              ? 'text-gray-700 hover:text-green-600'
+                                              : 'text-white hover:text-green-300'
                                     }`}
                                 >
                                     {item.name}
