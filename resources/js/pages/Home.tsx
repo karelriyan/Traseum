@@ -324,8 +324,8 @@ export default function Home({ stats, programs, testimonials }: HomeProps) {
                 {/* Mountain Image with Animation */}
                 <motion.div
                     className="absolute bottom-0 left-0 right-0 z-10 flex w-full justify-center"
-                    initial={{ opacity: 1.23, y: 160, x: 40 }}
-                    animate={{ opacity: 1, y: 60, x: 40 }}
+                    initial={{ opacity: 1.23, y: 180, x: 40 }}
+                    animate={{ opacity: 1, y: 80, x: 40 }}
                     transition={{
                         duration: 2.0,
                         ease: 'easeOut',
