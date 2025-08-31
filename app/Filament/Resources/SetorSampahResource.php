@@ -13,6 +13,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Support\RawJs;
 
 class SetorSampahResource extends Resource
 {
@@ -24,6 +25,17 @@ class SetorSampahResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    protected function getFormActions(): array
+    {
+        return [
+            $this->getCreateFormAction()
+                ->disabled(fn($livewire): bool => !$livewire->data['calculation_performed']),
+            $this->getCreateAnotherFormAction()
+                ->disabled(fn($livewire): bool => !$livewire->data['calculation_performed']),
+            $this->getCancelFormAction(),
+        ];
+    }
+
     public static function form(Form $form): Form
     {
         return $form
@@ -33,6 +45,7 @@ class SetorSampahResource extends Resource
                         Forms\Components\Select::make('rekening_id')
                             ->label('Pilih Rekening')
                             ->required()
+                            ->searchable()
                             ->validationMessages([
                                 'required' => 'Rekening tidak boleh kosong'
                             ])
@@ -51,11 +64,13 @@ class SetorSampahResource extends Resource
                             ->reactive(),
                         Forms\Components\TextInput::make('berat')
                             ->label('Berat')
-                            ->postfix('gram atau mL')
+                            ->postfix('gram')
+                            ->mask(RawJs::make('$money($input)'))
+                            ->stripCharacters(',')
                             ->numeric()
                             ->required()
-                            ->reactive()
                             ->afterStateUpdated(function (callable $set) {
+                                // Reset hasil hitung setiap kali berat diubah
                                 $set('calculation_performed', false);
                                 $set('total_saldo_dihasilkan', 0);
                                 $set('total_poin_dihasilkan', 0);
@@ -79,7 +94,7 @@ class SetorSampahResource extends Resource
 
                                     $sampah = \App\Models\Sampah::find($sampah_id);
                                     if ($sampah) {
-                                        $berat_kg_liter = $berat / 1000;
+                                        $berat_kg_liter = $berat;
                                         $total_saldo = $sampah->saldo_per_kg * $berat_kg_liter;
                                         $total_poin = $sampah->poin_per_kg * $berat_kg_liter;
 
@@ -100,7 +115,17 @@ class SetorSampahResource extends Resource
                             ->default(false),
 
                         Forms\Components\Placeholder::make('total_saldo_placeholder')
+                            ->label('Berat')
+                            ->visible(fn(callable $get): bool => (bool) $get('calculation_performed'))
+                            ->content(function (callable $get) {
+                                $total = $get('berat');
+                                return $total ? number_format($total, 0, ',', '.') . ' gram' : '0 gram';
+                            }),
+
+
+                        Forms\Components\Placeholder::make('total_saldo_placeholder')
                             ->label('Total Saldo Dihasilkan')
+                            ->visible(fn(callable $get): bool => (bool) $get('calculation_performed'))
                             ->content(function (callable $get) {
                                 $total = $get('total_saldo_dihasilkan');
                                 return $total ? 'Rp ' . number_format($total, 0, ',', '.') : 'Rp 0';
@@ -108,6 +133,7 @@ class SetorSampahResource extends Resource
 
                         Forms\Components\Placeholder::make('total_poin_placeholder')
                             ->label('Total Poin Dihasilkan')
+                            ->visible(fn(callable $get): bool => (bool) $get('calculation_performed'))
                             ->content(function (callable $get) {
                                 $total = $get('total_poin_dihasilkan');
                                 return $total ? number_format($total, 0, ',', '.') . ' Poin' : '0 Poin';
