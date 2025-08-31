@@ -82,7 +82,7 @@ return [
 
     'guard_names' => [
         'web' => 'web',
-        'api' => 'api',
+        //'api' => 'api',
     ],
 
     'toggleable_guard_names' => [
@@ -94,7 +94,7 @@ return [
         ],
     ],
 
-    'default_guard_name' => null,
+    'default_guard_name' => 'web',
 
     // if false guard option will not be show on screen. You should set a default_guard_name in this case
     'should_show_guard' => true,
@@ -141,7 +141,7 @@ return [
 
         'guard_names' => [
             'web',
-            'api',
+            //'api',
         ],
 
         'permission_affixes' => [

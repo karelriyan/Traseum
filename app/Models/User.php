@@ -50,6 +50,11 @@ class User extends Authenticatable
         return $this->hasRole('Super Admin');
     }
 
+    public function role(): string
+    {
+        return $this->belongsTo(Role::class);
+    }
+
     // protected static function booted(): void
     // {
     //     Gate::before(function (User $user, string $ability) {

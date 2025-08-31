@@ -114,16 +114,16 @@ export default function MainLayout({ children }: MainLayoutProps) {
 
                         {/* Desktop CTA Buttons */}
                         <div className="hidden space-x-4 md:flex">
-                            <Link href="/login">
+                            <Link href="/admin/login">
                                 <Button variant="outline" size="sm">
                                     Login
                                 </Button>
                             </Link>
-                            <Link href="/register">
+                            {/* <Link href="/register">
                                 <Button variant="primary" size="sm">
                                     Daftar
                                 </Button>
-                            </Link>
+                            </Link> */}
                         </div>
 
                         {/* Mobile Menu Button */}
