@@ -12,7 +12,7 @@
             "dist": {
                 "type": "path",
                 "url": "packages/filament-spatie-roles-permissions",
-                "reference": "79d2c777e56c87f97723d04c4b92450aceaf2de8"
+                "reference": "8611dea5ef143ddca7267d44b7c40903c40b230e"
             },
             "require": {
                 "filament/filament": "^3.0",
@@ -11379,6 +11379,6 @@
     "platform": {
         "php": "^8.2"
     },
-    "platform-dev": [],
-    "plugin-api-version": "2.3.0"
+    "platform-dev": {},
+    "plugin-api-version": "2.6.0"
 }
