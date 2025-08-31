@@ -47,7 +47,7 @@ class User extends Authenticatable
 
     public function isSuperAdmin(): bool
     {
-        return $this->hasRole('super-admin');
+        return $this->hasRole('Super Admin');
     }
 
     // protected static function booted(): void

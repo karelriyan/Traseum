@@ -6,6 +6,8 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
+
 
 class UserSeeder extends Seeder
 {
@@ -14,12 +16,24 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        User::create([
-            'name' => 'Super Admin',
-            'email' => 'superadmin@ciptamuri.co.id',
-            'password' => Hash::make('123456789'),
+         // 1) Buat role Super Admin (sekali saja)
+        $superAdminRole = Role::firstOrCreate([
+            'name' => 'Super Admin',     // gunakan nama persis ini
+            'guard_name' => 'web',
         ]);
-        
+
+        // 2) Buat user superadmin
+        $user = User::firstOrCreate(
+            ['email' => 'superadmin@ciptamuri.co.id'],
+            [
+                'name' => 'Super Admin',
+                'password' => Hash::make('123456789'),
+            ]
+        );
+
+        // 3) Assign role ke user (ini yang dibaca Filament/Spatie)
+        $user->assignRole($superAdminRole);
+
         $names = [
             // Nama Pelaksana
             'Dzaki Zain',
@@ -46,20 +60,23 @@ class UserSeeder extends Seeder
         ];
 
         foreach ($names as $name) {
+            $parts = preg_split('/\s+/', $name); // pisahkan nama berdasarkan spasi
+            $firstName = Str::lower(preg_replace('/[^a-zA-Z]/', '', $parts[0]));
+            $lastName = Str::lower(preg_replace('/[^a-zA-Z]/', '', end($parts)));
+
+            // Email: namadepan.namabelakang@ciptamuri.co.id
+            $email = $firstName . '.' . $lastName . '@ciptamuri.co.id';
+
+            // Password: nama depan + huruf terakhir nama depan -> angka
+            $lastChar = substr($firstName, -1);
+            $charToNum = ord(strtolower($lastChar)) - 96; // a=1, b=2, ... z=26
+            $rawPassword = $firstName . $charToNum;
+
             User::factory()->create([
                 'name' => $name,
                 'email' => $email,
                 'password' => Hash::make($rawPassword),
             ]);
-
-            // Assign roles based on user
-            if ($name === 'Admin') {
-                $user->assignRole('admin');
-            } elseif (in_array($name, ['Dzaki', 'Venna', 'Wulan'])) {
-                $user->assignRole('petugas');
-            } else {
-                $user->assignRole('viewer');
-            }
         }
     }
 }
