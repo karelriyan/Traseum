@@ -7,12 +7,13 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Althinect\FilamentSpatieRolesPermissions\Concerns\HasSuperAdmin;
 use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasUlids, HasRoles;
+    use HasFactory, Notifiable, HasUlids, HasRoles, HasSuperAdmin;
 
     /**
      * The attributes that are mass assignable.
@@ -43,4 +44,16 @@ class User extends Authenticatable
             'password' => 'hashed',
         ];
     }
+
+    public function isSuperAdmin(): bool
+    {
+        return $this->hasRole('super-admin');
+    }
+
+    // protected static function booted(): void
+    // {
+    //     Gate::before(function (User $user, string $ability) {
+    //         return $user->isSuperAdmin() ? true : null;
+    //     });
+    // }
 }

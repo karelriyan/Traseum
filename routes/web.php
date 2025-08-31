@@ -2,12 +2,17 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
+use App\Http\Controllers\NewsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
 
 // Public landing page
 Route::get('/', [HomeController::class, 'index'])->name('home');
+
+// News pages
+Route::get('/news', [NewsController::class, 'index'])->name('news');
+Route::get('/news/{id}', [NewsController::class, 'show'])->name('news.detail');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
