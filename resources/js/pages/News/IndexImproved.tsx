@@ -1,5 +1,5 @@
 import NewsCard from '@/components/News/NewsCard';
-import NewsLayout from '@/layouts/NewsLayout';
+import MainLayout from '@/layouts/MainLayout';
 import { formatNumber, formatRelativeTime, stripHtmlTags, truncateText } from '@/Utils/dateHelpers';
 import { Head, Link, router } from '@inertiajs/react';
 import { useState } from 'react';
@@ -144,7 +144,7 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
 
                 <div className="absolute bottom-0 left-0 right-0 p-6 text-white">
                     <div className="mb-3 flex items-center gap-2 text-sm">
-                        <span className="rounded-full bg-yellow-500 px-3 py-1 text-xs font-bold text-black">UNGGULAN</span>
+                        <span className="rounded-full bg-yellow-500 px-3 py-1 text-xs font-bold text-black">⭐ UNGGULAN</span>
                         <span className="text-gray-200">{formatRelativeTime(item.published_at)}</span>
                     </div>
 
@@ -199,7 +199,7 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
     };
 
     return (
-        <NewsLayout>
+        <MainLayout>
             <Head title="Berita & Artikel - Bank Sampah Cipta Muri" />
 
             {/* Hero Section with Featured News */}
@@ -216,7 +216,7 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
                     <div className="mb-16 text-center">
                         <h1 className="mb-6 text-4xl font-bold lg:text-6xl">
                             <span className="bg-gradient-to-r from-yellow-300 via-yellow-100 to-white bg-clip-text text-transparent">
-                                Berita & Artikel
+                                📰 Berita & Artikel
                             </span>
                         </h1>
                         <p className="mx-auto max-w-3xl text-xl leading-relaxed text-green-100 lg:text-2xl">
@@ -227,7 +227,7 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
                     {/* Featured News Section */}
                     {featuredNews.length > 0 && (
                         <div className="mb-8">
-                            <h2 className="mb-8 text-center text-2xl font-bold text-white">Berita Unggulan</h2>
+                            <h2 className="mb-8 text-center text-2xl font-bold text-white">🌟 Berita Unggulan</h2>
                             <div className="grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
                                 {featuredNews.slice(0, 3).map((item) => (
                                     <FeaturedNewsCard key={item.id} item={item} />
@@ -252,7 +252,7 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
                                             type="text"
                                             value={searchQuery}
                                             onChange={(e) => setSearchQuery(e.target.value)}
-                                            placeholder="Cari berita, artikel, atau topik tertentu..."
+                                            placeholder="🔍 Cari berita, artikel, atau topik tertentu..."
                                             className="w-full rounded-xl border border-gray-200 py-4 pl-12 pr-4 text-lg transition-all duration-300 focus:border-green-500 focus:ring-2 focus:ring-green-500"
                                         />
                                     </div>
@@ -262,7 +262,7 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
                                     disabled={isLoading}
                                     className="transform rounded-xl bg-gradient-to-r from-green-500 to-green-600 px-8 py-4 text-lg font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-1 hover:from-green-600 hover:to-green-700 hover:shadow-xl disabled:cursor-not-allowed disabled:opacity-50"
                                 >
-                                    {isLoading ? 'Mencari...' : 'Cari'}
+                                    {isLoading ? '🔄 Mencari...' : '🔍 Cari'}
                                 </button>
                             </div>
 
@@ -271,7 +271,7 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
                                 <div>
                                     <label className="mb-3 flex items-center gap-2 text-sm font-semibold text-gray-700">
                                         <FilterIcon className="h-4 w-4" />
-                                        Kategori
+                                        📂 Kategori
                                     </label>
                                     <select
                                         value={selectedCategory}
@@ -281,7 +281,7 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
                                         }}
                                         className="w-full rounded-xl border border-gray-200 px-4 py-3 text-lg transition-all duration-300 focus:border-green-500 focus:ring-2 focus:ring-green-500"
                                     >
-                                        <option value="">Semua Kategori</option>
+                                        <option value="">🌟 Semua Kategori</option>
                                         {Object.entries(categories).map(([key, label]) => (
                                             <option key={key} value={key}>
                                                 {label}
@@ -300,7 +300,7 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
                                                 d="M7 16V4m0 0L3 8m4-4l4 4m6 0v12m0 0l4-4m-4 4l-4-4"
                                             />
                                         </svg>
-                                        Urutkan
+                                        📊 Urutkan
                                     </label>
                                     <select
                                         value={sortBy}
@@ -310,9 +310,9 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
                                         }}
                                         className="w-full rounded-xl border border-gray-200 px-4 py-3 text-lg transition-all duration-300 focus:border-green-500 focus:ring-2 focus:ring-green-500"
                                     >
-                                        <option value="latest">Terbaru</option>
-                                        <option value="popular">Terpopuler</option>
-                                        <option value="oldest">Terlama</option>
+                                        <option value="latest">🆕 Terbaru</option>
+                                        <option value="popular">🔥 Terpopuler</option>
+                                        <option value="oldest">📅 Terlama</option>
                                     </select>
                                 </div>
                             </div>
@@ -323,11 +323,7 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
                     <div className="mb-8">
                         <div className="mb-8 flex flex-wrap items-center justify-between gap-4">
                             <h2 className="flex items-center gap-3 text-3xl font-bold text-gray-800">
-                                <span className="rounded-lg bg-green-100 p-2">
-                                    <svg className="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z" />
-                                    </svg>
-                                </span>
+                                <span className="rounded-lg bg-green-100 p-2">📖</span>
                                 Semua Berita
                             </h2>
                             <div className="rounded-full bg-white px-6 py-3 shadow-md">
@@ -355,11 +351,7 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
                             </>
                         ) : !isLoading ? (
                             <div className="rounded-2xl bg-white py-20 text-center shadow-lg">
-                                <div className="mb-6 text-6xl">
-                                    <svg className="mx-auto w-16 h-16 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-                                    </svg>
-                                </div>
+                                <div className="mb-6 text-6xl">🔍</div>
                                 <h3 className="mb-4 text-2xl font-bold text-gray-800">Oops! Tidak Ada Berita Ditemukan</h3>
                                 <p className="mx-auto mb-8 max-w-md text-lg text-gray-600">
                                     Coba ubah kata kunci pencarian atau pilih kategori yang berbeda untuk menemukan artikel yang menarik.
@@ -373,13 +365,13 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
                                     }}
                                     className="inline-flex items-center gap-2 rounded-xl bg-green-500 px-6 py-3 font-semibold text-white transition-colors duration-300 hover:bg-green-600"
                                 >
-                                    Reset Filter
+                                    🔄 Reset Filter
                                 </button>
                             </div>
                         ) : null}
                     </div>
                 </div>
             </section>
-        </NewsLayout>
+        </MainLayout>
     );
 }

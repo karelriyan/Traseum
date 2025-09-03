@@ -133,9 +133,9 @@ export default function NewsIndex({ news, categories, featuredNews, filters }: N
                     <div className="flex items-center justify-between text-xs text-gray-300">
                         <div className="flex items-center gap-2">
                             <div className="w-6 h-6 bg-white/20 rounded-full flex items-center justify-center">
-                                {item.author.name.charAt(0).toUpperCase()}
+                                {(item.author?.name?.charAt(0) || '?').toUpperCase()}
                             </div>
-                            <span>{item.author.name}</span>
+                            <span>{item.author?.name ?? 'Tanpa Penulis'}</span>
                         </div>
                         <div className="flex items-center gap-1">
                             <EyeIcon className="w-4 h-4" />

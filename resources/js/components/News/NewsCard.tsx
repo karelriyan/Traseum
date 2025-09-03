@@ -1,5 +1,12 @@
 import { Link } from '@inertiajs/react';
 
+const EyeIcon = ({ className }: { className?: string }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
+    </svg>
+);
+
 interface NewsItem {
     id: number;
     title: string;
@@ -99,15 +106,19 @@ export default function NewsCard({
             <div className="p-5">
                 <div className="flex items-center gap-3 text-xs mb-3">
                     <span className="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
-                        🗞️ Berita
+                        Berita
                     </span>
                     <div className="flex items-center gap-2 text-gray-500">
                         <span className="flex items-center gap-1">
-                            ⏰ {formatRelativeTime(news.published_at)}
+                            <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                            </svg>
+                            {formatRelativeTime(news.published_at)}
                         </span>
                         {showViews && (
                             <span className="flex items-center gap-1">
-                                👁️ {news.views_count}
+                                <EyeIcon className="w-3 h-3" />
+                                {news.views_count}
                             </span>
                         )}
                     </div>
