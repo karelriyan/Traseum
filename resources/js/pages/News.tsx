@@ -1,5 +1,5 @@
 import Button from '@/components/Button';
-import NewsCard from '@/components/NewsCard';
+import NewsCard from '@/components/News/NewsCard';
 import MainLayout from '@/layouts/MainLayout';
 import { Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';

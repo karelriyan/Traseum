@@ -2,7 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\HomeController;
-use App\Http\Controllers\NewsController;
+use App\Http\Controllers\Frontend\NewsController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -10,9 +10,17 @@ use Inertia\Inertia;
 // Public landing page
 Route::get('/', [HomeController::class, 'index'])->name('home');
 
-// News pages
+// News routes
+Route::prefix('berita')->name('news.')->group(function () {
+    Route::get('/', [NewsController::class, 'index'])->name('index');
+    Route::get('/search', [NewsController::class, 'search'])->name('search');
+    Route::get('/kategori/{category}', [NewsController::class, 'category'])->name('category');
+    Route::get('/{news:slug}', [NewsController::class, 'show'])->name('show');
+});
+
+// Legacy routes for backward compatibility
 Route::get('/news', [NewsController::class, 'index'])->name('news');
-Route::get('/news/{id}', [NewsController::class, 'show'])->name('news.detail');
+Route::get('/news/{news:slug}', [NewsController::class, 'show'])->name('news.detail');
 
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');

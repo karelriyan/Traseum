@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 //use App\Models\Nasabah;
 use App\Models\SetorSampah;
 use App\Models\SaldoTransaction;
+use App\Models\News;
 //use App\Models\Umkm;//
 use Illuminate\Http\Request;
 use Inertia\Inertia;
@@ -119,10 +120,20 @@ class HomeController extends Controller
             ]
         ];
 
+        // Get latest news for homepage
+        $latestNews = Cache::remember('homepage_latest_news', 3600, function () {
+            return News::published()
+                ->with('author')
+                ->orderBy('published_at', 'desc')
+                ->take(6)
+                ->get();
+        });
+
         return Inertia::render('Home', [
             'stats' => $stats,
             'programs' => $programs,
-            'testimonials' => $testimonials
+            'testimonials' => $testimonials,
+            'latestNews' => $latestNews
         ]);
     }
 }
