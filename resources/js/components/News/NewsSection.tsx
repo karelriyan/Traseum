@@ -57,7 +57,7 @@ export default function NewsSection({
             <div className="relative mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
                 {/* Section Header */}
                 <div className="mb-20 text-center">
-                    <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-5 py-2.5 font-medium text-slate-700">
+                    {/* <div className="mb-8 inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-100 px-5 py-2.5 font-medium text-slate-700">
                         <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path
                                 strokeLinecap="round"
@@ -67,7 +67,7 @@ export default function NewsSection({
                             />
                         </svg>
                         <span className="text-sm font-semibold uppercase tracking-wide">Pusat Informasi</span>
-                    </div>
+                    </div> */}
 
                     <h2 className="mb-6 text-4xl font-bold tracking-tight text-slate-900 md:text-5xl lg:text-6xl">{title}</h2>
 
@@ -231,14 +231,14 @@ export default function NewsSection({
                 )}
 
                 {/* Call to Action */}
-                <div className="rounded-3xl border border-slate-100 bg-gradient-to-br from-slate-50 to-white p-12 text-center">
+                <div className="rounded-2xl border border-slate-100 bg-gradient-to-br from-slate-50 to-white p-8 text-center">
                     <h3 className="mb-4 text-2xl font-bold text-slate-900">Jangan Lewatkan Update Terbaru</h3>
                     <p className="mx-auto mb-8 max-w-lg text-slate-600">
                         Dapatkan informasi terdepan tentang perkembangan Bank Sampah Cipta Muri dan program-program inovatif kami.
                     </p>
                     <Link
                         href={route('news.index')}
-                        className="group inline-flex transform items-center gap-3 rounded-2xl bg-slate-900 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-slate-800 hover:shadow-xl"
+                        className="group inline-flex transform items-center gap-3 rounded-2xl bg-green-600 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-text-green-600 hover:shadow-xl"
                     >
                         <span>Lihat Semua Berita</span>
                         <svg

@@ -108,8 +108,7 @@ export default function NewsCard({ news, size = 'medium', showExcerpt = true, sh
                 )}
 
                 <div className="flex flex-grow flex-col p-4">
-                    <div className="mb-3 flex items-center justify-between">
-                        <span className="rounded-full bg-slate-900 px-2 py-1 text-xs font-semibold tracking-wide text-white">BERITA</span>
+                    <div className="mb-3 flex items-center justify-end">
                         <div className="flex items-center gap-2 text-xs text-slate-500">
                             <span className="flex items-center gap-1">
                                 <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -132,7 +131,7 @@ export default function NewsCard({ news, size = 'medium', showExcerpt = true, sh
                     </div>
 
                     <h3
-                        className={`mb-4 line-clamp-2 font-bold text-slate-900 transition-colors duration-300 group-hover:text-green-600 ${titleSizeClasses[size]} flex-grow leading-tight`}
+                        className={`mb-4 line-clamp-2font-bold text-slate-900 transition-colors duration-300 group-hover:text-green-600 ${titleSizeClasses[size]} flex-grow leading-tight`}
                     >
                         {news.title}
                     </h3>
