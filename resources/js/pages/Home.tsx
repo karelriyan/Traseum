@@ -1,8 +1,9 @@
 import { Head } from '@inertiajs/react';
 import { motion } from 'framer-motion';
-import { ArrowRight, Calendar, Eye, Leaf, PiggyBank, Recycle, Shield, Smartphone, Users } from 'lucide-react';
+import { ArrowRight, Leaf, PiggyBank, Recycle, Shield, Smartphone, Users } from 'lucide-react';
 
 import Button from '../components/Button';
+import NewsSection from '../components/News/NewsSection';
 import ProgramCard from '../components/ProgramCard';
 import SectionHeader from '../components/SectionHeader';
 import StatCard from '../components/StatCard';
@@ -31,9 +32,25 @@ interface HomeProps {
         avatar: string;
         rating: number;
     }>;
+    latestNews: Array<{
+        id: number;
+        title: string;
+        slug: string;
+        excerpt: string;
+        content: string;
+        featured_image: string | null;
+        featured_image_url: string | null;
+        category: string;
+        published_at: string;
+        views_count: number;
+        author: {
+            id: number;
+            name: string;
+        };
+    }>;
 }
 
-export default function Home({ stats, programs, testimonials }: HomeProps) {
+export default function Home({ stats, programs, testimonials, latestNews }: HomeProps) {
     return (
         <MainLayout>
             <Head>
@@ -698,294 +715,7 @@ export default function Home({ stats, programs, testimonials }: HomeProps) {
             </section>
 
             {/* News & Publications Section */}
-            <section id="berita-publikasi" className="section-padding bg-gray-50">
-                <div className="container-custom">
-                    <SectionHeader
-                        subtitle="Berita & Publikasi"
-                        title="Berita Terkini & Aktivitas Kami"
-                        description="Ikuti perkembangan terbaru Bank Sampah Cipta Muri, prestasi yang diraih, dan berbagai kegiatan yang telah dilaksanakan."
-                    />
-
-                    <div className="mt-16 grid grid-cols-1 gap-8 md:grid-cols-2 lg:grid-cols-3">
-                        {/* News Item 1 */}
-                        <motion.article
-                            className="group overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl"
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.1 }}
-                            viewport={{ once: true }}
-                        >
-                            <div className="relative overflow-hidden">
-                                <img
-                                    src="/images/news/news1.jpg"
-                                    alt="Penghargaan Bank Sampah Terbaik"
-                                    className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                />
-                                <div className="absolute left-4 top-4 rounded-full bg-green-500 px-3 py-1 text-xs font-medium text-white">
-                                    Penghargaan
-                                </div>
-                            </div>
-                            <div className="p-6">
-                                <div className="mb-3 flex items-center space-x-4 text-sm text-gray-500">
-                                    <div className="flex items-center space-x-1">
-                                        <Calendar className="h-4 w-4" />
-                                        <span>15 Agustus 2024</span>
-                                    </div>
-                                    <div className="flex items-center space-x-1">
-                                        <Eye className="h-4 w-4" />
-                                        <span>1,234 views</span>
-                                    </div>
-                                </div>
-                                <h3 className="mb-3 text-lg font-bold text-gray-900 transition-colors group-hover:text-green-600">
-                                    Bank Sampah Cipta Muri Raih Penghargaan Bank Sampah Terbaik Jawa Tengah 2024
-                                </h3>
-                                <p className="mb-4 leading-relaxed text-gray-600">
-                                    Prestasi membanggakan diraih Bank Sampah Cipta Muri sebagai Bank Sampah Terbaik tingkat Provinsi Jawa Tengah
-                                    berkat inovasi sistem digital dan dampak positif terhadap lingkungan.
-                                </p>
-                                <Button variant="outline" size="sm" className="group/btn w-full" href="/news/penghargaan-bank-sampah-terbaik-2024">
-                                    Baca Selengkapnya
-                                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                                </Button>
-                            </div>
-                        </motion.article>
-
-                        {/* News Item 2 */}
-                        <motion.article
-                            className="group overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl"
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.2 }}
-                            viewport={{ once: true }}
-                        >
-                            <div className="relative overflow-hidden">
-                                <img
-                                    src="/images/news/news2.jpg"
-                                    alt="Workshop Edukasi Lingkungan"
-                                    className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                />
-                                <div className="absolute left-4 top-4 rounded-full bg-blue-500 px-3 py-1 text-xs font-medium text-white">
-                                    Kegiatan
-                                </div>
-                            </div>
-                            <div className="p-6">
-                                <div className="mb-3 flex items-center space-x-4 text-sm text-gray-500">
-                                    <div className="flex items-center space-x-1">
-                                        <Calendar className="h-4 w-4" />
-                                        <span>28 Juli 2024</span>
-                                    </div>
-                                    <div className="flex items-center space-x-1">
-                                        <Eye className="h-4 w-4" />
-                                        <span>856 views</span>
-                                    </div>
-                                </div>
-                                <h3 className="mb-3 text-lg font-bold text-gray-900 transition-colors group-hover:text-green-600">
-                                    Workshop Edukasi Lingkungan untuk 500 Siswa SD di Kabupaten Cilacap
-                                </h3>
-                                <p className="mb-4 leading-relaxed text-gray-600">
-                                    Program edukasi lingkungan yang diselenggarakan Bank Sampah Cipta Muri berhasil menjangkau 500 siswa SD dengan
-                                    materi pengelolaan sampah dan gaya hidup berkelanjutan.
-                                </p>
-                                <Button variant="outline" size="sm" className="group/btn w-full" href="/news/workshop-edukasi-lingkungan-siswa-sd">
-                                    Baca Selengkapnya
-                                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                                </Button>
-                            </div>
-                        </motion.article>
-
-                        {/* News Item 3 */}
-                        <motion.article
-                            className="group overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl"
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.3 }}
-                            viewport={{ once: true }}
-                        >
-                            <div className="relative overflow-hidden">
-                                <img
-                                    src="/images/news/news3.jpg"
-                                    alt="Peluncuran Aplikasi Mobile"
-                                    className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                />
-                                <div className="absolute left-4 top-4 rounded-full bg-purple-500 px-3 py-1 text-xs font-medium text-white">
-                                    Inovasi
-                                </div>
-                            </div>
-                            <div className="p-6">
-                                <div className="mb-3 flex items-center space-x-4 text-sm text-gray-500">
-                                    <div className="flex items-center space-x-1">
-                                        <Calendar className="h-4 w-4" />
-                                        <span>10 Juni 2024</span>
-                                    </div>
-                                    <div className="flex items-center space-x-1">
-                                        <Eye className="h-4 w-4" />
-                                        <span>2,145 views</span>
-                                    </div>
-                                </div>
-                                <h3 className="mb-3 text-lg font-bold text-gray-900 transition-colors group-hover:text-green-600">
-                                    Peluncuran Aplikasi Mobile "EcoBank Cipta Muri" dengan Fitur AI dan Blockchain
-                                </h3>
-                                <p className="mb-4 leading-relaxed text-gray-600">
-                                    Inovasi terdepan dalam pengelolaan sampah digital dengan meluncurkan aplikasi mobile yang dilengkapi teknologi AI
-                                    untuk identifikasi jenis sampah dan blockchain untuk transparansi transaksi.
-                                </p>
-                                <Button variant="outline" size="sm" className="group/btn w-full" href="/news/peluncuran-aplikasi-mobile-ecobank">
-                                    Baca Selengkapnya
-                                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                                </Button>
-                            </div>
-                        </motion.article>
-
-                        {/* News Item 4 */}
-                        <motion.article
-                            className="group overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl"
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.4 }}
-                            viewport={{ once: true }}
-                        >
-                            <div className="relative overflow-hidden">
-                                <img
-                                    src="/images/news/news4.jpg"
-                                    alt="Kemitraan UMKM Lokal"
-                                    className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                />
-                                <div className="absolute left-4 top-4 rounded-full bg-yellow-500 px-3 py-1 text-xs font-medium text-white">
-                                    Kemitraan
-                                </div>
-                            </div>
-                            <div className="p-6">
-                                <div className="mb-3 flex items-center space-x-4 text-sm text-gray-500">
-                                    <div className="flex items-center space-x-1">
-                                        <Calendar className="h-4 w-4" />
-                                        <span>22 Mei 2024</span>
-                                    </div>
-                                    <div className="flex items-center space-x-1">
-                                        <Eye className="h-4 w-4" />
-                                        <span>678 views</span>
-                                    </div>
-                                </div>
-                                <h3 className="mb-3 text-lg font-bold text-gray-900 transition-colors group-hover:text-green-600">
-                                    Kemitraan dengan 50 UMKM Lokal untuk Program Tukar Poin Produk Ramah Lingkungan
-                                </h3>
-                                <p className="mb-4 leading-relaxed text-gray-600">
-                                    Ekspansi jaringan kemitraan dengan 50 UMKM lokal memungkinkan nasabah menukarkan poin tabungan dengan berbagai
-                                    produk ramah lingkungan dan mendukung ekonomi lokal.
-                                </p>
-                                <Button variant="outline" size="sm" className="group/btn w-full" href="/news/kemitraan-umkm-lokal-program-tukar-poin">
-                                    Baca Selengkapnya
-                                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                                </Button>
-                            </div>
-                        </motion.article>
-
-                        {/* News Item 5 */}
-                        <motion.article
-                            className="group overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl"
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.5 }}
-                            viewport={{ once: true }}
-                        >
-                            <div className="relative overflow-hidden">
-                                <img
-                                    src="/images/news/news5.jpg"
-                                    alt="Pelatihan Pengelolaan Sampah"
-                                    className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                />
-                                <div className="absolute left-4 top-4 rounded-full bg-indigo-500 px-3 py-1 text-xs font-medium text-white">
-                                    Pelatihan
-                                </div>
-                            </div>
-                            <div className="p-6">
-                                <div className="mb-3 flex items-center space-x-4 text-sm text-gray-500">
-                                    <div className="flex items-center space-x-1">
-                                        <Calendar className="h-4 w-4" />
-                                        <span>05 April 2024</span>
-                                    </div>
-                                    <div className="flex items-center space-x-1">
-                                        <Eye className="h-4 w-4" />
-                                        <span>1,89 views</span>
-                                    </div>
-                                </div>
-                                <h3 className="mb-3 text-lg font-bold text-gray-900 transition-colors group-hover:text-green-600">
-                                    Pelatihan Pengelolaan Sampah untuk 20 Desa se-Kabupaten Cilacap
-                                </h3>
-                                <p className="mb-4 leading-relaxed text-gray-600">
-                                    Program transfer knowledge kepada 20 desa di Kabupaten Cilacap untuk mendirikan bank sampah mandiri dengan sistem
-                                    pengelolaan yang sustainable dan profitable.
-                                </p>
-                                <Button variant="outline" size="sm" className="group/btn w-full" href="/news/pelatihan-pengelolaan-sampah-20-desa">
-                                    Baca Selengkapnya
-                                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                                </Button>
-                            </div>
-                        </motion.article>
-
-                        {/* News Item 6 */}
-                        <motion.article
-                            className="group overflow-hidden rounded-xl bg-white shadow-lg transition-all duration-300 hover:translate-y-[-4px] hover:shadow-xl"
-                            initial={{ opacity: 0, y: 30 }}
-                            whileInView={{ opacity: 1, y: 0 }}
-                            transition={{ duration: 0.6, delay: 0.6 }}
-                            viewport={{ once: true }}
-                        >
-                            <div className="relative overflow-hidden">
-                                <img
-                                    src="/images/news/news6.jpg"
-                                    alt="Milestone 1000 Anggota"
-                                    className="h-48 w-full object-cover transition-transform duration-300 group-hover:scale-105"
-                                />
-                                <div className="absolute left-4 top-4 rounded-full bg-red-500 px-3 py-1 text-xs font-medium text-white">
-                                    Milestone
-                                </div>
-                            </div>
-                            <div className="p-6">
-                                <div className="mb-3 flex items-center space-x-4 text-sm text-gray-500">
-                                    <div className="flex items-center space-x-1">
-                                        <Calendar className="h-4 w-4" />
-                                        <span>18 Maret 2024</span>
-                                    </div>
-                                    <div className="flex items-center space-x-1">
-                                        <Eye className="h-4 w-4" />
-                                        <span>3,256 views</span>
-                                    </div>
-                                </div>
-                                <h3 className="mb-3 text-lg font-bold text-gray-900 transition-colors group-hover:text-green-600">
-                                    Milestone 1.250 Anggota Aktif dan Total Tabungan Rp 45 Miliar
-                                </h3>
-                                <p className="mb-4 leading-relaxed text-gray-600">
-                                    Pencapaian luar biasa dengan 1.250 anggota aktif dan total tabungan mencapai Rp 45 miliar, membuktikan kepercayaan
-                                    masyarakat terhadap sistem bank sampah digital.
-                                </p>
-                                <Button
-                                    variant="outline"
-                                    size="sm"
-                                    className="group/btn w-full"
-                                    href="/news/milestone-1250-anggota-45-miliar-tabungan"
-                                >
-                                    Baca Selengkapnya
-                                    <ArrowRight className="ml-2 h-4 w-4 transition-transform group-hover/btn:translate-x-1" />
-                                </Button>
-                            </div>
-                        </motion.article>
-                    </div>
-
-                    {/* View All News Button */}
-                    <motion.div
-                        className="mt-12 text-center"
-                        initial={{ opacity: 0, y: 20 }}
-                        whileInView={{ opacity: 1, y: 0 }}
-                        transition={{ duration: 0.6, delay: 0.7 }}
-                        viewport={{ once: true }}
-                    >
-                        <Button href="/news" size="lg" className="group bg-green-600 hover:bg-green-700">
-                            Lihat Semua Berita
-                            <ArrowRight className="ml-2 h-5 w-5 transition-transform group-hover:translate-x-1" />
-                        </Button>
-                    </motion.div>
-                </div>
-            </section>
+            <NewsSection latestNews={latestNews} />
 
             {/* Location Section */}
             <section id="lokasi" className="section-padding bg-gray-50">

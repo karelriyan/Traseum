@@ -25,20 +25,23 @@ export default function NewsLayout({ children, showBackButton = true, backUrl = 
                                 {backLabel}
                             </Link>
 
-                            <div className="flex items-center gap-3">
-                                <div className="flex items-center gap-2">
+                            <Link href="/" className="flex items-center gap-3 transition-transform duration-200 hover:scale-105">
+                                <div className="flex items-center space-x-3">
                                     <img
                                         src="/logo.png"
                                         alt="Bank Sampah Cipta Muri"
-                                        className="h-8 w-8 rounded-full"
+                                        className="h-10 w-10"
                                         onError={(e) => {
                                             const target = e.target as HTMLImageElement;
                                             target.style.display = 'none';
                                         }}
                                     />
-                                    <span className="text-sm font-semibold text-gray-700">Bank Sampah Cipta Muri</span>
+                                    <div className="flex flex-col">
+                                        <span className="text-xl font-bold text-green-600">Cipta Muri</span>
+                                        <span className="text-xs text-gray-500">e-Bank Sampah</span>
+                                    </div>
                                 </div>
-                            </div>
+                            </Link>
                         </div>
                     </div>
                 </header>

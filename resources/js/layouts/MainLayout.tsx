@@ -1,3 +1,4 @@
+import { Link } from '@inertiajs/react';
 import { Menu, X } from 'lucide-react';
 import { ReactNode, SyntheticEvent, useEffect, useState } from 'react';
 
@@ -72,7 +73,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                 <div className="container-custom">
                     <div className="flex items-center justify-between py-4">
                         {/* Logo */}
-                        <div className="flex items-center space-x-3">
+                        <Link href="/" className="flex items-center space-x-3 transition-transform duration-200 hover:scale-105">
                             <img
                                 src="/logo.png"
                                 alt="Bank Sampah Cipta Muri"
@@ -89,7 +90,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
                                     e-Bank Sampah
                                 </span>
                             </div>
-                        </div>
+                        </Link>
 
                         {/* Desktop Navigation */}
                         <div className="hidden items-center space-x-8 md:flex">

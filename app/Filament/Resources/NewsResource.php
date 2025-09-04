@@ -112,7 +112,7 @@ class NewsResource extends Resource
                         Select::make('status')
                             ->label('Status')
                             ->required()
-                            ->default('draft')
+                            ->default('published')
                             ->options(News::getStatusOptions())
                             ->live(),
 
