@@ -14,6 +14,7 @@ use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TagsInput;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
+use Filament\Forms\Components\Hidden;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
@@ -52,21 +53,10 @@ class NewsResource extends Resource
                             ->label('Judul')
                             ->required()
                             ->live(onBlur: true)
-                            ->afterStateUpdated(fn (string $context, $state, callable $set) => 
+                            ->afterStateUpdated(
+                                fn(string $context, $state, callable $set) =>
                                 $context === 'create' ? $set('slug', Str::slug($state)) : null
                             ),
-
-                        TextInput::make('slug')
-                            ->label('Slug')
-                            ->required()
-                            ->unique(News::class, 'slug', ignoreRecord: true)
-                            ->rules(['alpha_dash']),
-
-                        Textarea::make('excerpt')
-                            ->label('Ringkasan')
-                            ->rows(3)
-                            ->columnSpanFull()
-                            ->hint('Opsional - akan otomatis diambil dari konten jika kosong'),
 
                         RichEditor::make('content')
                             ->label('Konten')
@@ -93,7 +83,7 @@ class NewsResource extends Resource
 
                 Section::make('Media')
                     ->schema([
-                        FileUpload::make('featured_image')
+                        FileUpload::make('image')
                             ->label('Gambar Utama')
                             ->image()
                             ->disk('public')
@@ -109,26 +99,6 @@ class NewsResource extends Resource
 
                 Section::make('Publikasi')
                     ->schema([
-                        Select::make('status')
-                            ->label('Status')
-                            ->required()
-                            ->default('draft')
-                            ->options(News::getStatusOptions())
-                            ->live(),
-
-                        DateTimePicker::make('published_at')
-                            ->label('Tanggal Publikasi')
-                            ->default(now())
-                            ->required(fn ($get) => $get('status') === 'published')
-                            ->hidden(fn ($get) => $get('status') === 'draft'),
-
-                        Select::make('author_id')
-                            ->label('Penulis')
-                            ->relationship('author', 'name')
-                            ->searchable()
-                            ->preload()
-                            ->default(auth()->id()),
-
                         Select::make('category')
                             ->label('Kategori')
                             ->required()
@@ -142,19 +112,23 @@ class NewsResource extends Resource
                     ])
                     ->columns(2),
 
-                Section::make('SEO (Opsional)')
-                    ->schema([
-                        TextInput::make('meta_title')
-                            ->label('Meta Title')
-                            ->maxLength(60),
 
-                        Textarea::make('meta_description')
-                            ->label('Meta Description')
-                            ->rows(2)
-                            ->maxLength(160),
-                    ])
-                    ->collapsible()
-                    ->collapsed(),
+                Hidden::make('meta_title')
+                    ->label('Meta Title')
+                    ->maxLength(60)
+                    ->maxLength(60)
+                    ->default(fn(callable $get) => $get('title'))
+                    ->mutateStateBeforeSave(fn(callable $get, $state) => $state ?? $get('title')),
+
+                Hidden::make('meta_description')
+                    ->label('Meta Description')
+                    ->rows(2)
+                    ->maxLength(160)
+                    ->default(fn(callable $get) => $get('excerpt'))
+                    ->mutateStateBeforeSave(fn(callable $get, $state) => Str::limit($state ?? $get('excerpt'), 160)),
+
+                Hidden::make('slug')
+                    ->rules(['alpha_dash']),
             ]);
     }
 
@@ -199,7 +173,7 @@ class NewsResource extends Resource
                 TextColumn::make('category')
                     ->label('Kategori')
                     ->badge()
-                    ->formatStateUsing(fn (string $state): string => News::getCategoryOptions()[$state] ?? $state),
+                    ->formatStateUsing(fn(string $state): string => News::getCategoryOptions()[$state] ?? $state),
 
                 TextColumn::make('author.name')
                     ->label('Penulis')
@@ -245,15 +219,15 @@ class NewsResource extends Resource
                     ->label('Lihat Gambar')
                     ->icon('heroicon-o-eye')
                     ->color('info')
-                    ->modalHeading(fn (News $record): string => "Gambar: {$record->title}")
+                    ->modalHeading(fn(News $record): string => "Gambar: {$record->title}")
                     ->modalContent(function (News $record) {
                         if (!$record->featured_image) {
                             return view('filament.components.no-image-placeholder');
                         }
-                        
+
                         $imageUrl = url('storage/' . $record->featured_image);
                         $stats = ImageOptimizationService::getOptimizationStats($record->featured_image, 'public');
-                        
+
                         return view('filament.components.image-viewer', [
                             'imageUrl' => $imageUrl,
                             'title' => $record->title,
@@ -267,14 +241,15 @@ class NewsResource extends Resource
                             ->label('Download')
                             ->icon('heroicon-o-arrow-down-tray')
                             ->color('success')
-                            ->url(fn (News $record): string => url('storage/' . $record->featured_image))
+                            ->url(fn(News $record): string => url('storage/' . $record->featured_image))
                             ->openUrlInNewTab(),
                     ])
-                    ->modalCancelAction(fn () => \Filament\Actions\Action::make('cancel')
-                        ->label('Close')
-                        ->color('secondary')
+                    ->modalCancelAction(
+                        fn() => \Filament\Actions\Action::make('cancel')
+                            ->label('Close')
+                            ->color('secondary')
                     )
-                    ->visible(fn (News $record) => $record->featured_image),
+                    ->visible(fn(News $record) => $record->featured_image),
                 Tables\Actions\DeleteAction::make(),
                 Tables\Actions\RestoreAction::make(),
             ])
@@ -289,9 +264,9 @@ class NewsResource extends Resource
                         ->color('success')
                         ->action(function (\Illuminate\Database\Eloquent\Collection $records) {
                             $imagePaths = $records->whereNotNull('featured_image')
-                                                ->pluck('featured_image')
-                                                ->toArray();
-                            
+                                ->pluck('featured_image')
+                                ->toArray();
+
                             if (empty($imagePaths)) {
                                 \Filament\Notifications\Notification::make()
                                     ->title('No Images to Optimize')
@@ -299,11 +274,11 @@ class NewsResource extends Resource
                                     ->send();
                                 return;
                             }
-                            
+
                             $results = ImageOptimizationService::optimizeBatch($imagePaths, 'public');
-                            
+
                             $message = "Optimized: {$results['success']}, Failed: {$results['failed']}";
-                            
+
                             \Filament\Notifications\Notification::make()
                                 ->title('Batch Optimization Complete')
                                 ->body($message)
