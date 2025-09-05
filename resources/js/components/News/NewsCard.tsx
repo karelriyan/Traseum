@@ -1,5 +1,17 @@
 import { Link } from '@inertiajs/react';
 
+const EyeIcon = ({ className }: { className?: string }) => (
+    <svg className={className} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
+        <path
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            strokeWidth={2}
+            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"
+        />
+    </svg>
+);
+
 interface NewsItem {
     id: number;
     title: string;
@@ -25,13 +37,7 @@ interface NewsCardProps {
     showViews?: boolean;
 }
 
-export default function NewsCard({ 
-    news, 
-    size = 'medium', 
-    showExcerpt = true, 
-    showAuthor = true,
-    showViews = true 
-}: NewsCardProps) {
+export default function NewsCard({ news, size = 'medium', showExcerpt = true, showAuthor = true, showViews = true }: NewsCardProps) {
     const formatRelativeTime = (dateString: string): string => {
         const date = new Date(dateString);
         const now = new Date();
@@ -43,7 +49,7 @@ export default function NewsCard({
             { label: 'minggu', seconds: 604800 },
             { label: 'hari', seconds: 86400 },
             { label: 'jam', seconds: 3600 },
-            { label: 'menit', seconds: 60 }
+            { label: 'menit', seconds: 60 },
         ];
 
         for (const interval of intervals) {
@@ -66,88 +72,85 @@ export default function NewsCard({
     };
 
     const sizeClasses = {
-        small: 'max-w-xs',
-        medium: 'max-w-sm',
-        large: 'max-w-md'
+        small: '',
+        medium: '',
+        large: '',
     };
 
     const titleSizeClasses = {
         small: 'text-base',
         medium: 'text-lg',
-        large: 'text-xl'
+        large: 'text-xl',
     };
 
     return (
-        <article className={`group bg-white rounded-xl shadow-lg overflow-hidden hover:shadow-xl transition-all duration-300 border border-gray-100 hover:border-green-200 ${sizeClasses[size]}`}>
-            {news.featured_image_url ? (
-                <div className="aspect-video overflow-hidden bg-gradient-to-br from-gray-100 to-gray-200">
-                    <img
-                        src={news.featured_image_url}
-                        alt={news.title}
-                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
-                        loading="lazy"
-                    />
-                </div>
-            ) : (
-                <div className="aspect-video bg-gradient-to-br from-green-50 to-green-100 flex items-center justify-center">
-                    <svg className="w-16 h-16 text-green-300" fill="currentColor" viewBox="0 0 20 20">
-                        <path fillRule="evenodd" d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z" clipRule="evenodd" />
-                    </svg>
-                </div>
-            )}
-            
-            <div className="p-5">
-                <div className="flex items-center gap-3 text-xs mb-3">
-                    <span className="bg-gradient-to-r from-green-500 to-green-600 text-white px-3 py-1 rounded-full text-xs font-semibold shadow-sm">
-                        🗞️ Berita
-                    </span>
-                    <div className="flex items-center gap-2 text-gray-500">
-                        <span className="flex items-center gap-1">
-                            ⏰ {formatRelativeTime(news.published_at)}
-                        </span>
-                        {showViews && (
+        <Link href={route('news.show', news.slug)} className="group block h-full">
+            <article className="flex h-full flex-col overflow-hidden rounded-2xl border border-slate-100 bg-white shadow-sm transition-all duration-500 hover:-translate-y-1 hover:border-slate-200 hover:shadow-xl">
+                {news.featured_image_url ? (
+                    <div className="aspect-[4/3] flex-shrink-0 overflow-hidden bg-gradient-to-br from-slate-100 to-slate-200">
+                        <img
+                            src={news.featured_image_url}
+                            alt={news.title}
+                            className="h-full w-full bg-white object-contain transition-transform duration-700 group-hover:scale-105"
+                            loading="lazy"
+                        />
+                    </div>
+                ) : (
+                    <div className="flex aspect-[4/3] flex-shrink-0 items-center justify-center border-b border-slate-100 bg-gradient-to-br from-slate-50 to-slate-100">
+                        <svg className="h-16 w-16 text-slate-300" fill="currentColor" viewBox="0 0 20 20">
+                            <path
+                                fillRule="evenodd"
+                                d="M4 3a2 2 0 00-2 2v10a2 2 0 002 2h12a2 2 0 002-2V5a2 2 0 00-2-2H4zm12 12H4l4-8 3 6 2-4 3 6z"
+                                clipRule="evenodd"
+                            />
+                        </svg>
+                    </div>
+                )}
+
+                <div className="flex flex-grow flex-col p-4">
+                    <div className="mb-3 flex items-center justify-end">
+                        <div className="flex items-center gap-2 text-xs text-slate-500">
                             <span className="flex items-center gap-1">
-                                👁️ {news.views_count}
+                                <svg className="h-3 w-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path
+                                        strokeLinecap="round"
+                                        strokeLinejoin="round"
+                                        strokeWidth={2}
+                                        d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"
+                                    />
+                                </svg>
+                                {formatRelativeTime(news.published_at)}
                             </span>
-                        )}
+                            {showViews && (
+                                <span className="flex items-center gap-1">
+                                    <EyeIcon className="h-3 w-3" />
+                                    {news.views_count.toLocaleString('id-ID')}
+                                </span>
+                            )}
+                        </div>
+                    </div>
+
+                    <h3
+                        className={`mb-4 line-clamp-2font-bold text-slate-900 transition-colors duration-300 group-hover:text-green-600 ${titleSizeClasses[size]} flex-grow leading-tight`}
+                    >
+                        {news.title}
+                    </h3>
+
+                    <div className="mt-auto flex justify-end">
+                        <div className="flex items-center gap-1 text-xs font-semibold text-green-600 transition-colors group-hover:text-green-700">
+                            <span>Baca Selengkapnya</span>
+                            <svg
+                                className="h-3 w-3 transition-transform duration-300 group-hover:translate-x-1"
+                                fill="none"
+                                stroke="currentColor"
+                                viewBox="0 0 24 24"
+                            >
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
+                            </svg>
+                        </div>
                     </div>
                 </div>
-                
-                <h3 className={`font-bold mb-3 line-clamp-2 text-gray-800 group-hover:text-green-700 transition-colors duration-300 ${titleSizeClasses[size]} leading-tight`}>
-                    <Link href={route('news.show', news.slug)} className="hover:underline decoration-green-500 decoration-2 underline-offset-2">
-                        {news.title}
-                    </Link>
-                </h3>
-                
-                {showExcerpt && (
-                    <p className="text-gray-600 text-sm mb-4 line-clamp-3 leading-relaxed">
-                        {news.excerpt || truncateText(stripHtmlTags(news.content || ''), 100)}
-                    </p>
-                )}
-                
-                <div className="flex items-center justify-between pt-2 border-t border-gray-100">
-                    {showAuthor && (
-                        <div className="flex items-center gap-2">
-                            <div className="w-6 h-6 bg-gradient-to-r from-green-400 to-green-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-                                {news.author.name.charAt(0).toUpperCase()}
-                            </div>
-                            <span className="text-xs text-gray-500 font-medium">
-                                {news.author.name}
-                            </span>
-                        </div>
-                    )}
-                    
-                    <Link
-                        href={route('news.show', news.slug)}
-                        className="inline-flex items-center gap-1 px-3 py-1.5 bg-green-500 hover:bg-green-600 text-white text-xs font-semibold rounded-full transition-colors duration-300 shadow-sm hover:shadow-md"
-                    >
-                        Baca Selengkapnya
-                        <svg className="w-3 h-3 ml-1 transform group-hover:translate-x-1 transition-transform duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5l7 7-7 7" />
-                        </svg>
-                    </Link>
-                </div>
-            </div>
-        </article>
+            </article>
+        </Link>
     );
 }

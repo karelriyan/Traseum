@@ -18,10 +18,6 @@ Route::prefix('berita')->name('news.')->group(function () {
     Route::get('/{news:slug}', [NewsController::class, 'show'])->name('show');
 });
 
-// Legacy routes for backward compatibility
-Route::get('/news', [NewsController::class, 'index'])->name('news');
-Route::get('/news/{news:slug}', [NewsController::class, 'show'])->name('news.detail');
-
 Route::get('/dashboard', function () {
     return Inertia::render('Dashboard');
 })->middleware(['auth', 'verified'])->name('dashboard');

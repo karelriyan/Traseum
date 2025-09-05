@@ -99,6 +99,26 @@ class NewsResource extends Resource
 
                 Section::make('Publikasi')
                     ->schema([
+                        Select::make('status')
+                            ->label('Status')
+                            ->required()
+                            ->default('draft')
+                            ->options(News::getStatusOptions())
+                            ->live(),
+
+                        DateTimePicker::make('published_at')
+                            ->label('Tanggal Publikasi')
+                            ->default(now())
+                            ->required(fn ($get) => $get('status') === 'published')
+                            ->hidden(fn ($get) => $get('status') === 'draft'),
+
+                        Select::make('author_id')
+                            ->label('Penulis')
+                            ->relationship('author', 'name')
+                            ->searchable()
+                            ->preload()
+                            ->default(auth()->id()),
+
                         Select::make('category')
                             ->label('Kategori')
                             ->required()

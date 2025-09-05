@@ -34,6 +34,10 @@ class News extends Model
         'views_count' => 'integer',
     ];
 
+    protected $appends = [
+        'featured_image_url'
+    ];
+
     protected $dates = ['deleted_at'];
 
     // Status constants

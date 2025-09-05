@@ -2,52 +2,117 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\News;
 use Illuminate\Http\Request;
 use Inertia\Inertia;
 
 class NewsController extends Controller
 {
-    public function index()
+    // Helper function to transform news model to array
+    private function transformNews($news)
     {
-        // Sample news data - nanti bisa diganti dengan data dari database
-        $news = [
-            [
-                'id' => 1,
-                'title' => 'Bank Sampah Cipta Muri Raih Penghargaan Bank Sampah Terbaik Jawa Tengah 2024',
-                'excerpt' => 'Prestasi membanggakan diraih Bank Sampah Cipta Muri sebagai Bank Sampah Terbaik tingkat Provinsi Jawa Tengah berkat inovasi sistem digital dan dampak positif terhadap lingkungan.',
-                'content' => 'Dalam event tahunan penghargaan lingkungan hidup...',
-                'image' => '/images/news/news1.jpg',
-                'category' => 'Penghargaan',
-                'categoryColor' => 'bg-green-500',
-                'author' => 'Tim Redaksi',
-                'publishedAt' => '2024-08-15',
-                'views' => 1234,
-                'readTime' => '5 menit'
+        return [
+            'id' => $news->id,
+            'title' => $news->title,
+            'slug' => $news->slug,
+            'excerpt' => $news->excerpt,
+            'content' => $news->content,
+            'featured_image' => $news->featured_image,
+            'featured_image_url' => $news->featured_image_url,
+            'category' => $news->category,
+            'status' => $news->status,
+            'published_at' => $news->published_at,
+            'views_count' => $news->views_count,
+            'tags' => $news->tags ?? [],
+            'meta_title' => $news->meta_title,
+            'meta_description' => $news->meta_description,
+            'author' => [
+                'id' => $news->author->id,
+                'name' => $news->author->name,
             ],
-            [
-                'id' => 2,
-                'title' => 'Workshop Edukasi Lingkungan untuk 500 Siswa SD di Kabupaten Cilacap',
-                'excerpt' => 'Program edukasi lingkungan yang diselenggarakan Bank Sampah Cipta Muri berhasil menjangkau 500 siswa SD dengan materi pengelolaan sampah dan gaya hidup berkelanjutan.',
-                'content' => 'Workshop edukasi lingkungan yang diselenggarakan...',
-                'image' => '/images/news/news2.jpg',
-                'category' => 'Kegiatan',
-                'categoryColor' => 'bg-blue-500',
-                'author' => 'Sari Dewi',
-                'publishedAt' => '2024-08-10',
-                'views' => 856,
-                'readTime' => '3 menit'
+        ];
+    }
+
+    public function index(Request $request)
+    {
+        $query = News::with('author')
+            ->where('status', 'published')
+            ->orderBy('published_at', 'desc');
+
+        // Apply search filter
+        if ($request->has('search') && $request->search) {
+            $search = $request->search;
+            $query->where(function($q) use ($search) {
+                $q->where('title', 'like', "%{$search}%")
+                  ->orWhere('excerpt', 'like', "%{$search}%")
+                  ->orWhere('content', 'like', "%{$search}%");
+            });
+        }
+
+        // Apply category filter
+        if ($request->has('category') && $request->category) {
+            $query->where('category', $request->category);
+        }
+
+        // Apply sorting
+        if ($request->has('sort')) {
+            switch ($request->sort) {
+                case 'popular':
+                    $query->orderBy('views_count', 'desc');
+                    break;
+                case 'oldest':
+                    $query->orderBy('published_at', 'asc');
+                    break;
+                default:
+                    $query->orderBy('published_at', 'desc');
+                    break;
+            }
+        }
+
+        $news = $query->paginate(9);
+        
+        // Transform news data
+        $transformedNews = [
+            'data' => $news->getCollection()->map(function($item) {
+                return $this->transformNews($item);
+            }),
+            'current_page' => $news->currentPage(),
+            'last_page' => $news->lastPage(),
+            'per_page' => $news->perPage(),
+            'total' => $news->total(),
+        ];
+
+        // Get featured news (latest 6 with high views)
+        $featuredNews = News::with('author')
+            ->where('status', 'published')
+            ->orderBy('views_count', 'desc')
+            ->take(6)
+            ->get()
+            ->map(function($item) {
+                return $this->transformNews($item);
+            });
+
+        // Category mapping
+        $categories = [
+            'penghargaan' => 'Penghargaan',
+            'kegiatan' => 'Kegiatan',
+            'inovasi' => 'Inovasi',
+            'kemitraan' => 'Kemitraan',
+            'pelatihan' => 'Pelatihan',
+            'milestone' => 'Milestone',
+        ];
+
+        return Inertia::render('News/Index', [
+            'news' => $transformedNews,
+            'featuredNews' => $featuredNews,
+            'categories' => $categories,
+            'filters' => [
+                'search' => $request->search ?? '',
+                'category' => $request->category ?? '',
+                'sort' => $request->sort ?? 'latest',
             ],
-            [
-                'id' => 3,
-                'title' => 'Peluncuran Aplikasi Mobile "EcoBank Cipta Muri" dengan Fitur AI dan Blockchain',
-                'excerpt' => 'Inovasi terdepan dalam pengelolaan sampah digital dengan meluncurkan aplikasi mobile yang dilengkapi teknologi AI untuk identifikasi jenis sampah dan blockchain untuk transparansi transaksi.',
-                'content' => 'Aplikasi mobile EcoBank Cipta Muri resmi diluncurkan...',
-                'image' => '/images/news/news3.jpg',
-                'category' => 'Inovasi',
-                'categoryColor' => 'bg-purple-500',
-                'author' => 'Budi Santoso',
-                'publishedAt' => '2024-08-05',
-                'views' => 2100,
+        ]);
+    }
                 'readTime' => '7 menit'
             ],
             [
@@ -99,96 +164,91 @@ class NewsController extends Controller
         ]);
     }
 
-    public function show($id)
+    public function show($slug)
     {
-        // Sample news detail data - nanti bisa diganti dengan data dari database
-        $news = [
-            'id' => (int) $id,
-            'title' => 'Bank Sampah Cipta Muri Raih Penghargaan Bank Sampah Terbaik Jawa Tengah 2024',
-            'content' => '
-                <p>Dalam event tahunan penghargaan lingkungan hidup yang diselenggarakan oleh Pemerintah Provinsi Jawa Tengah, Bank Sampah Cipta Muri berhasil meraih prestasi membanggakan sebagai Bank Sampah Terbaik tingkat Provinsi Jawa Tengah tahun 2024.</p>
-                
-                <p>Penghargaan ini diberikan berdasarkan penilaian komprehensif terhadap beberapa aspek, antara lain:</p>
-                
-                <h3>Kriteria Penilaian</h3>
-                <ul>
-                    <li><strong>Inovasi Teknologi:</strong> Implementasi sistem digital dan aplikasi mobile yang memudahkan nasabah dalam bertransaksi</li>
-                    <li><strong>Dampak Lingkungan:</strong> Kontribusi nyata dalam pengurangan sampah dan peningkatan kesadaran masyarakat</li>
-                    <li><strong>Keberlanjutan Program:</strong> Konsistensi dalam menjalankan program edukasi dan pemberdayaan masyarakat</li>
-                    <li><strong>Transparansi Keuangan:</strong> Sistem pelaporan yang akuntabel dan mudah diakses publik</li>
-                    <li><strong>Kemitraan Strategis:</strong> Kolaborasi dengan berbagai pihak untuk memperluas dampak positif</li>
-                </ul>
-                
-                <h3>Pencapaian Luar Biasa</h3>
-                <p>Sepanjang tahun 2024, Bank Sampah Cipta Muri telah mencatatkan berbagai pencapaian signifikan:</p>
-                
-                <ul>
-                    <li>Meningkatkan jumlah anggota aktif menjadi 1.250 orang</li>
-                    <li>Mengolah lebih dari 150 ton sampah anorganik</li>
-                    <li>Mencapai total tabungan nasabah sebesar Rp 45 miliar</li>
-                    <li>Melaksanakan 25 program edukasi lingkungan</li>
-                    <li>Bermitra dengan 50 UMKM lokal</li>
-                </ul>
-                
-                <h3>Testimoni Kepala Dinas Lingkungan Hidup</h3>
-                <blockquote>
-                    "Bank Sampah Cipta Muri telah membuktikan bahwa pengelolaan sampah dapat dilakukan secara modern, efisien, dan menguntungkan. Inovasi teknologi yang mereka terapkan menjadi contoh bagi bank sampah lainnya di Jawa Tengah."
-                </blockquote>
-                <cite>- Drs. Bambang Sutrisno, M.Si., Kepala Dinas Lingkungan Hidup Provinsi Jawa Tengah</cite>
-                
-                <h3>Komitmen Berkelanjutan</h3>
-                <p>Sebagai penerima penghargaan, Bank Sampah Cipta Muri berkomitmen untuk terus berinovasi dan memperluas jangkauan program. Beberapa rencana strategis ke depan meliputi:</p>
-                
-                <ul>
-                    <li>Pengembangan fitur AI dalam aplikasi mobile untuk identifikasi jenis sampah</li>
-                    <li>Ekspansi program ke 10 desa sekitar</li>
-                    <li>Implementasi teknologi blockchain untuk transparansi transaksi</li>
-                    <li>Kemitraan dengan institusi pendidikan untuk program penelitian</li>
-                </ul>
-                
-                <p>Penghargaan ini bukan hanya milik Bank Sampah Cipta Muri, tetapi juga seluruh masyarakat Desa Muntang yang telah bersama-sama mendukung visi lingkungan berkelanjutan. Dengan dedikasi dan inovasi berkelanjutan, kami optimis dapat memberikan kontribusi yang lebih besar lagi untuk masa depan yang lebih hijau.</p>
-            ',
-            'excerpt' => 'Prestasi membanggakan diraih Bank Sampah Cipta Muri sebagai Bank Sampah Terbaik tingkat Provinsi Jawa Tengah berkat inovasi sistem digital dan dampak positif terhadap lingkungan.',
-            'image' => '/images/news/news1.jpg',
-            'category' => 'Penghargaan',
-            'categoryColor' => 'bg-green-500',
-            'author' => 'Tim Redaksi',
-            'publishedAt' => '2024-08-15',
-            'views' => 1234,
-            'readTime' => '5 menit',
-            'tags' => ['penghargaan', 'inovasi', 'lingkungan', 'teknologi', 'jawa-tengah']
+        $news = News::with('author')
+            ->where('slug', $slug)
+            ->where('status', 'published')
+            ->firstOrFail();
+
+        // Increment views count
+        $news->increment('views_count');
+
+        // Get related news (same category, exclude current)
+        $relatedNews = News::with('author')
+            ->where('category', $news->category)
+            ->where('id', '!=', $news->id)
+            ->where('status', 'published')
+            ->take(4)
+            ->get()
+            ->map(function($item) {
+                return $this->transformNews($item);
+            });
+
+        // Get next and previous news
+        $nextNews = News::where('published_at', '>', $news->published_at)
+            ->where('status', 'published')
+            ->orderBy('published_at', 'asc')
+            ->first();
+
+        $previousNews = News::where('published_at', '<', $news->published_at)
+            ->where('status', 'published')
+            ->orderBy('published_at', 'desc')
+            ->first();
+
+        // Category name mapping
+        $categoryNames = [
+            'penghargaan' => 'Penghargaan',
+            'kegiatan' => 'Kegiatan',
+            'inovasi' => 'Inovasi',
+            'kemitraan' => 'Kemitraan',
+            'pelatihan' => 'Pelatihan',
+            'milestone' => 'Milestone',
         ];
 
-        $relatedNews = [
-            [
-                'id' => 2,
-                'title' => 'Workshop Edukasi Lingkungan untuk 500 Siswa SD',
-                'excerpt' => 'Program edukasi lingkungan yang diselenggarakan Bank Sampah Cipta Muri berhasil menjangkau 500 siswa SD...',
-                'image' => '/images/news/news2.jpg',
-                'category' => 'Kegiatan',
-                'publishedAt' => '2024-08-10'
-            ],
-            [
-                'id' => 3,
-                'title' => 'Peluncuran Aplikasi Mobile "EcoBank Cipta Muri"',
-                'excerpt' => 'Inovasi terdepan dalam pengelolaan sampah digital dengan meluncurkan aplikasi mobile...',
-                'image' => '/images/news/news3.jpg',
-                'category' => 'Inovasi',
-                'publishedAt' => '2024-08-05'
-            ],
-            [
-                'id' => 4,
-                'title' => 'Kemitraan dengan 50 UMKM Lokal',
-                'excerpt' => 'Ekspansi jaringan kemitraan dengan 50 UMKM lokal memungkinkan nasabah menukarkan poin...',
-                'image' => '/images/news/news4.jpg',
-                'category' => 'Kemitraan',
-                'publishedAt' => '2024-07-28'
-            ]
+        return Inertia::render('News/Show', [
+            'news' => $this->transformNews($news),
+            'relatedNews' => $relatedNews,
+            'nextNews' => $nextNews ? $this->transformNews($nextNews) : null,
+            'previousNews' => $previousNews ? $this->transformNews($previousNews) : null,
+            'categoryName' => $categoryNames[$news->category] ?? ucfirst($news->category),
+        ]);
+    }
+
+    public function category($category)
+    {
+        $query = News::with('author')
+            ->where('category', $category)
+            ->where('status', 'published')
+            ->orderBy('published_at', 'desc');
+
+        $news = $query->paginate(9);
+        
+        // Transform news data
+        $transformedNews = [
+            'data' => $news->getCollection()->map(function($item) {
+                return $this->transformNews($item);
+            }),
+            'current_page' => $news->currentPage(),
+            'last_page' => $news->lastPage(),
+            'per_page' => $news->perPage(),
+            'total' => $news->total(),
         ];
 
-        return Inertia::render('NewsDetail', [
-            'news' => $news,
-            'relatedNews' => $relatedNews
+        // Category name mapping
+        $categoryNames = [
+            'penghargaan' => 'Penghargaan',
+            'kegiatan' => 'Kegiatan',
+            'inovasi' => 'Inovasi',
+            'kemitraan' => 'Kemitraan',
+            'pelatihan' => 'Pelatihan',
+            'milestone' => 'Milestone',
+        ];
+
+        return Inertia::render('News/Category', [
+            'news' => $transformedNews,
+            'category' => $category,
+            'categoryName' => $categoryNames[$category] ?? ucfirst($category),
         ]);
     }
 }
