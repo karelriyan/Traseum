@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -10,7 +11,7 @@ use Illuminate\Support\Str;
 
 class News extends Model
 {
-    use HasFactory, SoftDeletes;
+    use HasFactory, SoftDeletes, HasUlids;
 
     protected $fillable = [
         'title',
@@ -39,6 +40,71 @@ class News extends Model
     ];
 
     protected $dates = ['deleted_at'];
+
+    // Auto-generate fields
+    protected static function boot()
+    {
+        parent::boot();
+        
+        static::creating(function ($news) {
+            // Auto-set author to current logged in user
+            if (empty($news->author_id)) {
+                $news->author_id = auth()->id();
+            }
+            
+            // Auto-generate unique slug if not provided
+            if (empty($news->slug)) {
+                $slug = Str::slug($news->title);
+                $originalSlug = $slug;
+                $counter = 1;
+                
+                // Check if slug exists
+                while (static::where('slug', $slug)->exists()) {
+                    $slug = $originalSlug . '-' . $counter;
+                    $counter++;
+                }
+                
+                $news->slug = $slug;
+            }
+            
+            // Auto-generate meta_title if not provided
+            if (empty($news->meta_title)) {
+                $news->meta_title = Str::limit($news->title, 60);
+            }
+            
+            // Auto-generate meta_description if not provided
+            if (empty($news->meta_description)) {
+                $news->meta_description = Str::limit($news->excerpt, 160);
+            }
+        });
+        
+        static::updating(function ($news) {
+            // Auto-generate unique slug if not provided or title changed
+            if (empty($news->slug) || $news->isDirty('title')) {
+                $slug = Str::slug($news->title);
+                $originalSlug = $slug;
+                $counter = 1;
+                
+                // Check if slug exists (excluding current record)
+                while (static::where('slug', $slug)->where('id', '!=', $news->id)->exists()) {
+                    $slug = $originalSlug . '-' . $counter;
+                    $counter++;
+                }
+                
+                $news->slug = $slug;
+            }
+            
+            // Auto-generate meta_title if not provided
+            if (empty($news->meta_title)) {
+                $news->meta_title = Str::limit($news->title, 60);
+            }
+            
+            // Auto-generate meta_description if not provided
+            if (empty($news->meta_description)) {
+                $news->meta_description = Str::limit($news->excerpt, 160);
+            }
+        });
+    }
 
     // Status constants
     const STATUS_DRAFT = 'draft';

@@ -14,19 +14,19 @@ return new class extends Migration {
             $table->ulid('id')->primary();
 
             $table->string('title');
-            $table->longText('content');
-            $table->string('image')->nullable();
-            $table->string('category')->default('general');
-
-            $table->json('tags')->nullable();
-
-            $table->unsignedBigInteger('views_count')->default(0);
-
             $table->string('slug')->unique();
             $table->text('excerpt')->nullable();
+            $table->longText('content');
+            $table->string('featured_image')->nullable();
+            $table->string('status')->default('draft'); // draft, published, scheduled
+            $table->timestamp('published_at')->nullable();
+            $table->foreignUlid('author_id')->constrained('users')->onDelete('cascade');
+            $table->string('category')->default('general');
+            $table->json('tags')->nullable();
             $table->string('meta_title')->nullable();
             $table->text('meta_description')->nullable();
-            $table->foreignUlid('user_id')->constrained('users')->onDelete('cascade') ;
+            $table->unsignedBigInteger('views_count')->default(0);
+
             $table->softDeletes();
             $table->timestamps();
         });

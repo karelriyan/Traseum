@@ -51,12 +51,7 @@ class NewsResource extends Resource
                     ->schema([
                         TextInput::make('title')
                             ->label('Judul')
-                            ->required()
-                            ->live(onBlur: true)
-                            ->afterStateUpdated(
-                                fn(string $context, $state, callable $set) =>
-                                $context === 'create' ? $set('slug', Str::slug($state)) : null
-                            ),
+                            ->required(),
 
                         RichEditor::make('content')
                             ->label('Konten')
@@ -83,18 +78,16 @@ class NewsResource extends Resource
 
                 Section::make('Media')
                     ->schema([
-                        FileUpload::make('image')
+                        FileUpload::make('featured_image')
                             ->label('Gambar Utama')
                             ->image()
                             ->disk('public')
                             ->directory('news')
                             ->visibility('public')
                             ->maxSize(2048)
-                            ->imageEditor()
-                            ->optimize('webp')
-                            ->resize(10)
+                            ->acceptedFileTypes(['image/jpeg', 'image/png', 'image/webp'])
                             ->columnSpanFull()
-                            ->helperText('Upload gambar dengan ukuran maksimal 2MB)'),
+                            ->helperText('Upload gambar dengan ukuran maksimal 2MB (JPG, PNG, WebP)'),
                     ]),
 
                 Section::make('Publikasi')
@@ -112,11 +105,7 @@ class NewsResource extends Resource
                             ->required(fn ($get) => $get('status') === 'published')
                             ->hidden(fn ($get) => $get('status') === 'draft'),
 
-                        Select::make('author_id')
-                            ->label('Penulis')
-                            ->relationship('author', 'name')
-                            ->searchable()
-                            ->preload()
+                        Hidden::make('author_id')
                             ->default(auth()->id()),
 
                         Select::make('category')
@@ -133,19 +122,9 @@ class NewsResource extends Resource
                     ->columns(2),
 
 
-                Hidden::make('meta_title')
-                    ->label('Meta Title')
-                    ->maxLength(60)
-                    ->maxLength(60)
-                    ->default(fn(callable $get) => $get('title'))
-                    ->mutateStateBeforeSave(fn(callable $get, $state) => $state ?? $get('title')),
+                Hidden::make('meta_title'),
 
-                Hidden::make('meta_description')
-                    ->label('Meta Description')
-                    ->rows(2)
-                    ->maxLength(160)
-                    ->default(fn(callable $get) => $get('excerpt'))
-                    ->mutateStateBeforeSave(fn(callable $get, $state) => Str::limit($state ?? $get('excerpt'), 160)),
+                Hidden::make('meta_description'),
 
                 Hidden::make('slug')
                     ->rules(['alpha_dash']),

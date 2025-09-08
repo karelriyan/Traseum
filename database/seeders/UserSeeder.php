@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
-use Spatie\Permission\Models\Role;
 
 
 class UserSeeder extends Seeder
@@ -24,7 +24,7 @@ class UserSeeder extends Seeder
 
         // 2) Buat user superadmin
         $user = User::firstOrCreate(
-            ['email' => 'superadmin@ciptamuri.co.id'],
+            ['email' => 'superadmin@ciptamuri.com'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('123456789'),
@@ -64,8 +64,8 @@ class UserSeeder extends Seeder
             $firstName = Str::lower(preg_replace('/[^a-zA-Z]/', '', $parts[0]));
             $lastName = Str::lower(preg_replace('/[^a-zA-Z]/', '', end($parts)));
 
-            // Email: namadepan.namabelakang@ciptamuri.co.id
-            $email = $firstName . '.' . $lastName . '@ciptamuri.co.id';
+            // Email: namadepan.namabelakang@ciptamuri.com
+            $email = $firstName . '.' . $lastName . '@ciptamuri.com';
 
             // Password: nama depan + huruf terakhir nama depan -> angka
             $lastChar = substr($firstName, -1);
