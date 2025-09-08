@@ -113,56 +113,6 @@ class NewsController extends Controller
             ],
         ]);
     }
-                'readTime' => '7 menit'
-            ],
-            [
-                'id' => 4,
-                'title' => 'Kemitraan dengan 50 UMKM Lokal untuk Program Tukar Poin Produk Ramah Lingkungan',
-                'excerpt' => 'Ekspansi jaringan kemitraan dengan 50 UMKM lokal memungkinkan nasabah menukarkan poin tabungan dengan berbagai produk ramah lingkungan dan mendukung ekonomi lokal.',
-                'content' => 'Program kemitraan strategis dengan UMKM lokal...',
-                'image' => '/images/news/news4.jpg',
-                'category' => 'Kemitraan',
-                'categoryColor' => 'bg-yellow-500',
-                'author' => 'Rina Oktavia',
-                'publishedAt' => '2024-07-28',
-                'views' => 934,
-                'readTime' => '4 menit'
-            ],
-            [
-                'id' => 5,
-                'title' => 'Pelatihan Pengelolaan Sampah untuk 20 Desa se-Kabupaten Cilacap',
-                'excerpt' => 'Program transfer knowledge kepada 20 desa di Kabupaten Cilacap untuk mendirikan bank sampah mandiri dengan sistem pengelolaan yang sustainable dan profitable.',
-                'content' => 'Pelatihan komprehensif pengelolaan sampah...',
-                'image' => '/images/news/news5.jpg',
-                'category' => 'Pelatihan',
-                'categoryColor' => 'bg-indigo-500',
-                'author' => 'Ahmad Wijaya',
-                'publishedAt' => '2024-07-20',
-                'views' => 1456,
-                'readTime' => '6 menit'
-            ],
-            [
-                'id' => 6,
-                'title' => 'Milestone 1.250 Anggota Aktif dan Total Tabungan Rp 45 Miliar',
-                'excerpt' => 'Pencapaian luar biasa dengan 1.250 anggota aktif dan total tabungan mencapai Rp 45 miliar, membuktikan kepercayaan masyarakat terhadap sistem bank sampah digital.',
-                'content' => 'Pencapaian milestone yang membanggakan...',
-                'image' => '/images/news/news6.jpg',
-                'category' => 'Milestone',
-                'categoryColor' => 'bg-red-500',
-                'author' => 'Lisa Permata',
-                'publishedAt' => '2024-07-15',
-                'views' => 1789,
-                'readTime' => '4 menit'
-            ]
-        ];
-
-        $categories = ['Semua', 'Penghargaan', 'Kegiatan', 'Inovasi', 'Kemitraan', 'Pelatihan', 'Milestone'];
-
-        return Inertia::render('News', [
-            'news' => $news,
-            'categories' => $categories
-        ]);
-    }
 
     public function show($slug)
     {

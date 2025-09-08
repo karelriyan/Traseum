@@ -34,7 +34,7 @@ export default function NewsSection({
     }
 
     return (
-        <section className="relative bg-white py-24">
+        <section id="berita-publikasi" className="relative bg-white py-24">
             {/* Subtle Background Pattern */}
             <div className="absolute inset-0 opacity-[0.03]">
                 <svg width="60" height="60" viewBox="0 0 60 60" xmlns="http://www.w3.org/2000/svg">
@@ -238,7 +238,7 @@ export default function NewsSection({
                     </p>
                     <Link
                         href={route('news.index')}
-                        className="group inline-flex transform items-center gap-3 rounded-2xl bg-green-600 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:bg-text-green-600 hover:shadow-xl"
+                        className="hover:bg-text-green-600 group inline-flex transform items-center gap-3 rounded-2xl bg-green-600 px-8 py-4 font-semibold text-white shadow-lg transition-all duration-300 hover:-translate-y-0.5 hover:shadow-xl"
                     >
                         <span>Lihat Semua Berita</span>
                         <svg
