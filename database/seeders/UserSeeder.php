@@ -16,7 +16,7 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-         // 1) Buat role Super Admin (sekali saja)
+        // 1) Buat role Super Admin (sekali saja)
         $superAdminRole = Role::firstOrCreate([
             'name' => 'Super Admin',     // gunakan nama persis ini
             'guard_name' => 'web',
@@ -28,6 +28,7 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('123456789'),
+                'role' => 'Super Admin',
             ]
         );
 
