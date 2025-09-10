@@ -19,7 +19,7 @@ class UserResource extends Resource
 
     protected static ?string $navigationGroup = 'Manajemen Pengguna';
 
-    protected static bool $shouldRegisterNavigation = false;
+    protected static bool $shouldRegisterNavigation = true;
 
     protected static ?string $navigationLabel = 'Kelola Admin';
 
@@ -42,10 +42,22 @@ class UserResource extends Resource
                             ->required()
                             ->maxLength(255)
                             ->unique(ignoreRecord: true),
+
+                        Forms\Components\Select::make('roles')
+                            // ->multiple()
+                            ->relationship('roles', 'name')
+                            ->preload()
+                            ->required()
+                            ->validationMessages([
+                                'required' => 'Jabatan wajib diisi',
+                            ])
+                            ->label('Jabatan'),
+
+
                     ])
                     ->columns(2),
 
-                Forms\Components\Section::make('Keamanan Akun')
+                Forms\Components\Section::make('Ganti Password')
                     ->schema([
                         Forms\Components\TextInput::make('password')
                             ->label('Password')
@@ -80,15 +92,10 @@ class UserResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('nik')
-                    ->label('NIK')
+                Tables\Columns\TextColumn::make('role')
+                    ->label('Jabatan')
                     ->searchable()
                     ->sortable(),
-
-                Tables\Columns\IconColumn::make('email_verified_at')
-                    ->label('Email Terverifikasi')
-                    ->boolean()
-                    ->getStateUsing(fn(User $record): bool => (bool) $record->email_verified_at),
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat')
