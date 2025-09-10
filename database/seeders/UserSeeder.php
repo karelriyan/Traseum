@@ -73,8 +73,11 @@ class UserSeeder extends Seeder
             $charToNum = ord(strtolower($lastChar)) - 96; // a=1, b=2, ... z=26
             $rawPassword = $firstName . $charToNum;
 
-            User::factory()->create([
-                'name' => $name,
+            // Gunakan firstOrCreate untuk menghindari duplicate
+            User::firstOrCreate(
+                ['email' => $email], // cari berdasarkan email
+                [
+                    'name' => $name,
                 'email' => $email,
                 'password' => Hash::make($rawPassword),
             ]);
