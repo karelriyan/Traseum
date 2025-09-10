@@ -28,6 +28,7 @@ class UserSeeder extends Seeder
                 'name' => 'Super Admin',
                 'password' => Hash::make('123456789'),
                 'role' => 'Super Admin',           // kalau kamu pakai kolom custom 'role'
+                'email_verified_at' => now(),
             ]
         );
 
