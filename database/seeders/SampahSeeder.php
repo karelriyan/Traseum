@@ -29,13 +29,14 @@ class SampahSeeder extends Seeder
         ];
 
         foreach ($sampahData as $data) {
-            Sampah::create([
-                'id' => Str::ulid(), // Generate ULID for the 'id' field
-                'user_id' => $user->id, // Assign user_id
-                'jenis_sampah' => $data['jenis_sampah'],
-                'saldo_per_kg' => $data['saldo_per_kg'],
-                'poin_per_kg' => $data['poin_per_kg'],
-            ]);
+            Sampah::firstOrCreate(
+                ['jenis_sampah' => $data['jenis_sampah']], // cari berdasarkan jenis_sampah
+                [
+                    'user_id' => $user->id, // Assign user_id
+                    'saldo_per_kg' => $data['saldo_per_kg'],
+                    'poin_per_kg' => $data['poin_per_kg'],
+                ]
+            );
         }
     }
 }

@@ -60,17 +60,19 @@ class NewsSeeder extends Seeder
         ];
 
         foreach ($newsData as $data) {
-            News::create([
-                'title' => $data['title'],
-                'slug' => Str::slug($data['title']),
-                'content' => $data['content'],
-                'category' => $data['category'],
-                'status' => $data['status'],
-                'published_at' => $data['published_at'],
-                'author_id' => $user ? $user->id : null,
-                'tags' => $data['tags'],
-                'views_count' => rand(10, 500),
-            ]);
+            News::firstOrCreate(
+                ['title' => $data['title']], // cari berdasarkan title
+                [
+                    'slug' => Str::slug($data['title']),
+                    'content' => $data['content'],
+                    'category' => $data['category'],
+                    'status' => $data['status'],
+                    'published_at' => $data['published_at'],
+                    'author_id' => $user ? $user->id : null,
+                    'tags' => $data['tags'],
+                    'views_count' => rand(10, 500),
+                ]
+            );
         }
     }
 }
