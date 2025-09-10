@@ -36,6 +36,7 @@ class NewsResource extends Resource
     protected static ?string $navigationIcon = 'heroicon-o-newspaper';
 
     protected static ?string $navigationLabel = 'Berita';
+    protected static ?string $navigationGroup = 'Pengelolaan Website';
 
     protected static ?string $modelLabel = 'Berita';
 
@@ -102,8 +103,8 @@ class NewsResource extends Resource
                         DateTimePicker::make('published_at')
                             ->label('Tanggal Publikasi')
                             ->default(now())
-                            ->required(fn ($get) => $get('status') === 'published')
-                            ->hidden(fn ($get) => $get('status') === 'draft'),
+                            ->required(fn($get) => $get('status') === 'published')
+                            ->hidden(fn($get) => $get('status') === 'draft'),
 
                         Hidden::make('author_id')
                             ->default(auth()->id()),

@@ -59,6 +59,8 @@ class AdminPanelProvider extends PanelProvider
             ->navigationGroups([
                 'Manajemen Pengguna',
                 'Operasional Bank Sampah',
+                'Pengelolaan Website',
+                'Peran dan Izin',
             ])
             ->authMiddleware([
                 Authenticate::class,
