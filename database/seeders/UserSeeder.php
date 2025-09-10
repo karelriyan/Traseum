@@ -3,10 +3,10 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-use App\Models\Role;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
+use Spatie\Permission\Models\Role;
 
 
 class UserSeeder extends Seeder
@@ -16,11 +16,10 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1) Buat role Super Admin (sekali saja)
-        $superAdminRole = Role::firstOrCreate([
-            'name' => 'Super Admin',     // gunakan nama persis ini
-            'guard_name' => 'web',
-        ]);
+        // 1) Buat role tanpa set kolom 'id'
+        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
+        // (opsional) kalau kamu juga mau 'Super Admin' sebagai nama terpisah:
+        $superRole = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'web']);
 
         // 2) Buat user superadmin
         $user = User::firstOrCreate(
@@ -28,12 +27,13 @@ class UserSeeder extends Seeder
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('123456789'),
-                'role' => 'Super Admin',
+                'role' => 'Super Admin',           // kalau kamu pakai kolom custom 'role'
             ]
         );
 
-        // 3) Assign role ke user (ini yang dibaca Filament/Spatie)
-        $user->assignRole($superAdminRole);
+        // 3) Assign role Spatie (pilih salah satu atau keduanya)
+        $user->assignRole($adminRole);
+        $user->assignRole($superRole);
 
         $names = [
             // Nama Pelaksana
