@@ -20,6 +20,7 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Support\RawJs;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\BulkActionGroup;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
 use Filament\Tables;
 use App\Filament\Resources\RekeningResource\RelationManagers;
 
@@ -179,6 +180,7 @@ class RekeningResource extends Resource
                 Tables\Actions\ForceDeleteAction::make(),
             ])
             ->bulkActions([
+                ExportBulkAction::make(),
                 DeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),

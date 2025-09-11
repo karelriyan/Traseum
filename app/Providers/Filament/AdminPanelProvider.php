@@ -30,7 +30,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::Emerald ,
+                'primary' => Color::Emerald , 
             ])
             ->plugin(
                 FilamentSpatieRolesPermissionsPlugin::make()
