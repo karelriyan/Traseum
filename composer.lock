@@ -4,15 +4,21 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "4c4d04675bacd49c3732e8d745a14e29",
+    "content-hash": "bfc0dad2564fadb91d32933b0c6c61e6",
     "packages": [
         {
             "name": "althinect/filament-spatie-roles-permissions",
             "version": "2.x-dev",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/Althinect/filament-spatie-roles-permissions.git",
+                "reference": "79d2c777e56c87f97723d04c4b92450aceaf2de8"
+            },
             "dist": {
-                "type": "path",
-                "url": "packages/filament-spatie-roles-permissions",
-                "reference": "8611dea5ef143ddca7267d44b7c40903c40b230e"
+                "type": "zip",
+                "url": "https://api.github.com/repos/Althinect/filament-spatie-roles-permissions/zipball/79d2c777e56c87f97723d04c4b92450aceaf2de8",
+                "reference": "79d2c777e56c87f97723d04c4b92450aceaf2de8",
+                "shasum": ""
             },
             "require": {
                 "filament/filament": "^3.0",
@@ -25,15 +31,16 @@
                 "orchestra/testbench": "^7.0|^9.0|^10.0",
                 "phpunit/phpunit": "^9.0|^10.5|^11.5.3"
             },
+            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
-                    "providers": [
-                        "Althinect\\FilamentSpatieRolesPermissions\\FilamentSpatieRolesPermissionsServiceProvider"
-                    ],
                     "aliases": {
                         "FilamentSpatieRolesPermissions": "Althinect\\FilamentSpatieRolesPermissions\\FilamentSpatieRolesPermissionsFacade"
-                    }
+                    },
+                    "providers": [
+                        "Althinect\\FilamentSpatieRolesPermissions\\FilamentSpatieRolesPermissionsServiceProvider"
+                    ]
                 }
             },
             "autoload": {
@@ -41,19 +48,7 @@
                     "Althinect\\FilamentSpatieRolesPermissions\\": "src"
                 }
             },
-            "autoload-dev": {
-                "psr-4": {
-                    "Althinect\\FilamentSpatieRolesPermissions\\Tests\\": "tests"
-                }
-            },
-            "scripts": {
-                "test": [
-                    "vendor/bin/phpunit"
-                ],
-                "test-coverage": [
-                    "vendor/bin/phpunit --coverage-html coverage"
-                ]
-            },
+            "notification-url": "https://packagist.org/downloads/",
             "license": [
                 "MIT"
             ],
@@ -69,9 +64,11 @@
                 "althinect",
                 "filament-spatie-roles-permissions"
             ],
-            "transport-options": {
-                "relative": true
-            }
+            "support": {
+                "issues": "https://github.com/Althinect/filament-spatie-roles-permissions/issues",
+                "source": "https://github.com/Althinect/filament-spatie-roles-permissions/tree/2.x"
+            },
+            "time": "2025-08-05T16:16:46+00:00"
         },
         {
             "name": "anourvalar/eloquent-serialize",
