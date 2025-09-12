@@ -165,6 +165,22 @@ class WithdrawRequestResource extends Resource
                     ->label('Metode')
                     ->searchable(),
 
+                Tables\Columns\BadgeColumn::make('status')
+                    ->label('Status')
+                    ->colors([
+                        'warning' => 'pending',
+                        'success' => 'approved',
+                        'danger' => 'rejected',
+                        'primary' => 'processed',
+                    ])
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'pending' => 'Menunggu',
+                        'approved' => 'Disetujui',
+                        'rejected' => 'Ditolak',
+                        'processed' => 'Diproses',
+                        default => ucfirst($state),
+                    }),
+
                 TextColumn::make('user.name')
                     ->label('Diproses Oleh')
                     ->placeholder('-')
@@ -217,6 +233,9 @@ class WithdrawRequestResource extends Resource
                     ->icon('heroicon-o-check')
                     ->color('success')
                     ->visible(fn(WithdrawRequest $record): bool => $record->status === 'pending')
+                    ->requiresConfirmation()
+                    ->modalHeading('Setujui Penarikan Saldo')
+                    ->modalDescription('Apakah Anda yakin ingin menyetujui penarikan saldo ini?')
                     ->form([
                         Textarea::make('notes')
                             ->label('Catatan Admin (opsional)')
@@ -229,6 +248,13 @@ class WithdrawRequestResource extends Resource
                             'processed_at' => now(),
                             'notes' => $data['notes'] ?? null,
                         ]);
+                        
+                        // Tambahkan notifikasi
+                        \Filament\Notifications\Notification::make()
+                            ->title('Penarikan Saldo Disetujui')
+                            ->body("Penarikan saldo senilai Rp " . number_format($record->amount, 0, ',', '.') . " telah disetujui.")
+                            ->success()
+                            ->send();
                     }),
 
                 Tables\Actions\Action::make('reject')
@@ -236,6 +262,9 @@ class WithdrawRequestResource extends Resource
                     ->icon('heroicon-o-x-mark')
                     ->color('danger')
                     ->visible(fn(WithdrawRequest $record): bool => $record->status === 'pending')
+                    ->requiresConfirmation()
+                    ->modalHeading('Tolak Penarikan Saldo')
+                    ->modalDescription('Apakah Anda yakin ingin menolak penarikan saldo ini?')
                     ->form([
                         Textarea::make('rejection_reason')
                             ->label('Alasan Penolakan')
@@ -243,12 +272,29 @@ class WithdrawRequestResource extends Resource
                             ->rows(3),
                     ])
                     ->action(function (WithdrawRequest $record, array $data): void {
+                        // Kembalikan saldo jika ditolak
+                        if ($record->rekening && $record->amount > 0) {
+                            $rekening = $record->rekening;
+                            $rekening->balance += $record->amount;
+                            $rekening->save();
+
+                            // Hapus transaksi saldo yang sudah dibuat
+                            $record->saldoTransaction()?->delete();
+                        }
+                        
                         $record->update([
                             'status' => 'rejected',
                             'processed_by' => auth()->id(),
                             'processed_at' => now(),
                             'rejection_reason' => $data['rejection_reason'],
                         ]);
+                        
+                        // Tambahkan notifikasi
+                        \Filament\Notifications\Notification::make()
+                            ->title('Penarikan Saldo Ditolak')
+                            ->body("Penarikan saldo senilai Rp " . number_format($record->amount, 0, ',', '.') . " telah ditolak.")
+                            ->warning()
+                            ->send();
                     }),
 
                 Tables\Actions\DeleteAction::make()
