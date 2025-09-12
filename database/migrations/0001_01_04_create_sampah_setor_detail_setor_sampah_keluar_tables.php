@@ -16,6 +16,7 @@ return new class extends Migration {
             $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_sampah_user');
             $table->decimal('saldo_per_kg', 15, 2);
             $table->unsignedInteger('poin_per_kg')->nullable();
+            $table->decimal('total_berat_terkumpul', 15, 4)->default(0);
             $table->timestamps();
             $table->softDeletes();
         });

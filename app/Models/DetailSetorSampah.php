@@ -31,9 +31,37 @@ class DetailSetorSampah extends Model
 
     protected static function booted(): void
     {
-        static::creating(function ($DetailSetorSampah) {
-            if (!$DetailSetorSampah->user_id && Auth::check()) {
-                $DetailSetorSampah->user_id = Auth::id();
+        static::creating(function ($detail) {
+            if (!$detail->user_id && Auth::check()) {
+                $detail->user_id = Auth::id();
+            }
+        });
+
+        static::created(function ($detail) {
+            if ($detail->sampah) {
+                $detail->sampah->increment('total_berat_terkumpul', $detail->berat);
+            }
+        });
+
+        static::updating(function ($detail) {
+            if ($detail->isDirty('berat') && $detail->sampah) {
+                $originalBerat = $detail->getOriginal('berat') ?? 0;
+                $newBerat = $detail->berat;
+                $diff = $newBerat - $originalBerat;
+                $detail->sampah->increment('total_berat_terkumpul', $diff);
+            }
+        });
+
+        static::deleted(function ($detail) {
+            // This also handles soft deletes
+            if ($detail->sampah) {
+                $detail->sampah->decrement('total_berat_terkumpul', $detail->berat);
+            }
+        });
+
+        static::restored(function ($detail) {
+            if ($detail->sampah) {
+                $detail->sampah->increment('total_berat_terkumpul', $detail->berat);
             }
         });
     }
