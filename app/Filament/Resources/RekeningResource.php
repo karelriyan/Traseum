@@ -27,7 +27,6 @@ use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
 use pxlrbt\FilamentExcel\Exports\ExcelExport;
 use pxlrbt\FilamentExcel\Columns\Column;
 use App\Filament\Exports\CustomRekeningExport;
-use App\Filament\Exports\RingkasRekeningExport;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Hash;
@@ -213,20 +212,16 @@ class RekeningResource extends Resource
             ->headerActions([
                 ExportAction::make()
                     ->exports([
-                        ExcelExport::make('export_semua_data')
-                            ->label('Export Semua Data')
-                            ->fromTable()
-                            ->withFilename(fn () => 'seluruh_rekening_nasabah_' . date('Y-m-d_H-i-s')),
+                        CustomRekeningExport::make('export_lengkap')
+                            ->label('Export Lengkap'),
                         
-                        CustomRekeningExport::make('export_custom_lengkap')
-                            ->label('Export Lengkap (Terformat)'),
-                        
-                        RingkasRekeningExport::make('export_ringkas_header')
-                            ->label('Export Ringkas'),
+                        // ExcelExport::make('export_semua_data')
+                        //     ->label('Export Raw Data')
+                        //     ->fromTable()
+                        //     ->withFilename(fn () => 'raw_rekening_nasabah_' . date('Y-m-d_H-i-s')),
                     ])
-                    ->label('Export Data')
                     ->icon('heroicon-o-document-arrow-down')
-                    ->color('success'),
+                    ->color('primary'),
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
@@ -239,74 +234,16 @@ class RekeningResource extends Resource
             ])
             ->bulkActions([
                 ExportBulkAction::make()
-                    ->exports([
-                        ExcelExport::make('export_semua')
-                            ->label('Export Semua Kolom')
-                            ->fromTable()
-                            ->withFilename(fn () => 'rekening_nasabah_lengkap_' . date('Y-m-d_H-i-s')),
-                        
-                        CustomRekeningExport::make('export_custom')
-                            ->label('Export Custom (Semua Kolom Terformat)'),
-                            
-                        RingkasRekeningExport::make('export_ringkas')
-                            ->label('Export Ringkas (Nama, NIK, Saldo)'),
-                    ]),
-                Tables\Actions\BulkAction::make('bulkChangePassword')
-                    ->label('Ubah Password Massal')
-                    ->icon('heroicon-o-key')
-                    ->color('warning')
-                    ->form([
-                        TextInput::make('new_password')
-                            ->label('Password Baru (untuk semua yang dipilih)')
-                            ->password()
-                            ->required()
-                            ->minLength(6)
-                            ->maxLength(255)
-                            ->helperText('Password ini akan diterapkan ke semua nasabah yang dipilih'),
-                        TextInput::make('confirm_password')
-                            ->label('Konfirmasi Password')
-                            ->password()
-                            ->required()
-                            ->same('new_password'),
-                    ])
-                    ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data): void {
-                        $successCount = 0;
-                        $errorCount = 0;
-                        
-                        foreach ($records as $record) {
-                            if ($record->user) {
-                                $record->user->update([
-                                    'password' => Hash::make($data['new_password'])
-                                ]);
-                                $successCount++;
-                            } else {
-                                $errorCount++;
-                            }
-                        }
-                        
-                        if ($successCount > 0) {
-                            Notification::make()
-                                ->title('Password berhasil diubah')
-                                ->body("Password {$successCount} nasabah telah diperbarui." . 
-                                      ($errorCount > 0 ? " {$errorCount} gagal diupdate." : ""))
-                                ->success()
-                                ->send();
-                        }
-                        
-                        if ($errorCount > 0 && $successCount === 0) {
-                            Notification::make()
-                                ->title('Error')
-                                ->body("Gagal mengubah password {$errorCount} nasabah.")
-                                ->danger()
-                                ->send();
-                        }
-                    })
-                    ->requiresConfirmation()
-                    ->modalHeading('Ubah Password Massal')
-                    ->modalDescription('Password yang sama akan diterapkan ke semua nasabah yang dipilih.')
-                    ->modalSubmitActionLabel('Ubah Semua Password')
-                    ->deselectRecordsAfterCompletion(),
-                DeleteBulkAction::make(),
+                ->exports([
+                    // ExcelExport::make('export_semua')
+                    //     ->label('Export Semua Kolom')
+                    //     ->fromTable()
+                    //     ->withFilename(fn () => 'rekening_nasabah_custom_' . date('Y-m-d_H-i-s')),
+                    
+                    CustomRekeningExport::make('export_custom')
+                    ->label('Export'),
+                ]),
+                Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
             ]);
