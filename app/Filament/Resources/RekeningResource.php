@@ -261,7 +261,7 @@ class RekeningResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('no_rekening', '!=', '00000000000000')
+            ->where('no_rekening', '!=', '00000000')
             ->withTrashed();
     }
     public static function getRelations(): array

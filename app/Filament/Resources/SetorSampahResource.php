@@ -59,7 +59,7 @@ class SetorSampahResource extends Resource
                             ->options(function () {
                                 // Ambil semua rekening KECUALI rekening donasi
                                 return Rekening::query()
-                                    ->where('no_rekening', '!=', '00000000000000')
+                                    ->where('no_rekening', '!=', '00000000')
                                     ->select('id', 'nama', 'nik')
                                     ->get()
                                     ->mapWithKeys(fn($rekening) => [$rekening->id => "{$rekening->nama} - {$rekening->nik}"]);
@@ -202,7 +202,7 @@ class SetorSampahResource extends Resource
     {
         // 1. Handle kasus donasi untuk memastikan rekening_id terisi
         if (isset($data['jenis_setoran']) && $data['jenis_setoran'] === 'donasi') {
-            $rekeningDonasi = Rekening::where('no_rekening', '00000000000000')->first();
+            $rekeningDonasi = Rekening::where('no_rekening', '00000000')->first();
             if ($rekeningDonasi) {
                 $data['rekening_id'] = $rekeningDonasi->id;
             } else {
@@ -276,13 +276,13 @@ class SetorSampahResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->formatStateUsing(function ($state, $record) {
-                        if ($record->rekening?->no_rekening === '00000000000000') {
+                        if ($record->rekening?->no_rekening === '00000000') {
                             return 'Donasi'; // tampilkan teks badge
                         }
                         return $state; // tampilkan nama asli
                     })
-                    ->badge(fn($state, $record) => $record->rekening?->no_rekening === '00000000000000') // badge hanya kalau donasi
-                    ->color(fn($state, $record) => $record->rekening?->no_rekening === '00000000000000' ? 'success' : null),
+                    ->badge(fn($state, $record) => $record->rekening?->no_rekening === '00000000') // badge hanya kalau donasi
+                    ->color(fn($state, $record) => $record->rekening?->no_rekening === '00000000' ? 'success' : null),
 
                 TextColumn::make('details.sampah.jenis_sampah')
                     ->label('Item Sampah')

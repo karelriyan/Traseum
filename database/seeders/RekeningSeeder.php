@@ -16,7 +16,7 @@ class RekeningSeeder extends Seeder
         // Menggunakan updateOrCreate untuk mencegah duplikasi jika seeder dijalankan lagi
         // Kunci pencarian adalah 'no_rekening'
         Rekening::updateOrCreate(
-            ['no_rekening' => '00000000000000'],
+            ['no_rekening' => '00000000'],
             [
                 'nama'          => 'Tabungan Bank Sampah',
                 'dusun'         => '-',

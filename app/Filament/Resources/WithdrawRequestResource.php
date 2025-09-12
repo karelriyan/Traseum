@@ -54,7 +54,7 @@ class WithdrawRequestResource extends Resource
                             ->preload()
                             ->options(function () {
                                 return Rekening::query()
-                                    ->where('no_rekening', '!=', '00000000000000')
+                                    ->where('no_rekening', '!=', '00000000')
                                     ->select('id', 'nama', 'nik')
                                     ->get()
                                     ->mapWithKeys(fn($rekening) => [$rekening->id => "{$rekening->nama} - {$rekening->nik}"]);
