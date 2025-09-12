@@ -23,6 +23,14 @@ use Filament\Support\RawJs;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\BulkActionGroup;
 use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
+use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
+use pxlrbt\FilamentExcel\Exports\ExcelExport;
+use pxlrbt\FilamentExcel\Columns\Column;
+use Filament\Forms\Components\CheckboxList;
+use Filament\Tables\Actions\Action;
+use Illuminate\Support\Facades\Hash;
+use Filament\Notifications\Notification;
+use Illuminate\Support\Str;
 use Filament\Tables;
 use App\Filament\Resources\RekeningResource\RelationManagers;
 
@@ -200,6 +208,134 @@ class RekeningResource extends Resource
                 TextColumn::make('created_at')->label('Waktu Dibuat')->dateTime()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')->label('Terakhir Diubah')->dateTime()->toggleable(isToggledHiddenByDefault: true),
             ])
+            ->headerActions([
+                ExportAction::make()
+                    ->exports([
+                        ExcelExport::make('export_semua')
+                            ->label('Export Semua Data')
+                            ->fromTable()
+                            ->withFilename(fn () => 'seluruh_rekening_nasabah_' . date('Y-m-d_H-i-s')),
+                        
+                        ExcelExport::make('export_custom_header')
+                            ->label('Export Custom')
+                            ->askForWriterType()
+                            ->askForFilename()
+                            ->form([
+                                CheckboxList::make('columns')
+                                    ->label('Pilih Kolom yang Akan Di-Export')
+                                    ->options([
+                                        'no_rekening' => 'No. Rekening',
+                                        'nama' => 'Nama Nasabah',
+                                        'nik' => 'NIK',
+                                        'no_kk' => 'No. KK',
+                                        'gender' => 'Jenis Kelamin',
+                                        'tanggal_lahir' => 'Tanggal Lahir',
+                                        'pendidikan' => 'Pendidikan',
+                                        'alamat' => 'Alamat (Dusun/RW/RT)',
+                                        'telepon' => 'No. Telepon',
+                                        'current_balance' => 'Saldo Saat Ini',
+                                        'points_balance' => 'Poin',
+                                        'status_pegadaian' => 'Tab. Emas Pegadaian',
+                                        'no_rek_pegadaian' => 'No. Rek. Pegadaian',
+                                        'user.name' => 'Pembuat Rekening',
+                                        'created_at' => 'Tanggal Dibuat',
+                                        'updated_at' => 'Terakhir Diubah',
+                                    ])
+                                    ->columns(2)
+                                    ->required()
+                                    ->default([
+                                        'no_rekening',
+                                        'nama',
+                                        'current_balance',
+                                        'points_balance'
+                                    ])
+                                    ->helperText('Pilih kolom yang ingin dimasukkan dalam file export'),
+                            ])
+                            ->withColumns(function ($data) {
+                                $selectedColumns = $data['columns'] ?? [];
+                                $columns = [];
+                                
+                                foreach ($selectedColumns as $column) {
+                                    switch ($column) {
+                                        case 'no_rekening':
+                                            $columns[] = Column::make('no_rekening')->heading('No. Rekening');
+                                            break;
+                                        case 'nama':
+                                            $columns[] = Column::make('nama')->heading('Nama Nasabah');
+                                            break;
+                                        case 'nik':
+                                            $columns[] = Column::make('nik')->heading('NIK');
+                                            break;
+                                        case 'no_kk':
+                                            $columns[] = Column::make('no_kk')->heading('No. KK');
+                                            break;
+                                        case 'gender':
+                                            $columns[] = Column::make('gender')->heading('Jenis Kelamin');
+                                            break;
+                                        case 'tanggal_lahir':
+                                            $columns[] = Column::make('tanggal_lahir')
+                                                ->heading('Tanggal Lahir')
+                                                ->formatStateUsing(fn ($state) => $state ? date('d/m/Y', strtotime($state)) : '');
+                                            break;
+                                        case 'pendidikan':
+                                            $columns[] = Column::make('pendidikan')->heading('Pendidikan');
+                                            break;
+                                        case 'alamat':
+                                            $columns[] = Column::make('alamat')
+                                                ->heading('Alamat')
+                                                ->formatStateUsing(fn ($record) => "Dusun {$record->dusun}, RW {$record->rw}, RT {$record->rt}");
+                                            break;
+                                        case 'telepon':
+                                            $columns[] = Column::make('telepon')->heading('No. Telepon');
+                                            break;
+                                        case 'current_balance':
+                                            $columns[] = Column::make('current_balance')
+                                                ->heading('Saldo (Rp)')
+                                                ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'));
+                                            break;
+                                        case 'points_balance':
+                                            $columns[] = Column::make('points_balance')
+                                                ->heading('Poin')
+                                                ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.'));
+                                            break;
+                                        case 'status_pegadaian':
+                                            $columns[] = Column::make('status_pegadaian')
+                                                ->heading('Tab. Emas')
+                                                ->formatStateUsing(fn ($state) => $state ? 'Ya' : 'Tidak');
+                                            break;
+                                        case 'no_rek_pegadaian':
+                                            $columns[] = Column::make('no_rek_pegadaian')->heading('No. Rek. Pegadaian');
+                                            break;
+                                        case 'user.name':
+                                            $columns[] = Column::make('user.name')->heading('Pembuat Rekening');
+                                            break;
+                                        case 'created_at':
+                                            $columns[] = Column::make('created_at')
+                                                ->heading('Tanggal Dibuat')
+                                                ->formatStateUsing(fn ($state) => $state ? date('d/m/Y H:i', strtotime($state)) : '');
+                                            break;
+                                        case 'updated_at':
+                                            $columns[] = Column::make('updated_at')
+                                                ->heading('Terakhir Diubah')
+                                                ->formatStateUsing(fn ($state) => $state ? date('d/m/Y H:i', strtotime($state)) : '');
+                                            break;
+                                    }
+                                }
+                                
+                                return $columns;
+                            })
+                            ->withFilename(function ($filename, $data) {
+                                if (empty($filename)) {
+                                    $selectedCount = count($data['columns'] ?? []);
+                                    return "rekening_nasabah_custom_{$selectedCount}_kolom_" . date('Y-m-d_H-i-s');
+                                }
+                                return $filename . '_' . date('Y-m-d_H-i-s');
+                            }),
+                    ])
+                    ->label('Export Data')
+                    ->icon('heroicon-o-document-arrow-down')
+                    ->color('success'),
+            ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
             ])
@@ -210,7 +346,182 @@ class RekeningResource extends Resource
                 Tables\Actions\ForceDeleteAction::make(),
             ])
             ->bulkActions([
-                ExportBulkAction::make(),
+                ExportBulkAction::make()
+                    ->exports([
+                        ExcelExport::make('export_semua')
+                            ->label('Export Semua Kolom')
+                            ->fromTable()
+                            ->withFilename(fn () => 'rekening_nasabah_lengkap_' . date('Y-m-d_H-i-s')),
+                        
+                        ExcelExport::make('export_custom')
+                            ->label('Export Custom')
+                            ->askForWriterType()
+                            ->askForFilename()
+                            ->form([
+                                CheckboxList::make('columns')
+                                    ->label('Pilih Kolom yang Akan Di-Export')
+                                    ->options([
+                                        'nama' => 'Nama Nasabah',
+                                        'nik' => 'NIK',
+                                        'no_kk' => 'No. KK',
+                                        'gender' => 'Jenis Kelamin',
+                                        'tanggal_lahir' => 'Tanggal Lahir',
+                                        'pendidikan' => 'Pendidikan',
+                                        'alamat' => 'Alamat (Dusun/RW/RT)',
+                                        'telepon' => 'No. Telepon',
+                                        'current_balance' => 'Saldo Saat Ini',
+                                        'points_balance' => 'Poin',
+                                        'user.name' => 'Pembuat Rekening',
+                                        'created_at' => 'Tanggal Dibuat',
+                                        'updated_at' => 'Terakhir Diubah',
+                                    ])
+                                    ->columns(2)
+                                    ->required()
+                                    ->default([
+                                        'nama',
+                                        'nik', 
+                                        'no_kk',
+                                        'current_balance',
+                                        'points_balance'
+                                    ])
+                                    ->helperText('Pilih kolom yang ingin dimasukkan dalam file export'),
+                            ])
+                            ->withColumns(function ($data) {
+                                $selectedColumns = $data['columns'] ?? [];
+                                $columns = [];
+                                
+                                if (in_array('nama', $selectedColumns)) {
+                                    $columns[] = Column::make('nama')->heading('Nama Nasabah');
+                                }
+                                if (in_array('nik', $selectedColumns)) {
+                                    $columns[] = Column::make('nik')->heading('NIK');
+                                }
+                                if (in_array('no_kk', $selectedColumns)) {
+                                    $columns[] = Column::make('no_kk')->heading('No. KK');
+                                }
+                                if (in_array('gender', $selectedColumns)) {
+                                    $columns[] = Column::make('gender')->heading('Jenis Kelamin');
+                                }
+                                if (in_array('tanggal_lahir', $selectedColumns)) {
+                                    $columns[] = Column::make('tanggal_lahir')
+                                        ->heading('Tanggal Lahir')
+                                        ->formatStateUsing(fn ($state) => $state ? date('d/m/Y', strtotime($state)) : '');
+                                }
+                                if (in_array('pendidikan', $selectedColumns)) {
+                                    $columns[] = Column::make('pendidikan')->heading('Pendidikan');
+                                }
+                                if (in_array('alamat', $selectedColumns)) {
+                                    $columns[] = Column::make('alamat')
+                                        ->heading('Alamat')
+                                        ->formatStateUsing(fn ($record) => "Dusun {$record->dusun}, RW {$record->rw}, RT {$record->rt}");
+                                }
+                                if (in_array('telepon', $selectedColumns)) {
+                                    $columns[] = Column::make('telepon')->heading('No. Telepon');
+                                }
+                                if (in_array('current_balance', $selectedColumns)) {
+                                    $columns[] = Column::make('current_balance')
+                                        ->heading('Saldo (Rp)')
+                                        ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.'));
+                                }
+                                if (in_array('points_balance', $selectedColumns)) {
+                                    $columns[] = Column::make('points_balance')
+                                        ->heading('Poin')
+                                        ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.'));
+                                }
+                                if (in_array('user.name', $selectedColumns)) {
+                                    $columns[] = Column::make('user.name')->heading('Pembuat Rekening');
+                                }
+                                if (in_array('created_at', $selectedColumns)) {
+                                    $columns[] = Column::make('created_at')
+                                        ->heading('Tanggal Dibuat')
+                                        ->formatStateUsing(fn ($state) => $state ? date('d/m/Y H:i', strtotime($state)) : '');
+                                }
+                                if (in_array('updated_at', $selectedColumns)) {
+                                    $columns[] = Column::make('updated_at')
+                                        ->heading('Terakhir Diubah')
+                                        ->formatStateUsing(fn ($state) => $state ? date('d/m/Y H:i', strtotime($state)) : '');
+                                }
+                                
+                                return $columns;
+                            })
+                            ->withFilename(function ($filename, $data) {
+                                if (empty($filename)) {
+                                    $selectedCount = count($data['columns'] ?? []);
+                                    return "rekening_nasabah_custom_{$selectedCount}_kolom_" . date('Y-m-d_H-i-s');
+                                }
+                                return $filename . '_' . date('Y-m-d_H-i-s');
+                            }),
+                            
+                        ExcelExport::make('export_ringkas')
+                            ->label('Export Ringkas (Nama, NIK, Saldo)')
+                            ->withColumns([
+                                Column::make('nama')->heading('Nama Nasabah'),
+                                Column::make('nik')->heading('NIK'),
+                                Column::make('no_kk')->heading('No. KK'),
+                                Column::make('current_balance')
+                                    ->heading('Saldo (Rp)')
+                                    ->formatStateUsing(fn ($state) => 'Rp ' . number_format($state, 0, ',', '.')),
+                                Column::make('points_balance')
+                                    ->heading('Poin')
+                                    ->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.')),
+                            ])
+                            ->withFilename(fn () => 'rekening_nasabah_ringkas_' . date('Y-m-d_H-i-s')),
+                    ]),
+                Tables\Actions\BulkAction::make('bulkChangePassword')
+                    ->label('Ubah Password Massal')
+                    ->icon('heroicon-o-key')
+                    ->color('warning')
+                    ->form([
+                        TextInput::make('new_password')
+                            ->label('Password Baru (untuk semua yang dipilih)')
+                            ->password()
+                            ->required()
+                            ->minLength(6)
+                            ->maxLength(255)
+                            ->helperText('Password ini akan diterapkan ke semua nasabah yang dipilih'),
+                        TextInput::make('confirm_password')
+                            ->label('Konfirmasi Password')
+                            ->password()
+                            ->required()
+                            ->same('new_password'),
+                    ])
+                    ->action(function (\Illuminate\Database\Eloquent\Collection $records, array $data): void {
+                        $successCount = 0;
+                        $errorCount = 0;
+                        
+                        foreach ($records as $record) {
+                            if ($record->user) {
+                                $record->user->update([
+                                    'password' => Hash::make($data['new_password'])
+                                ]);
+                                $successCount++;
+                            } else {
+                                $errorCount++;
+                            }
+                        }
+                        
+                        if ($successCount > 0) {
+                            Notification::make()
+                                ->title('Password berhasil diubah')
+                                ->body("Password {$successCount} nasabah telah diperbarui." . 
+                                      ($errorCount > 0 ? " {$errorCount} gagal diupdate." : ""))
+                                ->success()
+                                ->send();
+                        }
+                        
+                        if ($errorCount > 0 && $successCount === 0) {
+                            Notification::make()
+                                ->title('Error')
+                                ->body("Gagal mengubah password {$errorCount} nasabah.")
+                                ->danger()
+                                ->send();
+                        }
+                    })
+                    ->requiresConfirmation()
+                    ->modalHeading('Ubah Password Massal')
+                    ->modalDescription('Password yang sama akan diterapkan ke semua nasabah yang dipilih.')
+                    ->modalSubmitActionLabel('Ubah Semua Password')
+                    ->deselectRecordsAfterCompletion(),
                 DeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
