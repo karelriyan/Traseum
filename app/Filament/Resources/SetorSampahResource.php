@@ -17,6 +17,7 @@ use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
+use Illuminate\Support\HtmlString;
 
 class SetorSampahResource extends Resource
 {
@@ -83,48 +84,122 @@ class SetorSampahResource extends Resource
                                     ->postfix('Kg')
                                     ->numeric()
                                     ->required()
-                                    ->minValue(0.01)
-                                    ->step(0.01)
+                                    ->minValue(0.0001)
+                                    ->step(0.0001)
                                     ->columnSpan(['md' => 1]),
                             ])
                             ->columns(3)
-                            ->live()
-                            ->afterStateUpdated(fn(Get $get, Set $set) => self::updateTotals($get, $set))
                             ->addAction(fn(Action $action) => $action->after(fn(Get $get, Set $set) => self::updateTotals($get, $set)))
                             ->deleteAction(fn(Action $action) => $action->after(fn(Get $get, Set $set) => self::updateTotals($get, $set)))
                             ->reorderable(false)
                             ->addActionLabel('Tambah Jenis Sampah')
                             ->defaultItems(1)
-                            ->itemLabel(fn(array $state): ?string => \App\Models\Sampah::find($state['sampah_id'])?->jenis_sampah ?? null),
+                            ->minItems(1)
+                            ->required()
+                            ->itemLabel(fn(array $state): ?string => \App\Models\Sampah::find($state['sampah_id'])?->jenis_sampah ?? null)
+                            ->validationMessages([
+                                'required' => 'Sampah tidak boleh kosong',
+                            ]),
                     ]),
+
                 Section::make('Total Perhitungan')
                     ->schema([
+
+                        // Flag apakah hitungan sudah dilakukan
                         Forms\Components\Hidden::make('calculation_performed')
-                            ->default(false),
-                        Forms\Components\Hidden::make('total_saldo_dihasilkan')
-                            ->default(0),
-                        Forms\Components\Hidden::make('total_poin_dihasilkan')
-                            ->default(0),
-                        Forms\Components\Hidden::make('berat')
-                            ->default(0),
-                        Forms\Components\Hidden::make('user_id')
-                            ->default(auth()->id()),
+                            ->default(false)
+                            ->dehydrated(true)
+                            ->required()
+                            ->rule('accepted') // wajib true sebelum bisa disubmit
+                            ->validationMessages([
+                                'accepted' => 'Anda harus menekan tombol Hitung terlebih dahulu.'
+                            ]),
 
-                        Forms\Components\Placeholder::make('total_berat_placeholder')
-                            ->label('Total Berat')
+                        Forms\Components\Hidden::make('total_saldo_dihasilkan')->default(0),
+                        Forms\Components\Hidden::make('total_poin_dihasilkan')->default(0),
+                        Forms\Components\Hidden::make('berat')->default(0),
+                        Forms\Components\Hidden::make('user_id')->default(auth()->id()),
+
+                        // Tombol hitung
+                        Forms\Components\Actions::make([
+                            Forms\Components\Actions\Action::make('hitung')
+                                ->label('Hitung Total')
+                                ->color('success')
+                                ->action(function (Get $get, Set $set) {
+                                    self::updateTotals($get, $set);
+                                    $set('calculation_performed', true);
+                                }),
+                        ]),
+
+                        // Placeholder hasil rinci → hanya muncul kalau calculation_performed = true
+                        Forms\Components\Placeholder::make('rincian_placeholder')
+                            ->label('Rincian Perhitungan')
+                            ->visible(fn(Get $get) => (bool) $get('calculation_performed'))
                             ->content(function (Get $get) {
-                                $total = $get('berat');
-                                return $total ? number_format($total, 2, ',', '.') . ' Kg' : '0 Kg';
-                            }),
+                                $items = $get('detailSetorSampah');
+                                if (!is_array($items) || empty($items)) {
+                                    return new HtmlString('<p><em>Belum ada item sampah.</em></p>');
+                                }
 
-                        Forms\Components\Placeholder::make('total_saldo_dihasilkan_placeholder')
-                            ->label('Total Saldo Dihasilkan')
-                            ->content(function (Get $get) {
-                                $total = $get('total_saldo_dihasilkan');
-                                return $total ? 'Rp ' . number_format($total, 2, ',', '.') : 'Rp 0';
-                            }),
+                                $totalSaldo = 0;
+                                $totalBerat = 0;
+                                $rows = '';
 
-                    ])->columns(3),
+                                foreach ($items as $item) {
+                                    if (empty($item['sampah_id']) || empty($item['berat']) || !is_numeric($item['berat'])) {
+                                        continue;
+                                    }
+
+                                    $sampah = \App\Models\Sampah::find($item['sampah_id']);
+                                    if ($sampah) {
+                                        $berat = (float) $item['berat'];
+                                        $saldo = $sampah->saldo_per_kg * $berat;
+
+                                        $rows .= "
+                                            <tr>
+                                                <td style='padding:6px;'>{$sampah->jenis_sampah}</td>
+                                                <td style='padding:6px; text-align:center;'>{$berat} Kg</td>
+                                                <td style='padding:6px; text-align:right;'>Rp " . number_format($saldo, 2, ',', '.') . "</td>
+                                            </tr>
+                                        ";
+
+                                        $totalSaldo += $saldo;
+                                        $totalBerat += $berat;
+                                    }
+                                }
+
+                                $rows .= "
+                                    <tr style='font-weight:bold; border-top:2px solid #333;'>
+                                        <td style='padding:6px;'>Total</td>
+                                        <td style='padding:6px; text-align:center;'>" . number_format($totalBerat, 2, ',', '.') . " Kg</td>
+                                        <td style='padding:6px; text-align:right;'>Rp " . number_format($totalSaldo, 2, ',', '.') . "</td>
+                                    </tr>
+                                ";
+
+                                $html = "
+                                    <table style='width:100%; border-collapse:collapse;'>
+                                        <thead>
+                                            <tr style='background:#f3f4f6; text-align:left;'>
+                                                <th style='padding:6px;'>Jenis Sampah</th>
+                                                <th style='padding:6px; text-align:center;'>Berat</th>
+                                                <th style='padding:6px; text-align:right;'>Saldo</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {$rows}
+                                        </tbody>
+                                    </table>
+                                ";
+
+                                return new HtmlString($html);
+                            })
+                            ->columnSpanFull()
+                            ->extraAttributes(['class' => 'prose max-w-none']),
+
+
+                    ])
+                    ->columns(3),
+
             ]);
     }
 
@@ -154,8 +229,8 @@ class SetorSampahResource extends Resource
         $set('total_saldo_dihasilkan', round($totalSaldo, 2));
         $set('total_poin_dihasilkan', round($totalPoin));
         $set('berat', round($totalBerat, 4));
-        $set('calculation_performed', count($items ?? []) > 0 && $totalBerat > 0);
     }
+
 
     public static function table(Table $table): Table
     {
@@ -198,7 +273,8 @@ class SetorSampahResource extends Resource
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
-            ]);
+            ])
+            ->defaultSort('created_at', 'desc');
     }
 
     public static function getPages(): array
