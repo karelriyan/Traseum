@@ -7,13 +7,16 @@ use App\Models\SetorSampah;
 use App\Models\Rekening;
 use Filament\Forms;
 use Filament\Forms\Form;
+use Filament\Forms\Get;
+use Filament\Forms\Set;
 use Filament\Forms\Components\Section;
+use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Actions\Action;
+use Filament\Forms\Components\Repeater;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
-use Filament\Support\RawJs;
 
 class SetorSampahResource extends Resource
 {
@@ -25,137 +28,159 @@ class SetorSampahResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
-    protected function getFormActions(): array
-    {
-        return [
-            $this->getCreateFormAction()
-                ->disabled(fn($livewire): bool => !$livewire->data['calculation_performed']),
-            $this->getCreateAnotherFormAction()
-                ->disabled(fn($livewire): bool => !$livewire->data['calculation_performed']),
-            $this->getCancelFormAction(),
-        ];
-    }
-
     public static function form(Form $form): Form
     {
         return $form
             ->schema([
-                Section::make('Informasi Sampah Masuk')
+                Section::make('Jenis Setoran')
                     ->schema([
-                        Forms\Components\Select::make('rekening_id')
-                            ->label('Pilih Rekening')
+                        Forms\Components\Select::make('jenis_setoran')
+                            ->label('Pilih Jenis Setoran')
+                            ->options([
+                                'rekening' => 'Rekening Nasabah',
+                                'donasi' => 'Donasi',
+                            ])
                             ->required()
+                            ->live(), // <-- Penting untuk membuat form reaktif
+
+                        Forms\Components\Select::make('rekening_id')
+                            ->label('Pilih Rekening Nasabah')
+                            ->preload()
                             ->searchable()
+                            ->dehydrated(true)
+                            // Hanya tampil dan wajib diisi jika jenis setoran adalah 'rekening'
+                            ->hidden(fn(Get $get) => $get('jenis_setoran') != 'rekening')
+                            ->required(fn(Get $get) => $get('jenis_setoran') === 'rekening')
                             ->validationMessages([
-                                'required' => 'Rekening tidak boleh kosong'
+                                'required' => 'Rekening nasabah tidak boleh kosong'
                             ])
                             ->options(function () {
+                                // Ambil semua rekening KECUALI rekening donasi
                                 return Rekening::query()
+                                    ->where('no_rekening', '!=', '00000000000000')
                                     ->select('id', 'nama', 'nik')
                                     ->get()
                                     ->mapWithKeys(fn($rekening) => [$rekening->id => "{$rekening->nama} - {$rekening->nik}"]);
                             }),
-                        Forms\Components\Select::make('sampah_id')
-                            ->relationship('sampah', 'jenis_sampah')
-                            ->label('Jenis Sampah')
-                            ->required()
-                            ->preload()
-                            ->searchable()
-                            ->reactive(),
-                        Forms\Components\TextInput::make('berat')
-                            ->label('Berat')
-                            ->postfix('Kg')
-                            ->numeric()
-                            ->required()
-                            ->afterStateUpdated(function (callable $set) {
-                                // Reset hasil hitung setiap kali berat diubah
-                                $set('calculation_performed', false);
-                                $set('total_saldo_dihasilkan', 0);
-                                $set('total_poin_dihasilkan', 0);
-                            }),
                     ]),
-
-                Section::make('Perhitungan Penambahan Saldo')
+                Section::make('Informasi Setoran Sampah')
                     ->schema([
-                        Forms\Components\Actions::make([
-                            Action::make('hitung')
-                                ->label('Hitung')
-                                ->action(function (callable $get, callable $set) {
-                                    $sampah_id = $get('sampah_id');
-                                    $berat = (float) $get('berat');
-
-                                    if (!$sampah_id || !$berat || $berat <= 0) {
-                                        $set('total_saldo_dihasilkan', 0);
-                                        $set('total_poin_dihasilkan', 0);
-                                        return;
-                                    }
-
-                                    $sampah = \App\Models\Sampah::find($sampah_id);
-                                    if ($sampah) {
-                                        $berat_kg_liter = $berat;
-                                        $total_saldo = $sampah->saldo_per_kg * $berat_kg_liter;
-                                        $total_poin = $sampah->poin_per_kg * $berat_kg_liter;
-
-                                        $set('total_saldo_dihasilkan', $total_saldo);
-                                        $set('total_poin_dihasilkan', $total_poin);
-                                        $set('calculation_performed', true);
-                                    } else {
-                                        $set('total_saldo_dihasilkan', 0);
-                                        $set('total_poin_dihasilkan', 0);
-                                        $set('calculation_performed', false);
-                                    }
-                                })
-                                ->color('primary')
-                                ->icon('heroicon-o-calculator'),
-                        ]),
-
+                        Repeater::make('detailSetorSampah')
+                            ->relationship('details')
+                            ->label('Item Sampah')
+                            ->schema([
+                                Forms\Components\Select::make('sampah_id')
+                                    ->relationship('sampah', 'jenis_sampah')
+                                    ->label('Jenis Sampah')
+                                    ->required()
+                                    ->preload()
+                                    ->searchable()
+                                    ->distinct()
+                                    ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                                    ->columnSpan(['md' => 2]),
+                                Forms\Components\TextInput::make('berat')
+                                    ->label('Berat')
+                                    ->postfix('Kg')
+                                    ->numeric()
+                                    ->required()
+                                    ->minValue(0.01)
+                                    ->step(0.01)
+                                    ->columnSpan(['md' => 1]),
+                            ])
+                            ->columns(3)
+                            ->live()
+                            ->afterStateUpdated(fn(Get $get, Set $set) => self::updateTotals($get, $set))
+                            ->addAction(fn(Action $action) => $action->after(fn(Get $get, Set $set) => self::updateTotals($get, $set)))
+                            ->deleteAction(fn(Action $action) => $action->after(fn(Get $get, Set $set) => self::updateTotals($get, $set)))
+                            ->reorderable(false)
+                            ->addActionLabel('Tambah Jenis Sampah')
+                            ->defaultItems(1)
+                            ->itemLabel(fn(array $state): ?string => \App\Models\Sampah::find($state['sampah_id'])?->jenis_sampah ?? null),
+                    ]),
+                Section::make('Total Perhitungan')
+                    ->schema([
                         Forms\Components\Hidden::make('calculation_performed')
                             ->default(false),
-
-                        Forms\Components\Placeholder::make('total_saldo_placeholder')
-                            ->label('Berat')
-                            ->visible(fn(callable $get): bool => (bool) $get('calculation_performed'))
-                            ->content(function (callable $get) {
-                                $total = $get('berat');
-                                return $total ? number_format($total, 0, ',', '.') . ' gram' : '0 gram';
-                            }),
-
-
-                        Forms\Components\Placeholder::make('total_saldo_placeholder')
-                            ->label('Total Saldo Dihasilkan')
-                            ->visible(fn(callable $get): bool => (bool) $get('calculation_performed'))
-                            ->content(function (callable $get) {
-                                $total = $get('total_saldo_dihasilkan');
-                                return $total ? 'Rp ' . number_format($total, 0, ',', '.') : 'Rp 0';
-                            }),
-
-                        Forms\Components\Placeholder::make('total_poin_placeholder')
-                            ->label('Total Poin Dihasilkan')
-                            ->visible(fn(callable $get): bool => (bool) $get('calculation_performed'))
-                            ->content(function (callable $get) {
-                                $total = $get('total_poin_dihasilkan');
-                                return $total ? number_format($total, 0, ',', '.') . ' Poin' : '0 Poin';
-                            }),
-
                         Forms\Components\Hidden::make('total_saldo_dihasilkan')
                             ->default(0),
-
+                        Forms\Components\Hidden::make('total_poin_dihasilkan')
+                            ->default(0),
+                        Forms\Components\Hidden::make('berat')
+                            ->default(0),
                         Forms\Components\Hidden::make('user_id')
                             ->default(auth()->id()),
-                    ]),
+
+                        Forms\Components\Placeholder::make('total_berat_placeholder')
+                            ->label('Total Berat')
+                            ->content(function (Get $get) {
+                                $total = $get('berat');
+                                return $total ? number_format($total, 2, ',', '.') . ' Kg' : '0 Kg';
+                            }),
+
+                        Forms\Components\Placeholder::make('total_saldo_dihasilkan_placeholder')
+                            ->label('Total Saldo Dihasilkan')
+                            ->content(function (Get $get) {
+                                $total = $get('total_saldo_dihasilkan');
+                                return $total ? 'Rp ' . number_format($total, 2, ',', '.') : 'Rp 0';
+                            }),
+
+                    ])->columns(3),
             ]);
+    }
+
+    public static function updateTotals(Get $get, Set $set): void
+    {
+        $items = $get('detailSetorSampah');
+        $totalSaldo = 0;
+        $totalPoin = 0;
+        $totalBerat = 0;
+
+        if (is_array($items)) {
+            foreach ($items as $item) {
+                if (empty($item['sampah_id']) || empty($item['berat']) || !is_numeric($item['berat'])) {
+                    continue;
+                }
+
+                $sampah = \App\Models\Sampah::find($item['sampah_id']);
+                if ($sampah) {
+                    $berat = (float) $item['berat'];
+                    $totalBerat += $berat;
+                    $totalSaldo += $sampah->saldo_per_kg * $berat;
+                    $totalPoin += $sampah->poin_per_kg * $berat;
+                }
+            }
+        }
+
+        $set('total_saldo_dihasilkan', round($totalSaldo, 2));
+        $set('total_poin_dihasilkan', round($totalPoin));
+        $set('berat', round($totalBerat, 4));
+        $set('calculation_performed', count($items ?? []) > 0 && $totalBerat > 0);
     }
 
     public static function table(Table $table): Table
     {
         return $table
             ->columns([
-                TextColumn::make('rekening.nama')->label('Nasabah')->sortable()->searchable(),
-                TextColumn::make('rekening.no_kk')->label('Nomor KK')->sortable()->searchable(),
-                TextColumn::make('sampah.jenis_sampah')->label('Jenis Sampah')->sortable()->searchable(),
-                TextColumn::make('berat')->label('Berat (Kg)')->sortable(),
-                TextColumn::make('total_saldo_dihasilkan')->label('Saldo Didapatkan')->sortable()->money('IDR'),
-                TextColumn::make('total_poin_dihasilkan')->label('Poin Didapatkan')->sortable(),
+                TextColumn::make('rekening.nama')
+                    ->label('Nasabah')
+                    ->sortable()
+                    ->searchable()
+                    ->formatStateUsing(function ($state, $record) {
+                        if ($record->rekening?->no_rekening === '00000000000000') {
+                            return 'Donasi'; // tampilkan teks badge
+                        }
+                        return $state; // tampilkan nama asli
+                    })
+                    ->badge(fn($state, $record) => $record->rekening?->no_rekening === '00000000000000') // badge hanya kalau donasi
+                    ->color(fn($state, $record) => $record->rekening?->no_rekening === '00000000000000' ? 'success' : null),
+
+                TextColumn::make('details.sampah.jenis_sampah')
+                    ->label('Item Sampah')
+                    ->listWithLineBreaks()
+                    ->limitList(2)
+                    ->expandableLimitedList(),
+                TextColumn::make('berat')->label('Total Berat (Kg)')->sortable()->weight('bold'),
+                TextColumn::make('total_saldo_dihasilkan')->label('Total Saldo')->sortable()->money('IDR'),
                 TextColumn::make('user.name')->label('Penyetor')->sortable()->searchable(),
                 TextColumn::make('created_at')->dateTime()->label('Dibuat')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')->dateTime()->label('Diubah')->toggleable(isToggledHiddenByDefault: true),

@@ -26,12 +26,12 @@ return new class extends Migration {
                 ->constrained('rekening')
                 ->index()
                 ->name('fk_setor_sampah_rekening');
-            $table->foreignUlid('sampah_id')->constrained('sampah')->name('fk_setor_sampah_sampah');
-            $table->decimal('berat',8,4)->required();
-            $table->string('calculation_performed');
-            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_setor_sampah_user');
+            $table->string('jenis_setoran'); // 'rekening' atau 'donasi'
+            $table->decimal('berat', 10, 4)->default(0); // Total berat dari semua item
+            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_setor_sampah_user'); // Dihapus di panduan, tapi ada di form
             $table->decimal('total_saldo_dihasilkan', 15, 2)->default(0);
             $table->bigInteger('total_poin_dihasilkan')->default(0);
+            $table->boolean('calculation_performed')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });
@@ -48,6 +48,7 @@ return new class extends Migration {
                 ->name('fk_detail_setor_sampah_sampah');
             $table->decimal('berat', 8, 4);
             $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_detail_setor_sampah_user');
+            $table->timestamps();
             $table->softDeletes();
         });
 
