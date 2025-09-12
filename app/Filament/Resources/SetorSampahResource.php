@@ -282,6 +282,7 @@ class SetorSampahResource extends Resource
         return [
             'index' => Pages\ListSetorSampahs::route('/'),
             'create' => Pages\CreateSetorSampah::route('/create'),
+            'view' => Pages\ViewSetorSampah::route('/{record}'),
             'edit' => Pages\EditSetorSampah::route('/{record}/edit'),
         ];
     }

@@ -18,40 +18,50 @@ class RecentTransactionsWidget extends BaseWidget
     {
         return $table
             ->query(
-                SetorSampah::with(['rekening'])
+                SetorSampah::with(['rekening', 'user'])
                     ->latest()
                     ->limit(10)
             )
             ->columns([
-                TextColumn::make('rekening.nama_nasabah')
+                TextColumn::make('rekening.nama')
                     ->label('Nasabah')
                     ->searchable()
-                    ->sortable(),
+                    ->sortable()
+                    ->formatStateUsing(function ($state, $record) {
+                        if ($record->rekening?->no_rekening === '00000000000000') {
+                            return 'Donasi';
+                        }
+                        return $state;
+                    }),
                     
                 TextColumn::make('created_at')
                     ->label('Tanggal')
                     ->dateTime('d/m/Y H:i')
                     ->sortable(),
                     
-                TextColumn::make('total_berat')
+                TextColumn::make('berat')
                     ->label('Total Berat')
                     ->suffix(' kg')
                     ->numeric(2)
                     ->sortable(),
                     
-                TextColumn::make('total_harga')
-                    ->label('Total Harga')
+                TextColumn::make('total_saldo_dihasilkan')
+                    ->label('Total Saldo')
                     ->money('IDR')
                     ->sortable(),
                     
-                TextColumn::make('status')
-                    ->label('Status')
+                TextColumn::make('jenis_setoran')
+                    ->label('Jenis')
                     ->badge()
                     ->color(fn (string $state): string => match ($state) {
-                        'pending' => 'warning',
-                        'approved' => 'success',
-                        'rejected' => 'danger',
+                        'rekening' => 'success',
+                        'donasi' => 'info',
                         default => 'gray',
+                    })
+                    ->formatStateUsing(fn (string $state): string => match ($state) {
+                        'rekening' => 'Rekening',
+                        'donasi' => 'Donasi',
+                        default => ucfirst($state),
                     }),
             ])
             ->actions([

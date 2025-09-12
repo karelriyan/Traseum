@@ -50,9 +50,10 @@ class SetorSampah extends Model
             // Tambahkan saldo dan poin ke rekening nasabah
             if ($SetorSampah->rekening && $SetorSampah->total_saldo_dihasilkan > 0) {
                 $rekening = $SetorSampah->rekening;
-                $rekening->balance += $SetorSampah->total_saldo_dihasilkan;
-                $rekening->points_balance += $SetorSampah->total_poin_dihasilkan;
-                $rekening->save();
+                
+                // Update saldo di tabel rekening
+                $rekening->increment('balance', $SetorSampah->total_saldo_dihasilkan);
+                $rekening->increment('points_balance', $SetorSampah->total_poin_dihasilkan);
 
                 // Buat transaksi saldo
                 \App\Models\SaldoTransaction::create([
@@ -93,10 +94,18 @@ class SetorSampah extends Model
                     $perubahanSaldo = $saldoBaru - $saldoLama;
                     $perubahanPoin = $poinBaru - $poinLama;
 
-                    // Update saldo dan poin rekening dengan nilai selisih
-                    $rekening->balance += $perubahanSaldo;
-                    $rekening->points_balance += $perubahanPoin;
-                    $rekening->save();
+                    // Update saldo dan poin rekening dengan nilai selisih menggunakan increment/decrement
+                    if ($perubahanSaldo > 0) {
+                        $rekening->increment('balance', $perubahanSaldo);
+                    } elseif ($perubahanSaldo < 0) {
+                        $rekening->decrement('balance', abs($perubahanSaldo));
+                    }
+                    
+                    if ($perubahanPoin > 0) {
+                        $rekening->increment('points_balance', $perubahanPoin);
+                    } elseif ($perubahanPoin < 0) {
+                        $rekening->decrement('points_balance', abs($perubahanPoin));
+                    }
 
                     // Buat transaksi baru untuk mencatat perubahan ini
                     if ($perubahanSaldo != 0) {
