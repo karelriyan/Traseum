@@ -60,7 +60,8 @@ class CustomRekeningExport extends ExcelExport
             $columns[] = Column::make('no_rek_pegadaian')
                 ->heading('No. Rek. Pegadaian')
                 ->format(NumberFormat::FORMAT_TEXT)
-                ->formatStateUsing(fn ($state) => $state ? (string) $state : '');
+                ->formatStateUsing(fn ($state) => $state ? (string) $state : ' '); // Space prefix untuk memaksa text
+                // ->formatStateUsing(fn ($state) => ' ' . $state), // Space
         }
         
         $columns = array_merge($columns, [
