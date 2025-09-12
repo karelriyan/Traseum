@@ -15,7 +15,7 @@ return new class extends Migration {
             $table->string('jenis_sampah', 255)->unique();
             $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_sampah_user');
             $table->decimal('saldo_per_kg', 15, 2);
-            $table->integer('poin_per_kg');
+            $table->unsignedInteger('poin_per_kg')->nullable();
             $table->timestamps();
             $table->softDeletes();
         });
@@ -27,7 +27,7 @@ return new class extends Migration {
                 ->index()
                 ->name('fk_setor_sampah_rekening');
             $table->foreignUlid('sampah_id')->constrained('sampah')->name('fk_setor_sampah_sampah');
-            $table->integer('berat')->required();
+            $table->decimal('berat',8,4)->required();
             $table->string('calculation_performed');
             $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_setor_sampah_user');
             $table->decimal('total_saldo_dihasilkan', 15, 2)->default(0);
@@ -46,7 +46,7 @@ return new class extends Migration {
                 ->constrained('sampah')
                 ->index()
                 ->name('fk_detail_setor_sampah_sampah');
-            $table->decimal('berat', 8, 2);
+            $table->decimal('berat', 8, 4);
             $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_detail_setor_sampah_user');
             $table->softDeletes();
         });

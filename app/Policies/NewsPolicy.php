@@ -2,115 +2,105 @@
 
 namespace App\Policies;
 
+use Illuminate\Auth\Access\Response;
 use App\Models\News;
 use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
 
 class NewsPolicy
 {
-    use HandlesAuthorization;
-
     /**
-     * Determine whether the user can view any news.
+     * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_news') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('view-any News');
     }
 
     /**
-     * Determine whether the user can view the news.
+     * Determine whether the user can view the model.
      */
     public function view(User $user, News $news): bool
     {
-        return $user->can('view_news') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('view News');
     }
 
     /**
-     * Determine whether the user can create news.
+     * Determine whether the user can create models.
      */
     public function create(User $user): bool
     {
-        return $user->can('create_news') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('create News');
     }
 
     /**
-     * Determine whether the user can update the news.
+     * Determine whether the user can update the model.
      */
     public function update(User $user, News $news): bool
     {
-        return $user->can('edit_news') || $user->hasRole('Super Admin') || $news->author_id === $user->id;
+        return $user->checkPermissionTo('update News');
     }
 
     /**
-     * Determine whether the user can delete the news.
+     * Determine whether the user can delete the model.
      */
     public function delete(User $user, News $news): bool
     {
-        return $user->can('delete_news') || $user->hasRole('Super Admin') || $news->author_id === $user->id;
+        return $user->checkPermissionTo('delete News');
     }
 
     /**
-     * Determine whether the user can bulk delete.
+     * Determine whether the user can delete any models.
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_news') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('delete-any News');
     }
 
     /**
-     * Determine whether the user can permanently delete.
-     */
-    public function forceDelete(User $user, News $news): bool
-    {
-        return $user->can('force_delete_news') || $user->hasRole('Super Admin');
-    }
-
-    /**
-     * Determine whether the user can permanently bulk delete.
-     */
-    public function forceDeleteAny(User $user): bool
-    {
-        return $user->can('force_delete_any_news') || $user->hasRole('Super Admin');
-    }
-
-    /**
-     * Determine whether the user can restore.
+     * Determine whether the user can restore the model.
      */
     public function restore(User $user, News $news): bool
     {
-        return $user->can('restore_news') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('restore News');
     }
 
     /**
-     * Determine whether the user can bulk restore.
+     * Determine whether the user can restore any models.
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_news') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('restore-any News');
     }
 
     /**
-     * Determine whether the user can replicate.
+     * Determine whether the user can replicate the model.
      */
     public function replicate(User $user, News $news): bool
     {
-        return $user->can('replicate_news') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('replicate News');
     }
 
     /**
-     * Determine whether the user can reorder.
+     * Determine whether the user can reorder the models.
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_news') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('reorder News');
     }
 
     /**
-     * Determine whether the user can publish/unpublish.
+     * Determine whether the user can permanently delete the model.
      */
-    public function publish(User $user, News $news): bool
+    public function forceDelete(User $user, News $news): bool
     {
-        return $user->can('publish_news') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('force-delete News');
+    }
+
+    /**
+     * Determine whether the user can permanently delete any models.
+     */
+    public function forceDeleteAny(User $user): bool
+    {
+        return $user->checkPermissionTo('force-delete-any News');
     }
 }

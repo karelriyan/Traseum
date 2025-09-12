@@ -10,8 +10,10 @@ use Filament\Tables\Table;
 use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Select;
 use Filament\Forms\Components\TextInput;
-use Filament\Forms\Components\Repeater;
+use Filament\Forms\Components\Toggle;
+use Filament\Forms\Get;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\IconColumn;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Pages\Actions;
 use App\Filament\Resources\RekeningResource\Pages;
@@ -155,6 +157,27 @@ class RekeningResource extends Resource
                         ]),
                 ])
                 ->columns(1),
+
+            Section::make('Informasi Tabungan Emas Pegadaian')
+                ->schema([
+                    Toggle::make('status_pegadaian')
+                        ->label('Memiliki Tabungan Emas Pegadaian?')
+                        ->onColor('success')
+                        ->offColor('danger')
+                        ->live(),
+                    TextInput::make('no_rek_pegadaian')
+                        ->label('Nomor Rekening Pegadaian')
+                        ->numeric()
+                        ->maxLength(16)
+                        ->unique(ignoreRecord: true)
+                        ->visible(fn(Get $get) => $get('status_pegadaian'))
+                        ->required(fn(Get $get) => $get('status_pegadaian'))
+                        ->validationMessages([
+                            'required' => 'Nomor rekening pegadaian wajib diisi jika memiliki tabungan emas.',
+                            'unique' => 'Nomor rekening pegadaian sudah terdaftar.',
+                        ]),
+                ])
+                ->columns(1),
         ]);
     }
 
@@ -162,10 +185,17 @@ class RekeningResource extends Resource
     {
         return $table
             ->columns([
+                TextColumn::make('no_rekening')->label('No. Rekening')->sortable()->searchable(),
                 TextColumn::make('nama')->label('Nama Nasabah')->sortable()->searchable(),
-                TextColumn::make('no_kk')->label('Nomor KK')->sortable()->searchable(),
                 TextColumn::make('current_balance')->label('Saldo')->sortable()->money('IDR'),
-                TextColumn::make('points_balance')->label('Poin')->sortable()->numeric()->formatStateUsing(fn ($state) => number_format($state, 0, ',', '.')),
+                IconColumn::make('status_pegadaian')
+                    ->label('Tab. Emas')
+                    ->boolean()
+                    ->trueIcon('heroicon-o-check-circle')
+                    ->falseIcon('heroicon-o-x-circle')
+                    ->trueColor('success')
+                    ->falseColor('danger')
+                    ->sortable(),
                 TextColumn::make('user.name')->label('Pembuat Rekening')->sortable()->searchable(),
                 TextColumn::make('created_at')->label('Waktu Dibuat')->dateTime()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')->label('Terakhir Diubah')->dateTime()->toggleable(isToggledHiddenByDefault: true),

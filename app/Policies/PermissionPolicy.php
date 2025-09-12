@@ -2,107 +2,105 @@
 
 namespace App\Policies;
 
+use Illuminate\Auth\Access\Response;
+use App\Models\Permission;
 use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
-use Spatie\Permission\Models\Permission;
 
 class PermissionPolicy
 {
-    use HandlesAuthorization;
-
     /**
-     * Determine whether the user can view any permissions.
+     * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_permission') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('view-any Permission');
     }
 
     /**
-     * Determine whether the user can view the permission.
+     * Determine whether the user can view the model.
      */
     public function view(User $user, Permission $permission): bool
     {
-        return $user->can('view_permission') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('view Permission');
     }
 
     /**
-     * Determine whether the user can create permissions.
+     * Determine whether the user can create models.
      */
     public function create(User $user): bool
     {
-        return $user->can('create_permission') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('create Permission');
     }
 
     /**
-     * Determine whether the user can update the permission.
+     * Determine whether the user can update the model.
      */
     public function update(User $user, Permission $permission): bool
     {
-        return $user->can('edit_permission') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('update Permission');
     }
 
     /**
-     * Determine whether the user can delete the permission.
+     * Determine whether the user can delete the model.
      */
     public function delete(User $user, Permission $permission): bool
     {
-        return $user->can('delete_permission') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('delete Permission');
     }
 
     /**
-     * Determine whether the user can bulk delete.
+     * Determine whether the user can delete any models.
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_permission') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('delete-any Permission');
     }
 
     /**
-     * Determine whether the user can permanently delete.
-     */
-    public function forceDelete(User $user, Permission $permission): bool
-    {
-        return $user->can('force_delete_permission') || $user->hasRole('Super Admin');
-    }
-
-    /**
-     * Determine whether the user can permanently bulk delete.
-     */
-    public function forceDeleteAny(User $user): bool
-    {
-        return $user->can('force_delete_any_permission') || $user->hasRole('Super Admin');
-    }
-
-    /**
-     * Determine whether the user can restore.
+     * Determine whether the user can restore the model.
      */
     public function restore(User $user, Permission $permission): bool
     {
-        return $user->can('restore_permission') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('restore Permission');
     }
 
     /**
-     * Determine whether the user can bulk restore.
+     * Determine whether the user can restore any models.
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_permission') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('restore-any Permission');
     }
 
     /**
-     * Determine whether the user can replicate.
+     * Determine whether the user can replicate the model.
      */
     public function replicate(User $user, Permission $permission): bool
     {
-        return $user->can('replicate_permission') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('replicate Permission');
     }
 
     /**
-     * Determine whether the user can reorder.
+     * Determine whether the user can reorder the models.
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_permission') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('reorder Permission');
+    }
+
+    /**
+     * Determine whether the user can permanently delete the model.
+     */
+    public function forceDelete(User $user, Permission $permission): bool
+    {
+        return $user->checkPermissionTo('force-delete Permission');
+    }
+
+    /**
+     * Determine whether the user can permanently delete any models.
+     */
+    public function forceDeleteAny(User $user): bool
+    {
+        return $user->checkPermissionTo('force-delete-any Permission');
     }
 }

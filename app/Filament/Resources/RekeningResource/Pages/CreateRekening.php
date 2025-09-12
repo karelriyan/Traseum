@@ -3,11 +3,38 @@
 namespace App\Filament\Resources\RekeningResource\Pages;
 
 use App\Filament\Resources\RekeningResource;
-use Filament\Actions;
+use App\Models\Rekening;
 use Filament\Resources\Pages\CreateRecord;
-use App\Models\Nasabah;
+use Illuminate\Support\Carbon;
 
 class CreateRekening extends CreateRecord
 {
     protected static string $resource = RekeningResource::class;
+
+    protected function mutateFormDataBeforeCreate(array $data): array
+    {
+        // Struktur Nomor Rekening: 5 (alamat) + 6 (tanggal) + 3 (urut) = 14 digit
+
+        // 1. Bagian Alamat (5 digit: 1 dusun, 2 RW, 2 RT)
+        $dusun = $data['dusun'];
+        $rw = str_pad($data['rw'], 2, '0', STR_PAD_LEFT);
+        $rt = str_pad($data['rt'], 2, '0', STR_PAD_LEFT);
+        $addressPart = $dusun . $rw . $rt;
+
+        // 2. Bagian Tanggal (6 digit: ddmmyy)
+        $datePart = Carbon::now()->format('dmy');
+
+        // 3. Bagian Nomor Urut (3 digit)
+        $lastRekeningToday = Rekening::whereDate('created_at', Carbon::today())->latest('id')->first();
+        $sequence = 1;
+        if ($lastRekeningToday) {
+            $lastSequence = (int) substr($lastRekeningToday->no_rekening, -3);
+            $sequence = $lastSequence + 1;
+        }
+        $sequencePart = str_pad($sequence, 3, '0', STR_PAD_LEFT);
+
+        $data['no_rekening'] = $addressPart . $datePart . $sequencePart;
+
+        return $data;
+    }
 }

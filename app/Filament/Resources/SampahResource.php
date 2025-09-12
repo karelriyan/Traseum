@@ -33,19 +33,19 @@ class SampahResource extends Resource
                     ->required()
                     ->maxLength(255),
                 Forms\Components\TextInput::make('saldo_per_kg')
-                    ->label('Saldo per-gram')
+                    ->label('Saldo per-Kg')
                     ->prefix('Rp')
                     ->mask(RawJs::make('$money($input)'))
                     ->stripCharacters(['.', ','])
                     ->numeric()
                     ->required(),
-                Forms\Components\TextInput::make('poin_per_kg')
-                    ->label('Poin per-gram')
-                    ->prefix('Poin')
-                    ->mask(RawJs::make('$money($input)'))
-                    ->stripCharacters(['.', ','])
-                    ->numeric()
-                    ->required(),
+                // Forms\Components\TextInput::make('poin_per_kg')
+                //     ->label('Poin per-gram')
+                //     ->prefix('Poin')
+                //     ->mask(RawJs::make('$money($input)'))
+                //     ->stripCharacters(['.', ','])
+                //     ->numeric()
+                //     ->required(),
             ])->columns(1);
     }
 
@@ -54,8 +54,8 @@ class SampahResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('jenis_sampah')->label('Nama Jenis Sampah')->sortable()->searchable(),
-                TextColumn::make('saldo_per_kg')->label('Saldo per-gram')->sortable()->money('IDR'),
-                TextColumn::make('poin_per_kg')->label('Poin per-gram')->sortable(),
+                TextColumn::make('saldo_per_kg')->label('Saldo per-Kg')->sortable()->money('IDR'),
+                // TextColumn::make('poin_per_kg')->label('Poin per-gram')->sortable(),
                 TextColumn::make('user.name')->label('Pembuat Data')->sortable()->searchable(),
             ])
             ->filters([

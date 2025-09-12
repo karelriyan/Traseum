@@ -64,9 +64,7 @@ class SetorSampahResource extends Resource
                             ->reactive(),
                         Forms\Components\TextInput::make('berat')
                             ->label('Berat')
-                            ->postfix('gram')
-                            ->mask(RawJs::make('$money($input)'))
-                            ->stripCharacters(',')
+                            ->postfix('Kg')
                             ->numeric()
                             ->required()
                             ->afterStateUpdated(function (callable $set) {
@@ -155,7 +153,7 @@ class SetorSampahResource extends Resource
                 TextColumn::make('rekening.nama')->label('Nasabah')->sortable()->searchable(),
                 TextColumn::make('rekening.no_kk')->label('Nomor KK')->sortable()->searchable(),
                 TextColumn::make('sampah.jenis_sampah')->label('Jenis Sampah')->sortable()->searchable(),
-                TextColumn::make('berat')->label('Berat (gram/mL)')->sortable(),
+                TextColumn::make('berat')->label('Berat (Kg)')->sortable(),
                 TextColumn::make('total_saldo_dihasilkan')->label('Saldo Didapatkan')->sortable()->money('IDR'),
                 TextColumn::make('total_poin_dihasilkan')->label('Poin Didapatkan')->sortable(),
                 TextColumn::make('user.name')->label('Penyetor')->sortable()->searchable(),

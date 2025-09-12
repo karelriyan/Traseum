@@ -2,107 +2,105 @@
 
 namespace App\Policies;
 
+use Illuminate\Auth\Access\Response;
+use App\Models\Role;
 use App\Models\User;
-use Illuminate\Auth\Access\HandlesAuthorization;
-use Spatie\Permission\Models\Role;
 
 class RolePolicy
 {
-    use HandlesAuthorization;
-
     /**
-     * Determine whether the user can view any roles.
+     * Determine whether the user can view any models.
      */
     public function viewAny(User $user): bool
     {
-        return $user->can('view_any_role') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('view-any Role');
     }
 
     /**
-     * Determine whether the user can view the role.
+     * Determine whether the user can view the model.
      */
     public function view(User $user, Role $role): bool
     {
-        return $user->can('view_role') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('view Role');
     }
 
     /**
-     * Determine whether the user can create roles.
+     * Determine whether the user can create models.
      */
     public function create(User $user): bool
     {
-        return $user->can('create_role') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('create Role');
     }
 
     /**
-     * Determine whether the user can update the role.
+     * Determine whether the user can update the model.
      */
     public function update(User $user, Role $role): bool
     {
-        return $user->can('edit_role') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('update Role');
     }
 
     /**
-     * Determine whether the user can delete the role.
+     * Determine whether the user can delete the model.
      */
     public function delete(User $user, Role $role): bool
     {
-        return $user->can('delete_role') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('delete Role');
     }
 
     /**
-     * Determine whether the user can bulk delete.
+     * Determine whether the user can delete any models.
      */
     public function deleteAny(User $user): bool
     {
-        return $user->can('delete_any_role') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('delete-any Role');
     }
 
     /**
-     * Determine whether the user can permanently delete.
-     */
-    public function forceDelete(User $user, Role $role): bool
-    {
-        return $user->can('force_delete_role') || $user->hasRole('Super Admin');
-    }
-
-    /**
-     * Determine whether the user can permanently bulk delete.
-     */
-    public function forceDeleteAny(User $user): bool
-    {
-        return $user->can('force_delete_any_role') || $user->hasRole('Super Admin');
-    }
-
-    /**
-     * Determine whether the user can restore.
+     * Determine whether the user can restore the model.
      */
     public function restore(User $user, Role $role): bool
     {
-        return $user->can('restore_role') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('restore Role');
     }
 
     /**
-     * Determine whether the user can bulk restore.
+     * Determine whether the user can restore any models.
      */
     public function restoreAny(User $user): bool
     {
-        return $user->can('restore_any_role') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('restore-any Role');
     }
 
     /**
-     * Replicate.
+     * Determine whether the user can replicate the model.
      */
     public function replicate(User $user, Role $role): bool
     {
-        return $user->can('replicate_role') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('replicate Role');
     }
 
     /**
-     * Reorder.
+     * Determine whether the user can reorder the models.
      */
     public function reorder(User $user): bool
     {
-        return $user->can('reorder_role') || $user->hasRole('Super Admin');
+        return $user->checkPermissionTo('reorder Role');
+    }
+
+    /**
+     * Determine whether the user can permanently delete the model.
+     */
+    public function forceDelete(User $user, Role $role): bool
+    {
+        return $user->checkPermissionTo('force-delete Role');
+    }
+
+    /**
+     * Determine whether the user can permanently delete any models.
+     */
+    public function forceDeleteAny(User $user): bool
+    {
+        return $user->checkPermissionTo('force-delete-any Role');
     }
 }
