@@ -12,7 +12,7 @@ return new class extends Migration {
     {
         Schema::create('rekening', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->string('no_rekening', 14)->unique()->index();
+            $table->string('no_rekening', 8)->unique()->index();
 
             $table->string('nama', 255);
             $table->string('dusun', 3);

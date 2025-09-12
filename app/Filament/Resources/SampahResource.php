@@ -8,6 +8,7 @@ use Filament\Forms;
 use Filament\Resources\Resource;
 use Filament\Resources\Forms\Form;
 use Filament\Support\RawJs;
+use App\Filament\Resources\SampahResource\RelationManagers;
 use Filament\Resources\Tables\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
@@ -55,6 +56,13 @@ class SampahResource extends Resource
             ->columns([
                 TextColumn::make('jenis_sampah')->label('Nama Jenis Sampah')->sortable()->searchable(),
                 TextColumn::make('saldo_per_kg')->label('Saldo per-Kg')->sortable()->money('IDR'),
+                TextColumn::make('total_berat_terkumpul')
+                    ->label('Total Terkumpul (Kg)')
+                    ->numeric(
+                        decimalPlaces: 4,
+                        decimalSeparator: ',',
+                        thousandsSeparator: '.'
+                    )->sortable(),
                 // TextColumn::make('poin_per_kg')->label('Poin per-gram')->sortable(),
                 TextColumn::make('user.name')->label('Pembuat Data')->sortable()->searchable(),
             ])
@@ -73,7 +81,7 @@ class SampahResource extends Resource
     public static function getRelations(): array
     {
         return [
-            //
+            RelationManagers\DetailSetorSampahRelationManager::class,
         ];
     }
 

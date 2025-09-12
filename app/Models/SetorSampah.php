@@ -113,7 +113,7 @@ class SetorSampah extends Model
                             'rekening_id' => $rekening->id,
                             'amount' => abs($perubahanSaldo),
                             'type' => $perubahanSaldo > 0 ? 'credit' : 'debit',
-                            'description' => 'Koreksi saldo dari perubahan data setor sampah',
+                            'description' => 'Koreksi Saldo Dari Perubahan Data Setor Sampah',
                             'transactable_id' => $setorSampah->id,
                             'transactable_type' => 'setor_sampah',
                         ]);
@@ -123,7 +123,7 @@ class SetorSampah extends Model
                         \App\Models\PoinTransaction::create([
                             'rekening_id' => $rekening->id,
                             'amount' => abs($perubahanPoin),
-                            'description' => 'Koreksi poin dari perubahan data setor sampah',
+                            'description' => 'Koreksi Poin Dari Perubahan Data Setor Sampah',
                             'transactable_id' => $setorSampah->id,
                             'transactable_type' => 'setor_sampah',
                         ]);
@@ -144,7 +144,7 @@ class SetorSampah extends Model
                     'rekening_id' => $rekening->id,
                     'amount' => $SetorSampah->total_saldo_dihasilkan,
                     'type' => 'debit',
-                    'description' => 'Pengurangan saldo dari pembatalan setor sampah',
+                    'description' => 'Pengurangan Saldo Dari Pembatalan Setor Sampah',
                     'transactable_id' => $SetorSampah->id,
                     'transactable_type' => 'setor_sampah',
                 ]);
@@ -153,7 +153,7 @@ class SetorSampah extends Model
                 \App\Models\PoinTransaction::create([
                     'rekening_id' => $rekening->id,
                     'amount' => $SetorSampah->total_poin_dihasilkan,
-                    'description' => 'Pengurangan poin dari pembatalan setor sampah',
+                    'description' => 'Pengurangan Poin Dari Pembatalan Setor Sampah',
                     'transactable_id' => $SetorSampah->id,
                     'transactable_type' => 'setor_sampah',
                 ]);
@@ -173,7 +173,7 @@ class SetorSampah extends Model
                     'rekening_id' => $rekening->id,
                     'amount' => $SetorSampah->total_saldo_dihasilkan,
                     'type' => 'credit',
-                    'description' => 'Pengembalian saldo dari setor sampah yang terhapus',
+                    'description' => 'Pengembalian Saldo Dari Setor Sampah yang Dihapus',
                     'transactable_id' => $SetorSampah->id,
                     'transactable_type' => 'setor_sampah',
                 ]);
@@ -182,7 +182,7 @@ class SetorSampah extends Model
                 \App\Models\PoinTransaction::create([
                     'rekening_id' => $rekening->id,
                     'amount' => $SetorSampah->total_poin_dihasilkan,
-                    'description' => 'Pengembalian poin dari setor sampah yang terhapus',
+                    'description' => 'Pengembalian Poin Dari Setor Sampah yang Dihapus',
                     'transactable_id' => $SetorSampah->id,
                     'transactable_type' => 'setor_sampah',
                 ]);

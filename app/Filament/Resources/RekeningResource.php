@@ -177,7 +177,7 @@ class RekeningResource extends Resource
                         ->maxLength(16)
                         ->unique(ignoreRecord: true)
                         ->visible(fn(Get $get) => $get('status_pegadaian'))
-                        ->required(fn(Get $get) => $get('status_pegadaian'))
+                        ->nullable()
                         ->validationMessages([
                             'required' => 'Nomor rekening pegadaian wajib diisi jika memiliki tabungan emas.',
                             'unique' => 'Nomor rekening pegadaian sudah terdaftar.',
@@ -227,6 +227,7 @@ class RekeningResource extends Resource
                 TextColumn::make('updated_at')->label('Terakhir Diubah')->dateTime()->toggleable(isToggledHiddenByDefault: true),
             ])
             ->headerActions([
+<<<<<<< HEAD
                 FilamentExportHeaderAction::make('export')
                     ->fileName('rekening_nasabah_lengkap')
                     ->defaultFormat('xlsx')
@@ -253,6 +254,17 @@ class RekeningResource extends Resource
                         TextColumn::make('user.name')->label('Pembuat Rekening'),
                         TextColumn::make('created_at')->label('Waktu Dibuat'),
                         TextColumn::make('updated_at')->label('Terakhir Diubah'),
+=======
+                ExportAction::make()
+                    ->exports([
+                        CustomRekeningExport::make('export_lengkap')
+                            ->label('Export Lengkap'),
+
+                        // ExcelExport::make('export_semua_data')
+                        //     ->label('Export Raw Data')
+                        //     ->fromTable()
+                        //     ->withFilename(fn () => 'raw_rekening_nasabah_' . date('Y-m-d_H-i-s')),
+>>>>>>> f3104222d6033eb742a42afc968a44501094b95c
                     ])
                     ->formatStates([
                         'no_rekening' => fn ($record) => ' ' . $record->no_rekening, // Space prefix untuk Excel
@@ -288,6 +300,7 @@ class RekeningResource extends Resource
                 Tables\Actions\ForceDeleteAction::make(),
             ])
             ->bulkActions([
+<<<<<<< HEAD
                 FilamentExportBulkAction::make('export')
                     ->fileName('rekening_nasabah_selected')
                     ->defaultFormat('xlsx')
@@ -334,6 +347,17 @@ class RekeningResource extends Resource
                         'user.name' => fn ($record) => $record->user->name ?? '',
                         'created_at' => fn ($record) => $record->created_at ? date('d/m/Y H:i', strtotime($record->created_at)) : '',
                         'updated_at' => fn ($record) => $record->updated_at ? date('d/m/Y H:i', strtotime($record->updated_at)) : '',
+=======
+                ExportBulkAction::make()
+                    ->exports([
+                        // ExcelExport::make('export_semua')
+                        //     ->label('Export Semua Kolom')
+                        //     ->fromTable()
+                        //     ->withFilename(fn () => 'rekening_nasabah_custom_' . date('Y-m-d_H-i-s')),
+
+                        CustomRekeningExport::make('export_custom')
+                            ->label('Export'),
+>>>>>>> f3104222d6033eb742a42afc968a44501094b95c
                     ]),
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
@@ -353,7 +377,7 @@ class RekeningResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('no_rekening', '!=', '00000000000000')
+            ->where('no_rekening', '!=', '00000000')
             ->withTrashed();
     }
     public static function getRelations(): array

@@ -14,25 +14,12 @@ class WithdrawRequest extends Model
 
     protected $table = 'withdraw_requests';
 
-    protected $fillable = [
-        'rekening_id',
-        'user_id',
-        'amount',
-        'jenis',
-        'catatan',
-        'bank_name',
-        'account_number',
-        'account_holder_name',
-        'status',
-        'notes',
-        'processed_by',
-        'processed_at',
-        'rejection_reason',
-    ];
+    protected $guarded = ['id'];
 
     protected $casts = [
         'amount' => 'decimal:2',
         'processed_at' => 'datetime',
+        'is_new_pegadaian_registration' => 'boolean',
     ];
 
     public function rekening()
@@ -65,6 +52,62 @@ class WithdrawRequest extends Model
         });
 
         static::created(function ($withdrawRequest) {
+            // Cek apakah permintaan ini ditandai sebagai pendaftaran baru DAN nomor rekeningnya ada.
+            if ($withdrawRequest->is_new_pegadaian_registration) {
+                $rekening = $withdrawRequest->rekening;
+
+                if ($rekening) {
+                    // Update status dan nomor rekening di tabel induk (rekening).
+                    $rekening->status_pegadaian = true;
+                    $rekening->no_rek_pegadaian = $withdrawRequest->no_rek_pegadaian;
+                    $rekening->save();
+                }
+            }
+        });
+
+        static::updated(function ($withdrawRequest) {
+            // Cek apakah permintaan ini ditandai sebagai pendaftaran baru DAN nomor rekeningnya ada.
+            if ($withdrawRequest->wasChanged('no_rek_pegadaian')) {
+                $rekening = $withdrawRequest->rekening;
+
+                if ($rekening) {
+                    // Update status dan nomor rekening di tabel induk (rekening).
+                    $rekening->no_rek_pegadaian = $withdrawRequest->no_rek_pegadaian;
+                    $rekening->save();
+                }
+            }
+        });
+
+
+        static::restored(function ($withdrawRequest) {
+            // Cek apakah permintaan ini ditandai sebagai pendaftaran baru DAN nomor rekeningnya ada.
+            if ($withdrawRequest->is_new_pegadaian_registration) {
+                $rekening = $withdrawRequest->rekening;
+
+                if ($rekening) {
+                    // Update status dan nomor rekening di tabel induk (rekening).
+                    $rekening->status_pegadaian = true;
+                    $rekening->no_rek_pegadaian = $withdrawRequest->no_rek_pegadaian;
+                    $rekening->save();
+                }
+            }
+        });
+
+        static::deleted(function ($withdrawRequest) {
+            // Cek apakah permintaan ini ditandai sebagai pendaftaran baru DAN nomor rekeningnya ada.
+            if ($withdrawRequest->is_new_pegadaian_registration) {
+                $rekening = $withdrawRequest->rekening;
+
+                if ($rekening) {
+                    // Update status dan nomor rekening di tabel induk (rekening).
+                    $rekening->status_pegadaian = false;
+                    $rekening->no_rek_pegadaian = null;
+                    $rekening->save();
+                }
+            }
+        });
+
+        static::created(function ($withdrawRequest) {
             // Kurangi saldo dan poin ke rekening nasabah
             if ($withdrawRequest->rekening && $withdrawRequest->amount > 0) {
                 $rekening = $withdrawRequest->rekening;
@@ -77,6 +120,76 @@ class WithdrawRequest extends Model
                     'amount' => $withdrawRequest->amount,
                     'type' => 'debit',
                     'description' => 'Penarikan Saldo',
+                    'transactable_id' => $withdrawRequest->id,
+                    'transactable_type' => 'tarik_saldo',
+                ]);
+            }
+        });
+
+        static::updated(function ($withdrawRequest) {
+            // Cek apakah total saldo/poin benar-benar berubah
+            if ($withdrawRequest->wasChanged('amount')) {
+                $rekening = $withdrawRequest->rekening;
+
+                if ($rekening) {
+                    // Ambil nilai lama sebelum di-update
+                    $amountLama = $withdrawRequest->getOriginal('amount') ?? 0;
+
+                    // Ambil nilai baru
+                    $amountBaru = $withdrawRequest->amount;
+
+                    // Hitung selisihnya
+                    $perubahanAmount = $amountBaru - $amountLama;
+
+                    // Update saldo dan poin rekening dengan nilai selisih
+                    $rekening->balance += $perubahanAmount;
+                    $rekening->save();
+
+                    // Buat transaksi baru untuk mencatat perubahan ini
+                    if ($perubahanAmount != 0) {
+                        \App\Models\SaldoTransaction::create([
+                            'rekening_id' => $rekening->id,
+                            'amount' => abs($perubahanAmount),
+                            'type' => $perubahanAmount > 0 ? 'debit' : 'credit',
+                            'description' => 'Koreksi Saldo Dari Perubahan Data Penarikan Saldo',
+                            'transactable_id' => $withdrawRequest->id,
+                            'transactable_type' => 'setor_sampah',
+                        ]);
+                    }
+                }
+            }
+        });
+
+        static::deleted(function ($withdrawRequest) {
+            if ($withdrawRequest->rekening && $withdrawRequest->amount > 0) {
+                $rekening = $withdrawRequest->rekening;
+                $rekening->balance += $withdrawRequest->amount;
+                $rekening->save();
+
+                \App\Models\SaldoTransaction::create([
+                    'rekening_id' => $rekening->id,
+                    'amount' => $withdrawRequest->amount,
+                    'type' => 'credit',
+                    'description' => 'Penambahan Saldo dari Pembatalan Penarikan Saldo',
+                    'transactable_id' => $withdrawRequest->id,
+                    'transactable_type' => 'tarik_saldo',
+                ]);
+            }
+        });
+
+        static::restored(function ($withdrawRequest) {
+            // Kurangi saldo dan poin ke rekening nasabah
+            if ($withdrawRequest->rekening && $withdrawRequest->amount > 0) {
+                $rekening = $withdrawRequest->rekening;
+                $rekening->balance -= $withdrawRequest->amount;
+                $rekening->save();
+
+                // Buat transaksi saldo
+                \App\Models\SaldoTransaction::create([
+                    'rekening_id' => $rekening->id,
+                    'amount' => $withdrawRequest->amount,
+                    'type' => 'debit',
+                    'description' => 'Pengembalian Pengurangan Penarikan Saldo yang Dibatalkan',
                     'transactable_id' => $withdrawRequest->id,
                     'transactable_type' => 'tarik_saldo',
                 ]);

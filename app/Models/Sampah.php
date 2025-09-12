@@ -24,6 +24,11 @@ class Sampah extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function detailSetorSampahs()
+    {
+        return $this->hasMany(DetailSetorSampah::class);
+    }
+
     protected static function booted(): void
     {
         static::creating(function ($Sampah) {
@@ -33,4 +38,3 @@ class Sampah extends Model
         });
     }
 }
-

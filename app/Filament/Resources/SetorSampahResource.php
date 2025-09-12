@@ -13,6 +13,7 @@ use Filament\Forms\Components\Section;
 use Filament\Forms\Components\Radio;
 use Filament\Forms\Components\Actions\Action;
 use Filament\Forms\Components\Repeater;
+use Filament\Notifications\Notification;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
@@ -58,7 +59,7 @@ class SetorSampahResource extends Resource
                             ->options(function () {
                                 // Ambil semua rekening KECUALI rekening donasi
                                 return Rekening::query()
-                                    ->where('no_rekening', '!=', '00000000000000')
+                                    ->where('no_rekening', '!=', '00000000')
                                     ->select('id', 'nama', 'nik')
                                     ->get()
                                     ->mapWithKeys(fn($rekening) => [$rekening->id => "{$rekening->nama} - {$rekening->nik}"]);
@@ -66,7 +67,7 @@ class SetorSampahResource extends Resource
                     ]),
                 Section::make('Informasi Setoran Sampah')
                     ->schema([
-                        Repeater::make('detailSetorSampah')
+                        Repeater::make('details')
                             ->relationship('details')
                             ->label('Item Sampah')
                             ->schema([
@@ -104,16 +105,10 @@ class SetorSampahResource extends Resource
 
                 Section::make('Total Perhitungan')
                     ->schema([
-
-                        // Flag apakah hitungan sudah dilakukan
+                        // Flag ini HANYA untuk melacak status. Validasi telah dipindahkan ke mutateFormDataBeforeCreate.
                         Forms\Components\Hidden::make('calculation_performed')
                             ->default(false)
-                            ->dehydrated(true)
-                            ->required()
-                            ->rule('accepted') // wajib true sebelum bisa disubmit
-                            ->validationMessages([
-                                'accepted' => 'Anda harus menekan tombol Hitung terlebih dahulu.'
-                            ]),
+                            ->dehydrated(true),
 
                         Forms\Components\Hidden::make('total_saldo_dihasilkan')->default(0),
                         Forms\Components\Hidden::make('total_poin_dihasilkan')->default(0),
@@ -136,7 +131,7 @@ class SetorSampahResource extends Resource
                             ->label('Rincian Perhitungan')
                             ->visible(fn(Get $get) => (bool) $get('calculation_performed'))
                             ->content(function (Get $get) {
-                                $items = $get('detailSetorSampah');
+                                $items = $get('details');
                                 if (!is_array($items) || empty($items)) {
                                     return new HtmlString('<p><em>Belum ada item sampah.</em></p>');
                                 }
@@ -203,9 +198,49 @@ class SetorSampahResource extends Resource
             ]);
     }
 
+    public static function mutateFormDataBeforeCreate(array $data): array
+    {
+        // 1. Handle kasus donasi untuk memastikan rekening_id terisi
+        if (isset($data['jenis_setoran']) && $data['jenis_setoran'] === 'donasi') {
+            $rekeningDonasi = Rekening::where('no_rekening', '00000000')->first();
+            if ($rekeningDonasi) {
+                $data['rekening_id'] = $rekeningDonasi->id;
+            } else {
+                // Berhenti dan beri notifikasi jika rekening donasi tidak ditemukan
+                Notification::make()
+                    ->title('Error Konfigurasi')
+                    ->body('Rekening untuk donasi tidak ditemukan. Harap hubungi administrator.')
+                    ->danger()
+                    ->send();
+
+                throw \Illuminate\Validation\ValidationException::withMessages([
+                    'jenis_setoran' => 'Rekening donasi tidak valid.',
+                ]);
+            }
+        }
+
+        // 2. Cek apakah perhitungan sudah dilakukan
+        if (!isset($data['calculation_performed']) || !$data['calculation_performed']) {
+            // Kirim notifikasi error
+            Notification::make()
+                ->title('Perhitungan Belum Dilakukan')
+                ->body('Anda harus menekan tombol "Hitung Total" sebelum menyimpan data.')
+                ->danger()
+                ->send();
+
+            // Hentikan proses penyimpanan dengan melempar exception
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'calculation_performed' => 'Anda harus menekan tombol Hitung Total terlebih dahulu.',
+            ]);
+        }
+
+        return $data;
+    }
+
     public static function updateTotals(Get $get, Set $set): void
     {
-        $items = $get('detailSetorSampah');
+        // PERBAIKAN: Menggunakan 'details' sesuai nama repeater
+        $items = $get('details');
         $totalSaldo = 0;
         $totalPoin = 0;
         $totalBerat = 0;
@@ -241,13 +276,13 @@ class SetorSampahResource extends Resource
                     ->sortable()
                     ->searchable()
                     ->formatStateUsing(function ($state, $record) {
-                        if ($record->rekening?->no_rekening === '00000000000000') {
+                        if ($record->rekening?->no_rekening === '00000000') {
                             return 'Donasi'; // tampilkan teks badge
                         }
                         return $state; // tampilkan nama asli
                     })
-                    ->badge(fn($state, $record) => $record->rekening?->no_rekening === '00000000000000') // badge hanya kalau donasi
-                    ->color(fn($state, $record) => $record->rekening?->no_rekening === '00000000000000' ? 'success' : null),
+                    ->badge(fn($state, $record) => $record->rekening?->no_rekening === '00000000') // badge hanya kalau donasi
+                    ->color(fn($state, $record) => $record->rekening?->no_rekening === '00000000' ? 'success' : null),
 
                 TextColumn::make('details.sampah.jenis_sampah')
                     ->label('Item Sampah')
@@ -287,3 +322,4 @@ class SetorSampahResource extends Resource
         ];
     }
 }
+
