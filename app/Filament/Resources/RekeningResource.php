@@ -180,7 +180,7 @@ class RekeningResource extends Resource
                         ->maxLength(16)
                         ->unique(ignoreRecord: true)
                         ->visible(fn(Get $get) => $get('status_pegadaian'))
-                        ->required(fn(Get $get) => $get('status_pegadaian'))
+                        ->nullable()
                         ->validationMessages([
                             'required' => 'Nomor rekening pegadaian wajib diisi jika memiliki tabungan emas.',
                             'unique' => 'Nomor rekening pegadaian sudah terdaftar.',
@@ -214,7 +214,7 @@ class RekeningResource extends Resource
                     ->exports([
                         CustomRekeningExport::make('export_lengkap')
                             ->label('Export Lengkap'),
-                        
+
                         // ExcelExport::make('export_semua_data')
                         //     ->label('Export Raw Data')
                         //     ->fromTable()
@@ -234,15 +234,15 @@ class RekeningResource extends Resource
             ])
             ->bulkActions([
                 ExportBulkAction::make()
-                ->exports([
-                    // ExcelExport::make('export_semua')
-                    //     ->label('Export Semua Kolom')
-                    //     ->fromTable()
-                    //     ->withFilename(fn () => 'rekening_nasabah_custom_' . date('Y-m-d_H-i-s')),
-                    
-                    CustomRekeningExport::make('export_custom')
-                    ->label('Export'),
-                ]),
+                    ->exports([
+                        // ExcelExport::make('export_semua')
+                        //     ->label('Export Semua Kolom')
+                        //     ->fromTable()
+                        //     ->withFilename(fn () => 'rekening_nasabah_custom_' . date('Y-m-d_H-i-s')),
+
+                        CustomRekeningExport::make('export_custom')
+                            ->label('Export'),
+                    ]),
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
