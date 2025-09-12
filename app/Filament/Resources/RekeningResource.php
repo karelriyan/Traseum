@@ -22,11 +22,8 @@ use Filament\Tables\Actions\DeleteBulkAction;
 use Filament\Support\RawJs;
 use Filament\Tables\Actions\DeleteAction;
 use Filament\Tables\Actions\BulkActionGroup;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportBulkAction;
-use pxlrbt\FilamentExcel\Actions\Tables\ExportAction;
-use pxlrbt\FilamentExcel\Exports\ExcelExport;
-use pxlrbt\FilamentExcel\Columns\Column;
-use App\Filament\Exports\CustomRekeningExport;
+use AlperenErsoy\FilamentExport\Actions\FilamentExportBulkAction;
+use AlperenErsoy\FilamentExport\Actions\FilamentExportHeaderAction;
 use Filament\Forms\Components\CheckboxList;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\Hash;
@@ -193,6 +190,9 @@ class RekeningResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
+            ->modifyQueryUsing(function (Builder $query) {
+                return $query->with(['user']);
+            })
             ->columns([
                 TextColumn::make('no_rekening')->label('No. Rekening')->sortable()->searchable(),
                 TextColumn::make('nama')->label('Nama Nasabah')->sortable()->searchable(),
@@ -205,21 +205,76 @@ class RekeningResource extends Resource
                     ->trueColor('success')
                     ->falseColor('danger')
                     ->sortable(),
-                TextColumn::make('user.name')->label('Pembuat Rekening')->sortable()->searchable(),
+                
+                // Kolom untuk export dalam urutan yang benar
+                TextColumn::make('nik')->label('NIK')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('no_kk')->label('No. KK')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('gender')->label('Jenis Kelamin')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('tanggal_lahir')->label('Tanggal Lahir')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('pendidikan')->label('Pendidikan')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('dusun')->label('Dusun')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('rw')->label('RW')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('rt')->label('RT')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('telepon')->label('No. Telepon')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('points_balance')->label('Poin')->toggleable(isToggledHiddenByDefault: true),
+                TextColumn::make('no_rek_pegadaian')
+                    ->label('No. Rek. Pegadaian')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                
+                // Kolom administrasi di paling akhir
+                TextColumn::make('user.name')->label('Pembuat Rekening')->sortable()->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')->label('Waktu Dibuat')->dateTime()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('updated_at')->label('Terakhir Diubah')->dateTime()->toggleable(isToggledHiddenByDefault: true),
             ])
             ->headerActions([
-                ExportAction::make()
-                    ->exports([
-                        CustomRekeningExport::make('export_lengkap')
-                            ->label('Export Lengkap'),
-                        
-                        // ExcelExport::make('export_semua_data')
-                        //     ->label('Export Raw Data')
-                        //     ->fromTable()
-                        //     ->withFilename(fn () => 'raw_rekening_nasabah_' . date('Y-m-d_H-i-s')),
+                FilamentExportHeaderAction::make('export')
+                    ->fileName('rekening_nasabah_lengkap')
+                    ->defaultFormat('xlsx')
+                    ->disableAdditionalColumns()
+                    ->filterColumnsFieldLabel('Pilih Kolom untuk Export')
+                    ->fileNameFieldLabel('Nama File')
+                    ->formatFieldLabel('Format File')
+                    ->withColumns([
+                        TextColumn::make('no_rekening')->label('No. Rekening'),
+                        TextColumn::make('nama')->label('Nama Nasabah'),
+                        TextColumn::make('current_balance')->label('Saldo'),
+                        IconColumn::make('status_pegadaian')->label('Tab. Emas'),
+                        TextColumn::make('nik')->label('NIK'),
+                        TextColumn::make('no_kk')->label('No. KK'),
+                        TextColumn::make('gender')->label('Jenis Kelamin'),
+                        TextColumn::make('tanggal_lahir')->label('Tanggal Lahir'),
+                        TextColumn::make('pendidikan')->label('Pendidikan'),
+                        TextColumn::make('dusun')->label('Dusun'),
+                        TextColumn::make('rw')->label('RW'),
+                        TextColumn::make('rt')->label('RT'),
+                        TextColumn::make('telepon')->label('No. Telepon'),
+                        TextColumn::make('points_balance')->label('Poin'),
+                        TextColumn::make('no_rek_pegadaian')->label('No. Rek. Pegadaian'),
+                        TextColumn::make('user.name')->label('Pembuat Rekening'),
+                        TextColumn::make('created_at')->label('Waktu Dibuat'),
+                        TextColumn::make('updated_at')->label('Terakhir Diubah'),
                     ])
+                    ->formatStates([
+                        'no_rekening' => fn ($record) => ' ' . $record->no_rekening, // Space prefix untuk Excel
+                        'nama' => fn ($record) => $record->nama,
+                        'current_balance' => fn ($record) => 'Rp ' . number_format($record->current_balance ?? 0, 0, ',', '.'),
+                        'status_pegadaian' => fn ($record) => $record->status_pegadaian == 1 ? 'Ada' : 'Tidak Ada',
+                        'nik' => fn ($record) => ' ' . $record->nik, // Space prefix untuk Excel
+                        'no_kk' => fn ($record) => ' ' . $record->no_kk, // Space prefix untuk Excel
+                        'gender' => fn ($record) => $record->gender,
+                        'tanggal_lahir' => fn ($record) => $record->tanggal_lahir ? date('d/m/Y', strtotime($record->tanggal_lahir)) : '',
+                        'pendidikan' => fn ($record) => $record->pendidikan,
+                        'dusun' => fn ($record) => $record->dusun,
+                        'rw' => fn ($record) => $record->rw,
+                        'rt' => fn ($record) => $record->rt,
+                        'telepon' => fn ($record) => $record->telepon ? ' ' . $record->telepon : '',
+                        'points_balance' => fn ($record) => number_format($record->points_balance ?? 0, 0, ',', '.'),
+                        'no_rek_pegadaian' => fn ($record) => $record->status_pegadaian == 1 && $record->no_rek_pegadaian ? ' ' . $record->no_rek_pegadaian : '', // Hanya tampil jika ada tabungan emas
+                        'user.name' => fn ($record) => $record->user->name ?? '',
+                        'created_at' => fn ($record) => $record->created_at ? date('d/m/Y H:i', strtotime($record->created_at)) : '',
+                        'updated_at' => fn ($record) => $record->updated_at ? date('d/m/Y H:i', strtotime($record->updated_at)) : '',
+                    ])
+                    
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('primary'),
             ])
@@ -233,16 +288,53 @@ class RekeningResource extends Resource
                 Tables\Actions\ForceDeleteAction::make(),
             ])
             ->bulkActions([
-                ExportBulkAction::make()
-                ->exports([
-                    // ExcelExport::make('export_semua')
-                    //     ->label('Export Semua Kolom')
-                    //     ->fromTable()
-                    //     ->withFilename(fn () => 'rekening_nasabah_custom_' . date('Y-m-d_H-i-s')),
-                    
-                    CustomRekeningExport::make('export_custom')
-                    ->label('Export'),
-                ]),
+                FilamentExportBulkAction::make('export')
+                    ->fileName('rekening_nasabah_selected')
+                    ->defaultFormat('xlsx')
+                    ->disableAdditionalColumns()
+                    ->filterColumnsFieldLabel('Pilih Kolom untuk Export')
+                    ->fileNameFieldLabel('Nama File')
+                    ->formatFieldLabel('Format File')
+                    ->withColumns([
+                        TextColumn::make('no_rekening')->label('No. Rekening'),
+                        TextColumn::make('nama')->label('Nama Nasabah'),
+                        TextColumn::make('current_balance')->label('Saldo'),
+                        IconColumn::make('status_pegadaian')->label('Tab. Emas'),
+                        TextColumn::make('nik')->label('NIK'),
+                        TextColumn::make('no_kk')->label('No. KK'),
+                        TextColumn::make('gender')->label('Jenis Kelamin'),
+                        TextColumn::make('tanggal_lahir')->label('Tanggal Lahir'),
+                        TextColumn::make('pendidikan')->label('Pendidikan'),
+                        TextColumn::make('dusun')->label('Dusun'),
+                        TextColumn::make('rw')->label('RW'),
+                        TextColumn::make('rt')->label('RT'),
+                        TextColumn::make('telepon')->label('No. Telepon'),
+                        TextColumn::make('points_balance')->label('Poin'),
+                        TextColumn::make('no_rek_pegadaian')->label('No. Rek. Pegadaian'),
+                        TextColumn::make('user.name')->label('Pembuat Rekening'),
+                        TextColumn::make('created_at')->label('Waktu Dibuat'),
+                        TextColumn::make('updated_at')->label('Terakhir Diubah'),
+                    ])
+                    ->formatStates([
+                        'no_rekening' => fn ($record) => ' ' . $record->no_rekening, // Space prefix untuk Excel
+                        'nama' => fn ($record) => $record->nama,
+                        'current_balance' => fn ($record) => 'Rp ' . number_format($record->current_balance ?? 0, 0, ',', '.'),
+                        'status_pegadaian' => fn ($record) => $record->status_pegadaian == 1 ? 'Ada' : 'Tidak Ada',
+                        'nik' => fn ($record) => ' ' . $record->nik, // Space prefix untuk Excel
+                        'no_kk' => fn ($record) => ' ' . $record->no_kk, // Space prefix untuk Excel
+                        'gender' => fn ($record) => $record->gender,
+                        'tanggal_lahir' => fn ($record) => $record->tanggal_lahir ? date('d/m/Y', strtotime($record->tanggal_lahir)) : '',
+                        'pendidikan' => fn ($record) => $record->pendidikan,
+                        'dusun' => fn ($record) => $record->dusun,
+                        'rw' => fn ($record) => $record->rw,
+                        'rt' => fn ($record) => $record->rt,
+                        'telepon' => fn ($record) => $record->telepon ? ' ' . $record->telepon : '',
+                        'points_balance' => fn ($record) => number_format($record->points_balance ?? 0, 0, ',', '.'),
+                        'no_rek_pegadaian' => fn ($record) => $record->status_pegadaian == 1 && $record->no_rek_pegadaian ? ' ' . $record->no_rek_pegadaian : '', // Hanya tampil jika ada tabungan emas
+                        'user.name' => fn ($record) => $record->user->name ?? '',
+                        'created_at' => fn ($record) => $record->created_at ? date('d/m/Y H:i', strtotime($record->created_at)) : '',
+                        'updated_at' => fn ($record) => $record->updated_at ? date('d/m/Y H:i', strtotime($record->updated_at)) : '',
+                    ]),
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
