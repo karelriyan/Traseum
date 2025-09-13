@@ -54,10 +54,31 @@ class SetorSampah extends Model
                 $setorSampah->user_id = Auth::id();
             }
 
-            // Automatically set rekening_id for 'donasi' type
-            if (($setorSampah->jenis_setoran ?? null) === 'donasi' && empty($setorSampah->rekening_id)) {
-                $rekening = Rekening::where('no_rekening', '00000000')->first();
-                $setorSampah->rekening_id = $rekening?->id;
+            // If the transaction type is 'donasi', force it to use the donation account.
+            // This will find the donation account or create it if it doesn't exist, preventing errors.
+            if (($setorSampah->jenis_setoran ?? null) === 'donasi') {
+                $donationUser = User::first(); // Get first user as owner
+                if (!$donationUser) {
+                    // This will prevent errors if no users exist in the system yet.
+                    throw new \Exception('Tidak ada user di dalam sistem untuk dijadikan pemilik rekening donasi.');
+                }
+
+                $rekening = Rekening::firstOrCreate(
+                    ['no_rekening' => '00000000'],
+                    [
+                        'nama' => 'Kas Bank Sampah (Donasi)',
+                        'nik' => '0000000000000000',
+                        'no_kk' => '0000000000000000',
+                        'gender' => 'Laki-laki',
+                        'tanggal_lahir' => now()->subYears(20)->toDateString(),
+                        'pendidikan' => 'TIDAK/BELUM SEKOLAH',
+                        'dusun' => '0',
+                        'rw' => '0',
+                        'rt' => '0',
+                        'user_id' => $donationUser->id,
+                    ]
+                );
+                $setorSampah->rekening_id = $rekening->id;
             }
         });
 
@@ -72,6 +93,7 @@ class SetorSampah extends Model
                     'keterangan' => 'Donasi dari Setor Sampah ID: ' . $setorSampah->id,
                     'sumber_pemasukan_id' => $sumber->id,
                     'user_id' => $setorSampah->user_id,
+                    'rekening_id' => $setorSampah->rekening_id, // Ini sekarang dijamin ada isinya
                     'masuk_id' => $setorSampah->id,
                     'masuk_type' => self::class,
                     'metode_pembayaran' => 'Sampah', // Penanda agar Pemasukan tidak trigger saldo
@@ -131,11 +153,15 @@ class SetorSampah extends Model
                     $perubahanSaldo = $saldoBaru - $saldoLama;
                     $perubahanPoin = $poinBaru - $poinLama;
 
-                    if ($perubahanSaldo > 0) $rekening->increment('balance', $perubahanSaldo);
-                    elseif ($perubahanSaldo < 0) $rekening->decrement('balance', abs($perubahanSaldo));
+                    if ($perubahanSaldo > 0)
+                        $rekening->increment('balance', $perubahanSaldo);
+                    elseif ($perubahanSaldo < 0)
+                        $rekening->decrement('balance', abs($perubahanSaldo));
 
-                    if ($perubahanPoin > 0) $rekening->increment('points_balance', $perubahanPoin);
-                    elseif ($perubahanPoin < 0) $rekening->decrement('points_balance', abs($perubahanPoin));
+                    if ($perubahanPoin > 0)
+                        $rekening->increment('points_balance', $perubahanPoin);
+                    elseif ($perubahanPoin < 0)
+                        $rekening->decrement('points_balance', abs($perubahanPoin));
 
                     if ($perubahanSaldo != 0) {
                         \App\Models\SaldoTransaction::create([
@@ -176,7 +202,7 @@ class SetorSampah extends Model
                     'transactable_id' => $setorSampah->id,
                     'transactable_type' => 'setor_sampah',
                 ]);
-                
+
                 if ($setorSampah->total_poin_dihasilkan > 0) {
                     \App\Models\PoinTransaction::create([
                         'rekening_id' => $rekening->id,
@@ -187,7 +213,7 @@ class SetorSampah extends Model
                     ]);
                 }
             }
-            
+
             // Handle sinkronisasi Pemasukan
             if ($setorSampah->isDonation()) {
                 $query = Pemasukan::where('masuk_id', $setorSampah->id)->where('masuk_type', self::class);

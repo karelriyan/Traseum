@@ -49,6 +49,7 @@ class SetorSampahResource extends Resource
                             ->label('Pilih Rekening Nasabah')
                             ->preload()
                             ->searchable()
+                            ->default(fn(Get $get) => Rekening::where('no_rekening', '00000000')->first()?->id)
                             ->dehydrated(true)
                             // Hanya tampil dan wajib diisi jika jenis setoran adalah 'rekening'
                             ->hidden(fn(Get $get) => $get('jenis_setoran') != 'rekening')
