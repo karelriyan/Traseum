@@ -49,15 +49,15 @@ class Pengeluaran extends Model
 
         static::created(function ($pengeluaran) {
             // Kurangi saldo dan poin ke rekening nasabah
-            if ($pengeluaran->rekening && $pengeluaran->amount > 0) {
+            if ($pengeluaran->rekening && $pengeluaran->nominal > 0) {
                 $rekening = $pengeluaran->rekening;
-                $rekening->balance -= $pengeluaran->amount;
+                $rekening->balance -= $pengeluaran->nominal;
                 $rekening->save();
 
                 // Buat transaksi saldo
                 \App\Models\SaldoTransaction::create([
                     'rekening_id' => $rekening->id,
-                    'amount' => $pengeluaran->amount,
+                    'amount' => $pengeluaran->nominal,
                     'type' => 'debit',
                     'description' => 'Pengurnagan Saldo Dari Pengeluaran',
                     'transactable_id' => $pengeluaran->id,
