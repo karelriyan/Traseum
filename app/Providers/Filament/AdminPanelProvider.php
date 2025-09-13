@@ -40,6 +40,8 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Emerald,
             ])
             ->defaultAvatarProvider(\Filament\AvatarProviders\UiAvatarsProvider::class)
+            ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
+            ->spa() // Menambahkan SPA mode untuk mencegah reload yang menyebabkan kedip
             ->profile(isSimple: false)
             ->userMenuItems([
                 UserMenuItem::make()

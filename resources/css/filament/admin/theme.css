@@ -13,6 +13,23 @@
     max-height: 2.5rem;
 }
 
+/* Avatar anti-flicker */
+.fi-avatar, .fi-user-avatar, .fi-avatar-img {
+    transition: opacity 0.2s ease-in-out;
+    will-change: auto;
+}
+
+.fi-avatar img, .fi-user-avatar img {
+    opacity: 1 !important;
+    transition: opacity 0.2s ease-in-out;
+}
+
+/* Prevent layout shifts from avatar loading */
+.fi-topbar-user-menu-trigger {
+    min-width: 2.5rem;
+    min-height: 2.5rem;
+}
+
 /* Custom brand colors */
 .fi-brand {
     --fi-brand-50: rgb(240 253 244);
