@@ -12,6 +12,7 @@ use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use App\Models\Rekening;
 
 class PemasukanResource extends Resource
 {
@@ -69,6 +70,10 @@ class PemasukanResource extends Resource
                     ->directory('bukti_pemasukan')
                     ->columnSpanFull()
                     ->nullable(),
+
+                Forms\Components\Hidden::make('rekening_id')
+                    ->default(fn() => Rekening::where('no_rekening', '00000000')->value('id')),
+
             ])->columns(1);
     }
 
