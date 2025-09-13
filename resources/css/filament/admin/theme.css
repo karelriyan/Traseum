@@ -14,12 +14,15 @@
 }
 
 /* Avatar anti-flicker */
-.fi-avatar, .fi-user-avatar, .fi-avatar-img {
+.fi-avatar,
+.fi-user-avatar,
+.fi-avatar-img {
     transition: opacity 0.2s ease-in-out;
     will-change: auto;
 }
 
-.fi-avatar img, .fi-user-avatar img {
+.fi-avatar img,
+.fi-user-avatar img {
     opacity: 1 !important;
     transition: opacity 0.2s ease-in-out;
 }
