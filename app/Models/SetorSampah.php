@@ -31,83 +31,112 @@ class SetorSampah extends Model
         return $this->belongsTo(User::class);
     }
 
+    /**
+     * Helper function to check if this is a donation.
+     * Caches the donation account ID for efficiency.
+     */
+    public function isDonation(): bool
+    {
+        static $donationRekeningId = null;
+
+        if (is_null($donationRekeningId)) {
+            $donationRekeningId = Rekening::where('no_rekening', '00000000')->value('id') ?? false;
+        }
+
+        return $this->rekening_id === $donationRekeningId;
+    }
+
     protected static function booted(): void
     {
-        static::creating(function ($model) {
-            if (($model->jenis_setoran ?? null) === 'donasi' && empty($model->rekening_id)) {
-                $rekening = Rekening::where('no_rekening', '00000000000000')->first();
-                $model->rekening_id = $rekening?->id;
+        static::creating(function ($setorSampah) {
+            // Automatically set user_id if not present
+            if (!$setorSampah->user_id && Auth::check()) {
+                $setorSampah->user_id = Auth::id();
+            }
+
+            // Automatically set rekening_id for 'donasi' type
+            if (($setorSampah->jenis_setoran ?? null) === 'donasi' && empty($setorSampah->rekening_id)) {
+                $rekening = Rekening::where('no_rekening', '00000000')->first();
+                $setorSampah->rekening_id = $rekening?->id;
             }
         });
 
-        static::creating(function ($SetorSampah) {
-            if (!$SetorSampah->user_id && Auth::check()) {
-                $SetorSampah->user_id = Auth::id();
+        static::created(function ($setorSampah) {
+            // --- 1. SINKRONISASI KE PEMASUKAN JIKA DONASI ---
+            if ($setorSampah->isDonation() && $setorSampah->total_saldo_dihasilkan > 0) {
+                $sumber = SumberPemasukan::firstOrCreate(['nama_pemasukan' => 'Donasi']);
+
+                Pemasukan::create([
+                    'tanggal' => $setorSampah->created_at->toDateString(),
+                    'nominal' => $setorSampah->total_saldo_dihasilkan,
+                    'keterangan' => 'Donasi dari Setor Sampah ID: ' . $setorSampah->id,
+                    'sumber_pemasukan_id' => $sumber->id,
+                    'user_id' => $setorSampah->user_id,
+                    'masuk_id' => $setorSampah->id,
+                    'masuk_type' => self::class,
+                    'metode_pembayaran' => 'Sampah', // Penanda agar Pemasukan tidak trigger saldo
+                ]);
             }
-        });
 
-        static::created(function ($SetorSampah) {
-            // Tambahkan saldo dan poin ke rekening nasabah
-            if ($SetorSampah->rekening && $SetorSampah->total_saldo_dihasilkan > 0) {
-                $rekening = $SetorSampah->rekening;
-                
-                // Update saldo di tabel rekening
-                $rekening->increment('balance', $SetorSampah->total_saldo_dihasilkan);
-                $rekening->increment('points_balance', $SetorSampah->total_poin_dihasilkan);
+            // --- 2. LOGIKA SALDO & POIN REKENING ---
+            if ($setorSampah->rekening && $setorSampah->total_saldo_dihasilkan > 0) {
+                $rekening = $setorSampah->rekening;
 
-                // Buat transaksi saldo
+                $rekening->increment('balance', $setorSampah->total_saldo_dihasilkan);
+                $rekening->increment('points_balance', $setorSampah->total_poin_dihasilkan);
+
                 \App\Models\SaldoTransaction::create([
                     'rekening_id' => $rekening->id,
-                    'amount' => $SetorSampah->total_saldo_dihasilkan,
+                    'amount' => $setorSampah->total_saldo_dihasilkan,
                     'type' => 'credit',
                     'description' => 'Penambahan saldo dari setor sampah',
-                    'transactable_id' => $SetorSampah->id,
+                    'transactable_id' => $setorSampah->id,
                     'transactable_type' => 'setor_sampah',
                 ]);
 
-                // Buat transaksi poin
-                \App\Models\PoinTransaction::create([
-                    'rekening_id' => $rekening->id,
-                    'amount' => $SetorSampah->total_poin_dihasilkan,
-                    'description' => 'Penambahan poin dari setor sampah',
-                    'transactable_id' => $SetorSampah->id,
-                    'transactable_type' => 'setor_sampah',
-                ]);
+                if ($setorSampah->total_poin_dihasilkan > 0) {
+                    \App\Models\PoinTransaction::create([
+                        'rekening_id' => $rekening->id,
+                        'amount' => $setorSampah->total_poin_dihasilkan,
+                        'description' => 'Penambahan poin dari setor sampah',
+                        'transactable_id' => $setorSampah->id,
+                        'transactable_type' => 'setor_sampah',
+                    ]);
+                }
             }
         });
 
         static::updated(function ($setorSampah) {
-            // Cek apakah total saldo/poin benar-benar berubah
+            // --- 1. SINKRONISASI UPDATE KE PEMASUKAN JIKA DONASI ---
+            if ($setorSampah->isDonation() && $setorSampah->wasChanged('total_saldo_dihasilkan')) {
+                $pemasukan = Pemasukan::where('masuk_id', $setorSampah->id)
+                    ->where('masuk_type', self::class)
+                    ->first();
+
+                if ($pemasukan) {
+                    $pemasukan->update(['nominal' => $setorSampah->total_saldo_dihasilkan]);
+                }
+            }
+
+            // --- 2. LOGIKA KOREKSI SALDO & POIN REKENING ---
             if ($setorSampah->wasChanged('total_saldo_dihasilkan') || $setorSampah->wasChanged('total_poin_dihasilkan')) {
                 $rekening = $setorSampah->rekening;
 
                 if ($rekening) {
-                    // Ambil nilai lama sebelum di-update
                     $saldoLama = $setorSampah->getOriginal('total_saldo_dihasilkan') ?? 0;
                     $poinLama = $setorSampah->getOriginal('total_poin_dihasilkan') ?? 0;
-
-                    // Ambil nilai baru
                     $saldoBaru = $setorSampah->total_saldo_dihasilkan;
                     $poinBaru = $setorSampah->total_poin_dihasilkan;
 
-                    // Hitung selisihnya
                     $perubahanSaldo = $saldoBaru - $saldoLama;
                     $perubahanPoin = $poinBaru - $poinLama;
 
-                    // Update saldo dan poin rekening dengan nilai selisih menggunakan increment/decrement
-                    if ($perubahanSaldo > 0) {
-                        $rekening->increment('balance', $perubahanSaldo);
-                    } elseif ($perubahanSaldo < 0) {
-                        $rekening->decrement('balance', abs($perubahanSaldo));
-                    }
-                    
-                    if ($perubahanPoin > 0) {
-                        $rekening->increment('points_balance', $perubahanPoin);
-                    } elseif ($perubahanPoin < 0) {
-                        $rekening->decrement('points_balance', abs($perubahanPoin));
-                    }
+                    if ($perubahanSaldo > 0) $rekening->increment('balance', $perubahanSaldo);
+                    elseif ($perubahanSaldo < 0) $rekening->decrement('balance', abs($perubahanSaldo));
 
-                    // Buat transaksi baru untuk mencatat perubahan ini
+                    if ($perubahanPoin > 0) $rekening->increment('points_balance', $perubahanPoin);
+                    elseif ($perubahanPoin < 0) $rekening->decrement('points_balance', abs($perubahanPoin));
+
                     if ($perubahanSaldo != 0) {
                         \App\Models\SaldoTransaction::create([
                             'rekening_id' => $rekening->id,
@@ -132,61 +161,72 @@ class SetorSampah extends Model
             }
         });
 
-        static::deleted(function ($SetorSampah) {
-            if ($SetorSampah->rekening && $SetorSampah->total_saldo_dihasilkan > 0) {
-                $rekening = $SetorSampah->rekening;
-                $rekening->balance -= $SetorSampah->total_saldo_dihasilkan;
-                $rekening->points_balance -= $SetorSampah->total_poin_dihasilkan;
-                $rekening->save();
+        static::deleting(function ($setorSampah) {
+            // Handle Saldo & Poin
+            if ($setorSampah->rekening && $setorSampah->total_saldo_dihasilkan > 0) {
+                $rekening = $setorSampah->rekening;
+                $rekening->decrement('balance', $setorSampah->total_saldo_dihasilkan);
+                $rekening->decrement('points_balance', $setorSampah->total_poin_dihasilkan);
 
-                // Buat transaksi saldo
                 \App\Models\SaldoTransaction::create([
                     'rekening_id' => $rekening->id,
-                    'amount' => $SetorSampah->total_saldo_dihasilkan,
+                    'amount' => $setorSampah->total_saldo_dihasilkan,
                     'type' => 'debit',
                     'description' => 'Pengurangan Saldo Dari Pembatalan Setor Sampah',
-                    'transactable_id' => $SetorSampah->id,
+                    'transactable_id' => $setorSampah->id,
                     'transactable_type' => 'setor_sampah',
                 ]);
-
-                // Buat transaksi poin
-                \App\Models\PoinTransaction::create([
-                    'rekening_id' => $rekening->id,
-                    'amount' => $SetorSampah->total_poin_dihasilkan,
-                    'description' => 'Pengurangan Poin Dari Pembatalan Setor Sampah',
-                    'transactable_id' => $SetorSampah->id,
-                    'transactable_type' => 'setor_sampah',
-                ]);
+                
+                if ($setorSampah->total_poin_dihasilkan > 0) {
+                    \App\Models\PoinTransaction::create([
+                        'rekening_id' => $rekening->id,
+                        'amount' => $setorSampah->total_poin_dihasilkan,
+                        'description' => 'Pengurangan Poin Dari Pembatalan Setor Sampah',
+                        'transactable_id' => $setorSampah->id,
+                        'transactable_type' => 'setor_sampah',
+                    ]);
+                }
+            }
+            
+            // Handle sinkronisasi Pemasukan
+            if ($setorSampah->isDonation()) {
+                $query = Pemasukan::where('masuk_id', $setorSampah->id)->where('masuk_type', self::class);
+                $setorSampah->isForceDeleting() ? $query->forceDelete() : $query->delete();
             }
         });
 
-        static::restored(function ($SetorSampah) {
-            // Tambahkan saldo dan poin ke rekening nasabah
-            if ($SetorSampah->rekening && $SetorSampah->total_saldo_dihasilkan > 0) {
-                $rekening = $SetorSampah->rekening;
-                $rekening->balance += $SetorSampah->total_saldo_dihasilkan;
-                $rekening->points_balance += $SetorSampah->total_poin_dihasilkan;
-                $rekening->save();
+        static::restored(function ($setorSampah) {
+            // Handle Saldo & Poin
+            if ($setorSampah->rekening && $setorSampah->total_saldo_dihasilkan > 0) {
+                $rekening = $setorSampah->rekening;
+                $rekening->increment('balance', $setorSampah->total_saldo_dihasilkan);
+                $rekening->increment('points_balance', $setorSampah->total_poin_dihasilkan);
 
-                // Buat transaksi saldo
                 \App\Models\SaldoTransaction::create([
                     'rekening_id' => $rekening->id,
-                    'amount' => $SetorSampah->total_saldo_dihasilkan,
+                    'amount' => $setorSampah->total_saldo_dihasilkan,
                     'type' => 'credit',
                     'description' => 'Pengembalian Saldo Dari Setor Sampah yang Dihapus',
-                    'transactable_id' => $SetorSampah->id,
+                    'transactable_id' => $setorSampah->id,
                     'transactable_type' => 'setor_sampah',
                 ]);
 
-                // Buat transaksi poin
-                \App\Models\PoinTransaction::create([
-                    'rekening_id' => $rekening->id,
-                    'amount' => $SetorSampah->total_poin_dihasilkan,
-                    'description' => 'Pengembalian Poin Dari Setor Sampah yang Dihapus',
-                    'transactable_id' => $SetorSampah->id,
-                    'transactable_type' => 'setor_sampah',
-                ]);
+                if ($setorSampah->total_poin_dihasilkan > 0) {
+                    \App\Models\PoinTransaction::create([
+                        'rekening_id' => $rekening->id,
+                        'amount' => $setorSampah->total_poin_dihasilkan,
+                        'description' => 'Pengembalian Poin Dari Setor Sampah yang Dihapus',
+                        'transactable_id' => $setorSampah->id,
+                        'transactable_type' => 'setor_sampah',
+                    ]);
+                }
+            }
+
+            // Handle sinkronisasi Pemasukan
+            if ($setorSampah->isDonation()) {
+                Pemasukan::where('masuk_id', $setorSampah->id)->where('masuk_type', self::class)->withTrashed()->restore();
             }
         });
     }
 }
+

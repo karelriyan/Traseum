@@ -31,7 +31,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->colors([
-                'primary' => Color::Emerald , 
+                'primary' => Color::Emerald,
             ])
             ->defaultAvatarProvider(\Filament\AvatarProviders\UiAvatarsProvider::class)
             ->profile(isSimple: false)
@@ -55,7 +55,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->discoverWidgets(in: app_path('Filament/Widgets'), for: 'App\\Filament\\Widgets')
             ->widgets([
-                // Widget bawaan Filament dihapus
+                    // Widget bawaan Filament dihapus
                 Widgets\AccountWidget::class,
                 // Widgets\FilamentInfoWidget::class,
             ])
@@ -72,6 +72,7 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 'Manajemen Pengguna',
+                'Keuangan Bank Sampah',
                 'Operasional Bank Sampah',
                 'Pengelolaan Website',
                 'Peran dan Izin',

@@ -14,6 +14,7 @@ use Filament\Forms\Components\Toggle;
 use Filament\Forms\Get;
 use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Columns\IconColumn;
+use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
 use Filament\Pages\Actions;
 use App\Filament\Resources\RekeningResource\Pages;
@@ -279,6 +280,28 @@ class RekeningResource extends Resource
                     ->color('primary'),
             ])
             ->filters([
+                // -- START PERUBAHAN --
+                SelectFilter::make('jenis_rekening')
+                    ->label('Jenis Rekening')
+                    ->options([
+                        'nasabah' => 'Rekening Nasabah',
+                        'donasi' => 'Rekening Donasi',
+                    ])
+                    ->query(function (Builder $query, array $data): Builder {
+                        if (empty($data['value'])) {
+                            return $query;
+                        }
+
+                        return $query->when(
+                            $data['value'] === 'nasabah',
+                            fn(Builder $query) => $query->where('no_rekening', '!=', '00000000')
+                        )->when(
+                                $data['value'] === 'donasi',
+                                fn(Builder $query) => $query->where('no_rekening', '=', '00000000')
+                            );
+                    })
+                    ->default('nasabah'),
+                // -- AKHIR PERUBAHAN --
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
@@ -353,7 +376,6 @@ class RekeningResource extends Resource
     public static function getEloquentQuery(): Builder
     {
         return parent::getEloquentQuery()
-            ->where('no_rekening', '!=', '00000000')
             ->withTrashed();
     }
     public static function getRelations(): array
