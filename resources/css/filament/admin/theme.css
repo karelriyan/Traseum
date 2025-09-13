@@ -1,0 +1,62 @@
+@import '/vendor/filament/filament/resources/css/theme.css';
+
+/* Custom brand styling for Filament */
+.fi-logo {
+    transition: all 0.3s ease;
+}
+
+.fi-logo:hover {
+    transform: scale(1.05);
+}
+
+.fi-topbar-brand .fi-logo {
+    max-height: 2.5rem;
+}
+
+/* Custom brand colors */
+.fi-brand {
+    --fi-brand-50: rgb(240 253 244);
+    --fi-brand-100: rgb(220 252 231);
+    --fi-brand-200: rgb(187 247 208);
+    --fi-brand-300: rgb(134 239 172);
+    --fi-brand-400: rgb(74 222 128);
+    --fi-brand-500: rgb(34 197 94);
+    --fi-brand-600: rgb(22 163 74);
+    --fi-brand-700: rgb(21 128 61);
+    --fi-brand-800: rgb(22 101 52);
+    --fi-brand-900: rgb(20 83 45);
+    --fi-brand-950: rgb(5 46 22);
+}
+
+/* Dark mode adjustments */
+.dark .fi-logo img {
+    filter: brightness(1.1);
+}
+
+/* Responsive adjustments */
+@media (max-width: 768px) {
+    .fi-logo .brand-text {
+        display: none;
+    }
+    
+    .fi-logo img {
+        height: 2rem;
+        width: 2rem;
+    }
+}
+
+/* Logo in sidebar */
+.fi-sidebar .fi-logo .brand-text {
+    display: flex;
+}
+
+/* Logo in topbar */
+.fi-topbar .fi-logo .brand-text {
+    display: none;
+}
+
+@media (min-width: 1024px) {
+    .fi-topbar .fi-logo .brand-text {
+        display: flex;
+    }
+}

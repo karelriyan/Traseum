@@ -30,6 +30,11 @@ class AdminPanelProvider extends PanelProvider
             ->id('admin')
             ->path('admin')
             ->login()
+            ->brandName('Cipta Muri')
+            ->brandLogo(fn () => view('filament.admin.brand'))
+            ->brandLogoHeight('2.5rem')
+            ->favicon(asset('favicon.ico'))
+            ->viteTheme('resources/css/filament/admin/theme.css')
             ->colors([
                 'primary' => Color::Emerald,
             ])
