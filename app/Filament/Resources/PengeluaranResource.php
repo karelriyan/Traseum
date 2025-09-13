@@ -27,7 +27,7 @@ class PengeluaranResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\DatePicker::make('tanggal_pengeluaran')
+                Forms\Components\DatePicker::make('tanggal')
                     ->label('Tanggal Pengeluaran')
                     ->required()
                     ->default(now()),
