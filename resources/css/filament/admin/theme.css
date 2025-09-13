@@ -19,7 +19,7 @@
 .fi-avatar-img,
 .fi-topbar-user-menu-trigger .fi-avatar,
 .fi-dropdown-trigger .fi-avatar,
-[data-slot="trigger"] .fi-avatar {
+[data-slot='trigger'] .fi-avatar {
     transition: none !important;
     will-change: auto;
     backface-visibility: hidden;
@@ -30,7 +30,7 @@
 .fi-user-avatar img,
 .fi-topbar-user-menu-trigger .fi-avatar img,
 .fi-dropdown-trigger .fi-avatar img,
-[data-slot="trigger"] .fi-avatar img {
+[data-slot='trigger'] .fi-avatar img {
     opacity: 1 !important;
     transition: none !important;
     backface-visibility: hidden;
