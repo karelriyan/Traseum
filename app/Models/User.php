@@ -101,7 +101,17 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     {
         $avatarPath = $this->attributes['avatar_url'] ?? null;
         
-        if ($avatarPath && Storage::disk('public')->exists($avatarPath)) {
+        if (!$avatarPath) {
+            return null;
+        }
+        
+        // If it's already a full URL, return as is
+        if (filter_var($avatarPath, FILTER_VALIDATE_URL)) {
+            return $avatarPath;
+        }
+        
+        // If it's a relative path, check if file exists in storage
+        if (Storage::disk('public')->exists($avatarPath)) {
             return asset('storage/' . $avatarPath);
         }
         
@@ -110,6 +120,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
 
     /**
      * Get the avatar URL attribute for general use.
+     */
+    public function getAvatarAttribute()
+    {
+        return $this->getFilamentAvatarUrl();
+    }
+
+    /**
+     * Get the raw avatar_url attribute.
      */
     public function getAvatarUrlAttribute()
     {

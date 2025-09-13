@@ -11,6 +11,7 @@ use Filament\Panel;
 use Filament\PanelProvider;
 use Filament\Support\Colors\Color;
 use Filament\Widgets;
+use Filament\Navigation\UserMenuItem;
 use Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse;
 use Illuminate\Cookie\Middleware\EncryptCookies;
 use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
@@ -40,6 +41,13 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->defaultAvatarProvider(\Filament\AvatarProviders\UiAvatarsProvider::class)
             ->profile(isSimple: false)
+            ->userMenuItems([
+                UserMenuItem::make()
+                    ->label('Beranda')
+                    ->url('/')
+                    ->icon('heroicon-o-home')
+                    ->sort(-1), // Menampilkan di atas menu lainnya
+            ])
             ->plugin(
                 FilamentSpatieRolesPermissionsPlugin::make()
             )
