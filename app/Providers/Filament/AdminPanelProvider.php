@@ -34,6 +34,7 @@ class AdminPanelProvider extends PanelProvider
                 'primary' => Color::Emerald , 
             ])
             ->defaultAvatarProvider(\Filament\AvatarProviders\UiAvatarsProvider::class)
+            ->profile(isSimple: false)
             ->plugin(
                 FilamentSpatieRolesPermissionsPlugin::make()
             )

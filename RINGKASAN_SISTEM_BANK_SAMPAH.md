@@ -9,12 +9,14 @@ Sistem Bank Sampah adalah aplikasi manajemen yang dirancang untuk mengelola oper
 ## 🏗️ Arsitektur Sistem
 
 ### Platform Teknologi
+
 - **Framework**: Laravel 11 dengan Filament 3 (Admin Panel)
 - **Database**: SQLite/MySQL
 - **Authentication**: Laravel Sanctum
 - **Export**: alperenersoy/filament-export dengan Spatie SimpleExcel
 
 ### Komponen Utama
+
 1. **Admin Panel** - Interface manajemen untuk operator
 2. **Database Layer** - Penyimpanan data dengan relasi kompleks
 3. **Observer Pattern** - Automasi transaksi keuangan
@@ -25,6 +27,7 @@ Sistem Bank Sampah adalah aplikasi manajemen yang dirancang untuk mengelola oper
 ## 🗂️ Struktur Data Utama
 
 ### 1. **Nasabah (Rekening)**
+
 ```php
 - ID: ULID unik
 - Data Pribadi: NIK, Nama, Alamat, Gender, Tanggal Lahir
@@ -37,6 +40,7 @@ Sistem Bank Sampah adalah aplikasi manajemen yang dirancang untuk mengelola oper
 ```
 
 ### 2. **Jenis Sampah (Sampah)**
+
 ```php
 - Jenis Sampah: Kategori sampah (plastik, kertas, dll)
 - Saldo per Kg: Nilai rupiah per kilogram
@@ -45,6 +49,7 @@ Sistem Bank Sampah adalah aplikasi manajemen yang dirancang untuk mengelola oper
 ```
 
 ### 3. **Transaksi Setor Sampah**
+
 ```php
 Header (SetorSampah):
 - Rekening ID: Reference ke nasabah
@@ -59,6 +64,7 @@ Detail (DetailSetorSampah):
 ```
 
 ### 4. **Sistem Transaksi Keuangan**
+
 ```php
 Saldo Transactions:
 - Type: 'credit' (penambahan) atau 'debit' (pengurangan)
@@ -71,6 +77,7 @@ Poin Transactions:
 ```
 
 ### 5. **Penarikan Dana (WithdrawRequest)**
+
 ```php
 - Jenis: 'tunai', 'transfer', 'pegadaian'
 - Amount: Jumlah penarikan
@@ -83,12 +90,14 @@ Poin Transactions:
 ## 🔄 Alur Proses Bisnis
 
 ### A. **Pendaftaran Nasabah**
+
 1. Admin input data pribadi nasabah
 2. Sistem generate nomor rekening otomatis
 3. Saldo awal = 0, Poin awal = 0
 4. Status pegadaian default = false
 
 ### B. **Proses Setor Sampah**
+
 ```
 1. Admin pilih rekening nasabah
 2. Input detail sampah (jenis + berat)
@@ -105,6 +114,7 @@ Poin Transactions:
 ```
 
 ### C. **Proses Penarikan Dana**
+
 ```
 1. Admin input permintaan penarikan
 2. Validasi saldo mencukupi
@@ -118,6 +128,7 @@ Poin Transactions:
 ```
 
 ### D. **Integrasi Pegadaian**
+
 - Nasabah bisa mendaftar tabungan emas
 - Penarikan langsung ke rekening pegadaian
 - Status tracking di sistem bank sampah
@@ -127,29 +138,34 @@ Poin Transactions:
 ## 🔧 Fitur Utama
 
 ### Dashboard & Monitoring
+
 - ✅ Dashboard overview statistik
 - ✅ Laporan transaksi real-time
 - ✅ Export data ke Excel/CSV/PDF
 
 ### Manajemen Nasabah
+
 - ✅ CRUD data nasabah lengkap
 - ✅ Tracking saldo dan poin
 - ✅ History transaksi per nasabah
 - ✅ Status integrasi pegadaian
 
 ### Transaksi Sampah
+
 - ✅ Input setoran multi-jenis sampah
 - ✅ Kalkulasi otomatis saldo & poin
 - ✅ Validasi berat dan jenis sampah
 - ✅ Support setoran donasi (tanpa rekening)
 
 ### Sistem Keuangan
+
 - ✅ Double-entry bookkeeping sederhana
 - ✅ Audit trail lengkap semua transaksi
 - ✅ Validasi saldo sebelum penarikan
 - ✅ Reversal otomatis saat delete/restore
 
 ### Pelaporan & Export
+
 - ✅ Export data nasabah dengan filter kolom
 - ✅ Format Excel dengan formatting khusus
 - ✅ Preview sebelum export
@@ -160,17 +176,20 @@ Poin Transactions:
 ## 🔐 Keamanan & Validasi
 
 ### Data Integrity
+
 - **Unique Constraints**: NIK, No. KK, No. Rekening Pegadaian
 - **Soft Deletes**: Data tidak benar-benar terhapus
 - **Database Transactions**: Konsistensi data terjamin
 - **Observer Pattern**: Automasi business logic
 
 ### Access Control
+
 - **Authentication**: Laravel Sanctum
 - **Role-based**: Admin panel dengan Filament
 - **Audit Trail**: User tracking di setiap transaksi
 
 ### Validasi Input
+
 - **NIK**: 16 digit numerik, unik
 - **No. KK**: 16 digit numerik, unik
 - **Berat Sampah**: Numerik positif
@@ -181,6 +200,7 @@ Poin Transactions:
 ## 📊 Perhitungan & Business Logic
 
 ### Formula Dasar
+
 ```php
 // Setor Sampah
 Saldo = Berat_Sampah × Saldo_per_kg
@@ -192,6 +212,7 @@ Points_Balance = Σ(Poin_Transactions)
 ```
 
 ### Automation Rules
+
 1. **Setor Sampah**: Otomatis credit saldo & poin
 2. **Penarikan**: Otomatis debit saldo
 3. **Delete/Restore**: Otomatis reversal transaksi
@@ -202,12 +223,14 @@ Points_Balance = Σ(Poin_Transactions)
 ## 📈 Laporan & Analytics
 
 ### Data Export Features
+
 - **Rekening Nasabah**: Data lengkap dengan status pegadaian
 - **Transaksi Setor**: Detail sampah dan nilai transaksi
 - **Transaksi Penarikan**: History penarikan per nasabah
 - **Custom Filters**: Pilih kolom sesuai kebutuhan
 
 ### Format Output
+
 - **Excel**: Formatting otomatis, column width optimal
 - **CSV**: Delimiter kustomisasi
 - **PDF**: Template printable
@@ -232,12 +255,14 @@ graph TD
 ## 🚀 Pengembangan & Maintenance
 
 ### Code Quality
+
 - **Laravel Best Practices**: MVC pattern, Service classes
 - **Database Design**: Normalized, dengan proper indexing
 - **Error Handling**: Comprehensive exception handling
 - **Documentation**: Inline comments dan docblocks
 
 ### Scalability Considerations
+
 - **Database**: SQLite untuk development, MySQL untuk production
 - **Caching**: Laravel cache untuk performance
 - **Queue**: Background jobs untuk operasi berat
@@ -248,11 +273,13 @@ graph TD
 ## 📞 Support & Dokumentasi
 
 ### File Penting
+
 - `PanduanMigrasi.txt`: Dokumentasi struktur database
 - `Prompting.md`: Panduan development
 - `README.md`: Setup dan instalasi
 
 ### Key Models
+
 - `app/Models/Rekening.php`: Core nasabah model
 - `app/Models/SetorSampah.php`: Transaksi setoran
 - `app/Models/WithdrawRequest.php`: Penarikan dana
@@ -262,4 +289,4 @@ graph TD
 
 **Sistem Bank Sampah** - Solusi digitalisasi manajemen bank sampah yang terintegrasi dengan sistem keuangan modern dan program tabungan emas.
 
-*Dikembangkan dengan Laravel + Filament untuk kemudahan penggunaan dan maintainability.*
+_Dikembangkan dengan Laravel + Filament untuk kemudahan penggunaan dan maintainability._

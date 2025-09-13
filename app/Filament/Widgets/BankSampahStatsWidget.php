@@ -26,7 +26,7 @@ class BankSampahStatsWidget extends BaseWidget
                 ->descriptionIcon('heroicon-m-arrow-trending-up')
                 ->color('info'),
                 
-            Stat::make('Total Saldo', 'Rp ' . number_format(SaldoTransaction::sum('nominal'), 0, ',', '.'))
+            Stat::make('Total Saldo', 'Rp ' . number_format(SaldoTransaction::where('type', 'credit')->sum('amount') - SaldoTransaction::where('type', 'debit')->sum('amount'), 0, ',', '.'))
                 ->description('Total saldo semua nasabah')
                 ->descriptionIcon('heroicon-m-banknotes')
                 ->color('warning'),
