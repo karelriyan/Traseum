@@ -92,8 +92,9 @@ class UserResource extends Resource
                     ->searchable()
                     ->sortable(),
 
-                Tables\Columns\TextColumn::make('role')
+                Tables\Columns\TextColumn::make('roles.name')
                     ->label('Jabatan')
+                    ->badge()
                     ->searchable()
                     ->sortable(),
 

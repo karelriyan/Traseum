@@ -18,7 +18,6 @@ class DatabaseSeeder extends Seeder
             SampahSeeder::class,
             RekeningSeeder::class,
             SumberPemasukanSeeder::class,
-            KategoriPengeluaranSeeder::class,
         ]);
     }
 }

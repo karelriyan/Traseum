@@ -16,25 +16,55 @@ class UserSeeder extends Seeder
      */
     public function run(): void
     {
-        // 1) Buat role tanpa set kolom 'id'
-        $adminRole = Role::firstOrCreate(['name' => 'admin', 'guard_name' => 'web']);
-        // (opsional) kalau kamu juga mau 'Super Admin' sebagai nama terpisah:
-        $superRole = Role::firstOrCreate(['name' => 'Super Admin', 'guard_name' => 'web']);
+        // 1) Buat role jika belum ada
+        $adminRole = Role::where('name', 'Admin')->first();
+        if (!$adminRole) {
+            $adminRole = new Role();
+            $adminRole->name = 'Admin';
+            $adminRole->guard_name = 'web';
+            $adminRole->save();
+        }
+
+        $superRole = Role::where('name', 'Super Admin')->first();
+        if (!$superRole) {
+            $superRole = new Role();
+            $superRole->name = 'Super Admin';
+            $superRole->guard_name = 'web';
+            $superRole->save();
+        }
 
         // 2) Buat user superadmin
-        $user = User::firstOrCreate(
+        $superUser = User::firstOrCreate(
             ['email' => 'superadmin@ciptamuri.com'],
             [
                 'name' => 'Super Admin',
                 'password' => Hash::make('123456789'),
-                'role' => 'Super Admin',           // kalau kamu pakai kolom custom 'role'
                 'email_verified_at' => now(),
             ]
         );
 
-        // 3) Assign role Spatie (pilih salah satu atau keduanya)
-        $user->assignRole($adminRole);
-        $user->assignRole($superRole);
+        // 3) Assign role Super Admin
+        if (!$superUser->hasRole('Super Admin')) {
+            $superUser->assignRole($superRole);
+        }
+        if (!$superUser->hasRole('Admin')) {
+            $superUser->assignRole($adminRole);
+        }
+
+        // 4) Buat user admin biasa untuk testing
+        $adminUser = User::firstOrCreate(
+            ['email' => 'admin@ciptamuri.com'],
+            [
+                'name' => 'Administrator',
+                'password' => Hash::make('password'),
+                'email_verified_at' => now(),
+            ]
+        );
+
+        // 5) Assign role Admin saja
+        if (!$adminUser->hasRole('Admin')) {
+            $adminUser->assignRole($adminRole);
+        }
 
         $names = [
             // Nama Pelaksana
@@ -75,13 +105,25 @@ class UserSeeder extends Seeder
             $rawPassword = $firstName . $charToNum;
 
             // Gunakan firstOrCreate untuk menghindari duplicate
-            User::firstOrCreate(
+            $user = User::firstOrCreate(
                 ['email' => $email], // cari berdasarkan email
                 [
                     'name' => $name,
-                'email' => $email,
-                'password' => Hash::make($rawPassword),
-            ]);
+                    'email' => $email,
+                    'password' => Hash::make($rawPassword),
+                    'email_verified_at' => now(),
+                ]
+            );
+
+            // Assign role Admin untuk semua user selain super admin
+            if (!$user->hasRole('Admin')) {
+                $user->assignRole($adminRole);
+            }
+
+            // Pastikan tidak ada role Super Admin untuk user biasa
+            if ($user->hasRole('Super Admin') && $user->email !== 'superadmin@ciptamuri.com') {
+                $user->removeRole($superRole);
+            }
         }
     }
 }

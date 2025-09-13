@@ -67,13 +67,10 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function canAccessPanel(Panel $panel): bool
     {
         // Allow access to admin panel for users with specific roles
-        return $this->hasRole(['Super Admin', 'admin']) || $this->isSuperAdmin();
+        return $this->hasRole(['Super Admin', 'Admin']) || $this->isSuperAdmin();
     }
 
-    public function role(): string
-    {
-        return $this->belongsTo(Role::class);
-    }
+    // Hapus method role() yang salah - sudah ada trait HasRoles dari Spatie
 
     /**
      * Get the full URL for the avatar image.

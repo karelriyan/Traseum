@@ -13,8 +13,12 @@ class SumberPemasukanSeeder extends Seeder
      */
     public function run(): void
     {
-        // Nonaktifkan pengecekan foreign key untuk sementara jika perlu
-        DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        // Untuk SQLite, kita menggunakan PRAGMA
+        if (DB::getDriverName() === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = OFF;');
+        } else {
+            DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+        }
         
         // Kosongkan tabel sebelum mengisi untuk menghindari duplikat
         SumberPemasukan::truncate();
@@ -31,6 +35,10 @@ class SumberPemasukanSeeder extends Seeder
         }
 
         // Aktifkan kembali pengecekan foreign key
-        DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        if (DB::getDriverName() === 'sqlite') {
+            DB::statement('PRAGMA foreign_keys = ON;');
+        } else {
+            DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+        }
     }
 }
