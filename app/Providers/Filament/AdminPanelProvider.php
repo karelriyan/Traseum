@@ -39,6 +39,7 @@ class AdminPanelProvider extends PanelProvider
             ->colors([
                 'primary' => Color::Emerald,
             ])
+            ->defaultAvatarProvider(null) // Disable default avatar provider to prevent flickering
             ->globalSearchKeyBindings(['command+k', 'ctrl+k'])
             ->spa() // Menambahkan SPA mode untuk mencegah reload yang menyebabkan kedip
             ->profile(isSimple: false)

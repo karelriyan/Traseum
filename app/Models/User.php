@@ -99,35 +99,20 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      */
     public function getFilamentAvatarUrl(): ?string
     {
-        // Cache avatar URL to prevent multiple checks
-        static $cachedAvatarUrl = null;
-        static $lastCheckedId = null;
-        
-        if ($cachedAvatarUrl !== null && $lastCheckedId === $this->id) {
-            return $cachedAvatarUrl;
-        }
-        
         $avatarPath = $this->attributes['avatar_url'] ?? null;
         
         if (!$avatarPath) {
-            $cachedAvatarUrl = null;
-            $lastCheckedId = $this->id;
-            return null;
+            // Return a consistent placeholder instead of null to prevent flickering
+            return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=10b981&color=ffffff';
         }
         
         // If it's already a full URL, return as is
         if (filter_var($avatarPath, FILTER_VALIDATE_URL)) {
-            $cachedAvatarUrl = $avatarPath;
-            $lastCheckedId = $this->id;
             return $avatarPath;
         }
         
         // If it's a relative path, construct full URL
-        $fullUrl = asset('storage/' . $avatarPath);
-        $cachedAvatarUrl = $fullUrl;
-        $lastCheckedId = $this->id;
-        
-        return $fullUrl;
+        return asset('storage/' . $avatarPath);
     }
 
     /**

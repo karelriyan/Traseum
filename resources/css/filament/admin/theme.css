@@ -13,24 +13,57 @@
     max-height: 2.5rem;
 }
 
-/* Avatar anti-flicker */
+/* Avatar anti-flicker - More specific selectors */
 .fi-avatar,
 .fi-user-avatar,
-.fi-avatar-img {
-    transition: opacity 0.2s ease-in-out;
+.fi-avatar-img,
+.fi-topbar-user-menu-trigger .fi-avatar,
+.fi-dropdown-trigger .fi-avatar,
+[data-slot="trigger"] .fi-avatar {
+    transition: none !important;
     will-change: auto;
+    backface-visibility: hidden;
+    transform: translateZ(0);
 }
 
 .fi-avatar img,
-.fi-user-avatar img {
+.fi-user-avatar img,
+.fi-topbar-user-menu-trigger .fi-avatar img,
+.fi-dropdown-trigger .fi-avatar img,
+[data-slot="trigger"] .fi-avatar img {
     opacity: 1 !important;
-    transition: opacity 0.2s ease-in-out;
+    transition: none !important;
+    backface-visibility: hidden;
+    transform: translateZ(0);
+    image-rendering: crisp-edges;
 }
 
-/* Prevent layout shifts from avatar loading */
+/* Prevent any avatar loading states */
+.fi-avatar::before,
+.fi-avatar::after,
+.fi-user-avatar::before,
+.fi-user-avatar::after {
+    display: none !important;
+}
+
+/* Force stable avatar container */
 .fi-topbar-user-menu-trigger {
     min-width: 2.5rem;
     min-height: 2.5rem;
+    position: relative;
+}
+
+.fi-topbar-user-menu-trigger .fi-avatar {
+    position: static !important;
+    display: flex !important;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Disable any avatar animations */
+.fi-avatar * {
+    animation: none !important;
+    transition: none !important;
 }
 
 /* Custom brand colors */
