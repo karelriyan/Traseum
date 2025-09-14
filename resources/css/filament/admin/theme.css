@@ -24,6 +24,7 @@
     will-change: auto;
     backface-visibility: hidden;
     transform: translateZ(0);
+    contain: layout style paint;
 }
 
 .fi-avatar img,
@@ -36,6 +37,8 @@
     backface-visibility: hidden;
     transform: translateZ(0);
     image-rendering: crisp-edges;
+    will-change: auto;
+    contain: layout style paint;
 }
 
 /* Prevent any avatar loading states */
@@ -44,6 +47,7 @@
 .fi-user-avatar::before,
 .fi-user-avatar::after {
     display: none !important;
+    visibility: hidden !important;
 }
 
 /* Force stable avatar container */
@@ -51,6 +55,7 @@
     min-width: 2.5rem;
     min-height: 2.5rem;
     position: relative;
+    contain: layout;
 }
 
 .fi-topbar-user-menu-trigger .fi-avatar {
@@ -58,12 +63,34 @@
     display: flex !important;
     align-items: center;
     justify-content: center;
+    contain: layout style paint;
 }
 
-/* Disable any avatar animations */
-.fi-avatar * {
+/* Disable any avatar animations and loading effects */
+.fi-avatar *,
+.fi-user-avatar * {
     animation: none !important;
     transition: none !important;
+    will-change: auto !important;
+}
+
+/* Prevent layout shifts during avatar load */
+.fi-avatar[src],
+.fi-avatar img[src] {
+    visibility: visible !important;
+    opacity: 1 !important;
+}
+
+/* Override any loading placeholders */
+.fi-avatar[aria-label]:empty::before,
+.fi-avatar:empty::before {
+    display: none !important;
+}
+
+/* Force immediate avatar display */
+.fi-avatar:not(:empty) {
+    opacity: 1 !important;
+    visibility: visible !important;
 }
 
 /* Custom brand colors */
