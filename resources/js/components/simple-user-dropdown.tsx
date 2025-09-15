@@ -1,5 +1,5 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Button } from '@/components/ui/button';
+import { UserAvatarAlternative } from '@/components/user-avatar-alternative';
 import { useInitials } from '@/hooks/use-initials';
 import { type User } from '@/types';
 import { router } from '@inertiajs/react';
@@ -89,21 +89,12 @@ export function SimpleUserDropdown({ user, variant = 'default', className }: Sim
                         : 'hover:bg-gray-100 hover:shadow-md'
                 } ${isOpen ? 'ring-2 ring-green-500/50' : ''} ${className}`}
             >
-                <Avatar
-                    className={`size-8 overflow-hidden rounded-full transition-all duration-300 ${
-                        isOpen ? 'ring-2 ring-green-400' : ''
-                    } group-hover:ring-2 group-hover:ring-green-300`}
-                >
-                    <AvatarImage
-                        src={user.avatar ? `${user.avatar}?v=${Date.now()}` : undefined}
-                        alt={user.name}
-                        onError={() => console.log('Avatar failed to load:', user.avatar)}
-                        onLoad={() => console.log('Avatar loaded successfully:', user.avatar)}
-                    />
-                    <AvatarFallback className="rounded-lg bg-neutral-200 text-xs font-medium text-black transition-colors duration-300 group-hover:bg-green-100 group-hover:text-green-800">
-                        {getInitials(user.name)}
-                    </AvatarFallback>
-                </Avatar>
+                <UserAvatarAlternative
+                    user={user}
+                    size="md"
+                    variant="initials"
+                    className={`transition-all duration-300 ${isOpen ? 'ring-2 ring-green-400' : ''} group-hover:ring-2 group-hover:ring-green-300`}
+                />
             </Button>
 
             {isOpen && (
@@ -111,12 +102,12 @@ export function SimpleUserDropdown({ user, variant = 'default', className }: Sim
                     {/* User Info */}
                     <div className="rounded-t-lg border-b bg-gradient-to-r from-green-50 to-blue-50 px-3 py-3">
                         <div className="group flex items-center gap-3">
-                            <Avatar className="h-10 w-10 ring-2 ring-green-200 transition-all duration-300 group-hover:ring-green-400">
-                                <AvatarImage src={user.avatar ? `${user.avatar}?v=${Date.now()}` : undefined} alt={user.name} />
-                                <AvatarFallback className="bg-gradient-to-br from-green-100 to-blue-100 text-sm font-medium text-green-800">
-                                    {getInitials(user.name)}
-                                </AvatarFallback>
-                            </Avatar>
+                            <UserAvatarAlternative
+                                user={user}
+                                size="lg"
+                                variant="initials"
+                                className="ring-2 ring-green-200 transition-all duration-300 group-hover:ring-green-400"
+                            />
                             <div className="flex-1 text-left">
                                 <div className="font-semibold text-gray-900 transition-colors duration-300 group-hover:text-green-700">
                                     {user.name}
