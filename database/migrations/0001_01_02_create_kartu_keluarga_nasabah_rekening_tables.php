@@ -15,14 +15,15 @@ return new class extends Migration {
             $table->string('no_rekening', 8)->unique()->index();
 
             $table->string('nama', 255);
-            $table->string('dusun', 3);
-            $table->string('rt', 3);
-            $table->string('rw', 3);
+            $table->string('dusun', 3)->nullable();
+            $table->string('rt', 3)->nullable();
+            $table->string('rw', 3)->nullable();
+            $table->string('alamat');
             $table->string('gender');
-            $table->string('no_kk', 16)->unique()->index();
-            $table->string('nik', 16)->unique()->index();
-            $table->date('tanggal_lahir');
-            $table->string('pendidikan');
+            $table->string('no_kk', 16)->unique()->nullable();
+            $table->string('nik', 16)->unique()->nullable();
+            $table->date('tanggal_lahir')->nullable();
+            $table->string('pendidikan')->nullable();
 
             $table->string('telepon')->nullable();
             $table->decimal('balance', 15, 2)->default(0);
@@ -30,6 +31,9 @@ return new class extends Migration {
 
             $table->boolean('status_pegadaian')->default(false);
             $table->string('no_rek_pegadaian', 16)->unique()->nullable();
+
+            $table->boolean('status_lengkap')->default(false);
+            $table->boolean('status_desa'); //Nasabah Dalam Desa atau Luar Desa
 
             $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_rekening_user');
             $table->timestamps();

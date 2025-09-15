@@ -15,6 +15,12 @@ class Rekening extends Model
     protected $table = 'rekening';
     protected $guarded = [];
 
+    protected $casts = [
+        'status_desa' => 'boolean', // <-- TAMBAHKAN BARIS INI
+        'status_pegadaian' => 'boolean',
+        'status_lengkap' => 'boolean',
+    ];
+
     /**
      * The accessors to append to the model's array form.
      */
@@ -48,11 +54,11 @@ class Rekening extends Model
         $credits = $this->saldoTransactions()
             ->where('type', 'credit')
             ->sum('amount');
-            
+
         $debits = $this->saldoTransactions()
             ->where('type', 'debit')
             ->sum('amount');
-            
+
         return $credits - $debits;
     }
 
@@ -82,12 +88,49 @@ class Rekening extends Model
         return 'Rp ' . number_format($this->current_balance, 0, ',', '.');
     }
 
+
+    // Method untuk menghitung dan mengatur status kelengkapan
+    public function calculateAndSetStatusLengkap(): void
+    {
+        $requiredFields = [
+            'nik',
+            'no_kk',
+            'tanggal_lahir',
+            'pendidikan',
+            'alamat',
+        ];
+
+        foreach ($requiredFields as $field) {
+            if (empty($this->{$field})) {
+                $this->status_lengkap = false;
+                return;
+            }
+        }
+
+        if ($this->status_desa === false) {
+            if (empty($this->dusun) || empty($this->rw) || empty($this->rt)) {
+                $this->status_lengkap = false;
+                return;
+            }
+        } else {
+            $this->status_lengkap = false;
+            return;
+        }
+
+        $this->status_lengkap = true;
+    }
+
     protected static function booted(): void
     {
         static::creating(function ($Rekening) {
             if (!$Rekening->user_id && Auth::check()) {
                 $Rekening->user_id = Auth::id();
             }
+        });
+
+        static::saving(function (Rekening $rekening) {
+            // Panggil method untuk kalkulasi status
+            $rekening->calculateAndSetStatusLengkap();
         });
     }
 }

@@ -65,16 +65,10 @@
         {
             "name": "althinect/filament-spatie-roles-permissions",
             "version": "2.x-dev",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/Althinect/filament-spatie-roles-permissions.git",
-                "reference": "79d2c777e56c87f97723d04c4b92450aceaf2de8"
-            },
             "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/Althinect/filament-spatie-roles-permissions/zipball/79d2c777e56c87f97723d04c4b92450aceaf2de8",
-                "reference": "79d2c777e56c87f97723d04c4b92450aceaf2de8",
-                "shasum": ""
+                "type": "path",
+                "url": "packages/filament-spatie-roles-permissions",
+                "reference": "8611dea5ef143ddca7267d44b7c40903c40b230e"
             },
             "require": {
                 "filament/filament": "^3.0",
@@ -87,16 +81,15 @@
                 "orchestra/testbench": "^7.0|^9.0|^10.0",
                 "phpunit/phpunit": "^9.0|^10.5|^11.5.3"
             },
-            "default-branch": true,
             "type": "library",
             "extra": {
                 "laravel": {
-                    "aliases": {
-                        "FilamentSpatieRolesPermissions": "Althinect\\FilamentSpatieRolesPermissions\\FilamentSpatieRolesPermissionsFacade"
-                    },
                     "providers": [
                         "Althinect\\FilamentSpatieRolesPermissions\\FilamentSpatieRolesPermissionsServiceProvider"
-                    ]
+                    ],
+                    "aliases": {
+                        "FilamentSpatieRolesPermissions": "Althinect\\FilamentSpatieRolesPermissions\\FilamentSpatieRolesPermissionsFacade"
+                    }
                 }
             },
             "autoload": {
@@ -104,7 +97,19 @@
                     "Althinect\\FilamentSpatieRolesPermissions\\": "src"
                 }
             },
-            "notification-url": "https://packagist.org/downloads/",
+            "autoload-dev": {
+                "psr-4": {
+                    "Althinect\\FilamentSpatieRolesPermissions\\Tests\\": "tests"
+                }
+            },
+            "scripts": {
+                "test": [
+                    "vendor/bin/phpunit"
+                ],
+                "test-coverage": [
+                    "vendor/bin/phpunit --coverage-html coverage"
+                ]
+            },
             "license": [
                 "MIT"
             ],
@@ -120,11 +125,9 @@
                 "althinect",
                 "filament-spatie-roles-permissions"
             ],
-            "support": {
-                "issues": "https://github.com/Althinect/filament-spatie-roles-permissions/issues",
-                "source": "https://github.com/Althinect/filament-spatie-roles-permissions/tree/2.x"
-            },
-            "time": "2025-08-05T16:16:46+00:00"
+            "transport-options": {
+                "relative": true
+            }
         },
         {
             "name": "anourvalar/eloquent-serialize",
@@ -9217,16 +9220,16 @@
         },
         {
             "name": "tightenco/ziggy",
-            "version": "v2.5.3",
+            "version": "v2.6.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/tighten/ziggy.git",
-                "reference": "0b3b521d2c55fbdb04b6721532f7f5f49d32f52b"
+                "reference": "cccc6035c109daab03a33926b3a8499bedbed01f"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/tighten/ziggy/zipball/0b3b521d2c55fbdb04b6721532f7f5f49d32f52b",
-                "reference": "0b3b521d2c55fbdb04b6721532f7f5f49d32f52b",
+                "url": "https://api.github.com/repos/tighten/ziggy/zipball/cccc6035c109daab03a33926b3a8499bedbed01f",
+                "reference": "cccc6035c109daab03a33926b3a8499bedbed01f",
                 "shasum": ""
             },
             "require": {
@@ -9281,9 +9284,9 @@
             ],
             "support": {
                 "issues": "https://github.com/tighten/ziggy/issues",
-                "source": "https://github.com/tighten/ziggy/tree/v2.5.3"
+                "source": "https://github.com/tighten/ziggy/tree/v2.6.0"
             },
-            "time": "2025-05-17T18:15:19+00:00"
+            "time": "2025-09-15T00:00:26+00:00"
         },
         {
             "name": "tijsverkoyen/css-to-inline-styles",
@@ -12882,6 +12885,6 @@
     "platform": {
         "php": "^8.2"
     },
-    "platform-dev": {},
-    "plugin-api-version": "2.6.0"
+    "platform-dev": [],
+    "plugin-api-version": "2.3.0"
 }

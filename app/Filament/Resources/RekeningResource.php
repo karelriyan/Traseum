@@ -4,6 +4,7 @@ namespace App\Filament\Resources;
 
 use App\Models\Rekening;
 use Filament\Forms\Components\DatePicker;
+use Filament\Forms\Components\Grid;
 use Filament\Resources\Resource;
 use Filament\Forms\Form;
 use Filament\Tables\Table;
@@ -13,6 +14,7 @@ use Filament\Forms\Components\TextInput;
 use Filament\Forms\Components\Toggle;
 use Filament\Forms\Get;
 use Filament\Tables\Columns\TextColumn;
+use Filament\Tables\Columns\BadgeColumn;
 use Filament\Tables\Columns\IconColumn;
 use Filament\Tables\Filters\SelectFilter;
 use Illuminate\Database\Eloquent\Builder;
@@ -49,12 +51,10 @@ class RekeningResource extends Resource
                     TextInput::make('no_kk')
                         ->label('Nomor KK (Kartu Keluarga)')
                         ->length(16)
-                        ->required()
                         ->rule('regex:/^\d+$/')
                         ->placeholder('Masukkan Nomor KK')
                         ->unique(ignoreRecord: true)
                         ->validationMessages([
-                            'required' => 'No. KK tidak boleh kosong',
                             'unique' => 'No. KK sudah pernah terdaftar (cek pada file yang sudah dihapus jika tidak muncul)',
                             'regex' => 'No. KK hanya boleh berisi angka',
                         ]),
@@ -63,12 +63,10 @@ class RekeningResource extends Resource
                 ->schema([
                     TextInput::make('nik')
                         ->label('Nomor Induk Kependudukan (NIK)')
-                        ->required()
                         ->length(16)
                         ->rule('regex:/^\d+$/')
                         ->unique(ignoreRecord: true)
                         ->validationMessages([
-                            'required' => 'NIK tidak boleh kosong',
                             'unique' => 'NIK sudah pernah terdaftar (cek pada file yang sudah dihapus jika tidak muncul)',
                             'regex' => 'NIK hanya boleh berisi angka',
                         ]),
@@ -86,11 +84,7 @@ class RekeningResource extends Resource
                             'required' => 'Jenis Kelamin tidak boleh kosong'
                         ]),
                     DatePicker::make('tanggal_lahir')
-                        ->label('Tanggal Lahir')
-                        ->required()
-                        ->validationMessages([
-                            'required' => 'Tanggal Lahir tidak boleh kosong',
-                        ]),
+                        ->label('Tanggal Lahir'),
                     Select::make('pendidikan')
                         ->label('Pendidikan Terakhir')
                         ->options([
@@ -104,54 +98,77 @@ class RekeningResource extends Resource
                             'DIPLOMA IV/STRATA I' => 'DIPLOMA IV/STRATA I',
                             'STRATA II' => 'STRATA II',
                             'STRATA III' => 'STRATA III',
-                        ])
-                        ->required()
-                        ->validationMessages([
-                            'required' => 'Pendidikan tidak boleh kosong'
                         ]),
                 ])
                 ->columns(1),
             Section::make('Alamat')
                 ->schema([
-                    TextInput::make('dusun')
-                        ->label('Dusun')
-                        ->required()
-                        ->length(1)
-                        ->minValue(1)
-                        ->numeric()
-                        ->validationMessages([
-                            'required' => 'Dusun tidak boleh kosong',
-                            'regex' => 'Dusun hanya boleh berisi huruf dan angka',
-                            'digits' => 'Dusun harus 1 digit',
-                            'min_value' => 'Tidak voleh kurang dari 1',
-                        ]),
-                    TextInput::make('rw')
-                        ->label('RW')
-                        ->required()
-                        ->maxLength(2)
-                        ->minValue(1)
-                        ->numeric()
-                        ->rule('regex:/^[0-9]+$/')
-                        ->validationMessages([
-                            'required' => 'RW tidak boleh kosong',
-                            'regex' => 'RW hanya boleh berisi angka',
-                            'max_digits' => 'RW maksimal 2 digit',
-                            'min_value' => 'Tidak voleh kurang dari 1',
-                        ]),
-                    TextInput::make('rt')
-                        ->label('RT')
-                        ->required()
-                        ->maxLength(2)
-                        ->minValue(1)
-                        ->numeric()
-                        ->rule('regex:/^[0-9]+$/')
-                        ->validationMessages([
-                            'required' => 'RT tidak boleh kosong',
-                            'regex' => 'RT hanya boleh berisi angka',
-                            'max_digits' => 'RT maksimal 2 digit',
-                            'min_value' => 'Tidak voleh kurang dari 1',
-                        ]),
-                ])->columns(3),
+                    Grid::make()
+                        ->columns(3)
+                        ->schema([
+                            Select::make('status_desa')
+                                ->label('Penduduk Desa/Luar Desa')
+                                ->live()
+                                ->options([
+                                    false => 'Penduduk Desa',
+                                    true => 'Penduduk Luar Desa',
+                                ])
+                                ->required()
+                                ->columnSpan('full'),
+                            TextInput::make('dusun')
+                                ->label('Dusun')
+                                ->required()
+                                ->length(1)
+                                ->minValue(1)
+                                ->numeric()
+                                ->visible(fn(Get $get) => $get('status_desa') == false && $get('status_desa') !== null)
+                                ->columnSpan(1)
+                                ->validationMessages([
+                                    'required' => 'Dusun tidak boleh kosong',
+                                    'regex' => 'Dusun hanya boleh berisi huruf dan angka',
+                                    'digits' => 'Dusun harus 1 digit',
+                                    'min_value' => 'Tidak voleh kurang dari 1',
+                                ]),
+                            TextInput::make('rw')
+                                ->label('RW')
+                                ->required()
+                                ->maxLength(2)
+                                ->minValue(1)
+                                ->columnSpan(1)
+                                ->visible(fn(Get $get) => $get('status_desa') == false && $get('status_desa') !== null)
+                                ->numeric()
+                                ->rule('regex:/^[0-9]+$/')
+                                ->validationMessages([
+                                    'required' => 'RW tidak boleh kosong',
+                                    'regex' => 'RW hanya boleh berisi angka',
+                                    'max_digits' => 'RW maksimal 2 digit',
+                                    'min_value' => 'Tidak voleh kurang dari 1',
+                                ]),
+                            TextInput::make('rt')
+                                ->label('RT')
+                                ->required()
+                                ->maxLength(2)
+                                ->minValue(1)
+                                ->visible(fn(Get $get) => $get('status_desa') == false && $get('status_desa') !== null)
+                                ->numeric()
+                                ->columnSpan(1)
+                                ->rule('regex:/^[0-9]+$/')
+                                ->validationMessages([
+                                    'required' => 'RT tidak boleh kosong',
+                                    'regex' => 'RT hanya boleh berisi angka',
+                                    'max_digits' => 'RT maksimal 2 digit',
+                                    'min_value' => 'Tidak voleh kurang dari 1',
+                                ]),
+                            TextInput::make('alamat')
+                                ->label('Alamat Domisili')
+                                ->required()
+                                ->columnSpan('full')
+                                ->visible(fn(Get $get) => $get('status_desa') !== null)
+                                ->validationMessages([
+                                    'required' => 'Alamat tidak boleh kosong',
+                                ]),
+                        ])
+                ]),
             Section::make('Informasi Kontak')
                 ->schema([
                     TextInput::make('telepon')
@@ -195,6 +212,14 @@ class RekeningResource extends Resource
                 return $query->with(['user']);
             })
             ->columns([
+                BadgeColumn::make('status_lengkap')
+                    ->label('Status Data')
+                    ->formatStateUsing(fn(bool $state): string => $state ? 'Lengkap' : 'Belum Lengkap')
+                    ->colors([
+                        'success' => true,
+                        'danger' => false,
+                    ])
+                    ->sortable(),
                 TextColumn::make('no_rekening')->label('No. Rekening')->sortable()->searchable(),
                 TextColumn::make('nama')->label('Nama Nasabah')->sortable()->searchable(),
                 TextColumn::make('current_balance')->label('Saldo')->sortable()->money('IDR'),
@@ -206,7 +231,7 @@ class RekeningResource extends Resource
                     ->trueColor('success')
                     ->falseColor('danger')
                     ->sortable(),
-                
+
                 // Kolom untuk export dalam urutan yang benar
                 TextColumn::make('nik')->label('NIK')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('no_kk')->label('No. KK')->toggleable(isToggledHiddenByDefault: true),
@@ -221,7 +246,7 @@ class RekeningResource extends Resource
                 TextColumn::make('no_rek_pegadaian')
                     ->label('No. Rek. Pegadaian')
                     ->toggleable(isToggledHiddenByDefault: true),
-                
+
                 // Kolom administrasi di paling akhir
                 TextColumn::make('user.name')->label('Pembuat Rekening')->sortable()->searchable()->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('created_at')->label('Waktu Dibuat')->dateTime()->toggleable(isToggledHiddenByDefault: true),
@@ -256,26 +281,26 @@ class RekeningResource extends Resource
                         TextColumn::make('updated_at')->label('Terakhir Diubah'),
                     ])
                     ->formatStates([
-                        'no_rekening' => fn ($record) => ' ' . $record->no_rekening, // Space prefix untuk Excel
-                        'nama' => fn ($record) => $record->nama,
-                        'current_balance' => fn ($record) => 'Rp ' . number_format($record->current_balance ?? 0, 0, ',', '.'),
-                        'status_pegadaian' => fn ($record) => $record->status_pegadaian == 1 ? 'Ada' : 'Tidak Ada',
-                        'nik' => fn ($record) => ' ' . $record->nik, // Space prefix untuk Excel
-                        'no_kk' => fn ($record) => ' ' . $record->no_kk, // Space prefix untuk Excel
-                        'gender' => fn ($record) => $record->gender,
-                        'tanggal_lahir' => fn ($record) => $record->tanggal_lahir ? date('d/m/Y', strtotime($record->tanggal_lahir)) : '',
-                        'pendidikan' => fn ($record) => $record->pendidikan,
-                        'dusun' => fn ($record) => $record->dusun,
-                        'rw' => fn ($record) => $record->rw,
-                        'rt' => fn ($record) => $record->rt,
-                        'telepon' => fn ($record) => $record->telepon ? ' ' . $record->telepon : '',
-                        'points_balance' => fn ($record) => number_format($record->points_balance ?? 0, 0, ',', '.'),
-                        'no_rek_pegadaian' => fn ($record) => $record->status_pegadaian == 1 && $record->no_rek_pegadaian ? ' ' . $record->no_rek_pegadaian : '', // Hanya tampil jika ada tabungan emas
-                        'user.name' => fn ($record) => $record->user->name ?? '',
-                        'created_at' => fn ($record) => $record->created_at ? date('d/m/Y H:i', strtotime($record->created_at)) : '',
-                        'updated_at' => fn ($record) => $record->updated_at ? date('d/m/Y H:i', strtotime($record->updated_at)) : '',
+                        'no_rekening' => fn($record) => ' ' . $record->no_rekening, // Space prefix untuk Excel
+                        'nama' => fn($record) => $record->nama,
+                        'current_balance' => fn($record) => 'Rp ' . number_format($record->current_balance ?? 0, 0, ',', '.'),
+                        'status_pegadaian' => fn($record) => $record->status_pegadaian == 1 ? 'Ada' : 'Tidak Ada',
+                        'nik' => fn($record) => ' ' . $record->nik, // Space prefix untuk Excel
+                        'no_kk' => fn($record) => ' ' . $record->no_kk, // Space prefix untuk Excel
+                        'gender' => fn($record) => $record->gender,
+                        'tanggal_lahir' => fn($record) => $record->tanggal_lahir ? date('d/m/Y', strtotime($record->tanggal_lahir)) : '',
+                        'pendidikan' => fn($record) => $record->pendidikan,
+                        'dusun' => fn($record) => $record->dusun,
+                        'rw' => fn($record) => $record->rw,
+                        'rt' => fn($record) => $record->rt,
+                        'telepon' => fn($record) => $record->telepon ? ' ' . $record->telepon : '',
+                        'points_balance' => fn($record) => number_format($record->points_balance ?? 0, 0, ',', '.'),
+                        'no_rek_pegadaian' => fn($record) => $record->status_pegadaian == 1 && $record->no_rek_pegadaian ? ' ' . $record->no_rek_pegadaian : '', // Hanya tampil jika ada tabungan emas
+                        'user.name' => fn($record) => $record->user->name ?? '',
+                        'created_at' => fn($record) => $record->created_at ? date('d/m/Y H:i', strtotime($record->created_at)) : '',
+                        'updated_at' => fn($record) => $record->updated_at ? date('d/m/Y H:i', strtotime($record->updated_at)) : '',
                     ])
-                    
+
                     ->icon('heroicon-o-document-arrow-down')
                     ->color('primary'),
             ])
@@ -339,24 +364,24 @@ class RekeningResource extends Resource
                         TextColumn::make('updated_at')->label('Terakhir Diubah'),
                     ])
                     ->formatStates([
-                        'no_rekening' => fn ($record) => ' ' . $record->no_rekening, // Space prefix untuk Excel
-                        'nama' => fn ($record) => $record->nama,
-                        'current_balance' => fn ($record) => 'Rp ' . number_format($record->current_balance ?? 0, 0, ',', '.'),
-                        'status_pegadaian' => fn ($record) => $record->status_pegadaian == 1 ? 'Ada' : 'Tidak Ada',
-                        'nik' => fn ($record) => ' ' . $record->nik, // Space prefix untuk Excel
-                        'no_kk' => fn ($record) => ' ' . $record->no_kk, // Space prefix untuk Excel
-                        'gender' => fn ($record) => $record->gender,
-                        'tanggal_lahir' => fn ($record) => $record->tanggal_lahir ? date('d/m/Y', strtotime($record->tanggal_lahir)) : '',
-                        'pendidikan' => fn ($record) => $record->pendidikan,
-                        'dusun' => fn ($record) => $record->dusun,
-                        'rw' => fn ($record) => $record->rw,
-                        'rt' => fn ($record) => $record->rt,
-                        'telepon' => fn ($record) => $record->telepon ? ' ' . $record->telepon : '',
-                        'points_balance' => fn ($record) => number_format($record->points_balance ?? 0, 0, ',', '.'),
-                        'no_rek_pegadaian' => fn ($record) => $record->status_pegadaian == 1 && $record->no_rek_pegadaian ? ' ' . $record->no_rek_pegadaian : '', // Hanya tampil jika ada tabungan emas
-                        'user.name' => fn ($record) => $record->user->name ?? '',
-                        'created_at' => fn ($record) => $record->created_at ? date('d/m/Y H:i', strtotime($record->created_at)) : '',
-                        'updated_at' => fn ($record) => $record->updated_at ? date('d/m/Y H:i', strtotime($record->updated_at)) : '',
+                        'no_rekening' => fn($record) => ' ' . $record->no_rekening, // Space prefix untuk Excel
+                        'nama' => fn($record) => $record->nama,
+                        'current_balance' => fn($record) => 'Rp ' . number_format($record->current_balance ?? 0, 0, ',', '.'),
+                        'status_pegadaian' => fn($record) => $record->status_pegadaian == 1 ? 'Ada' : 'Tidak Ada',
+                        'nik' => fn($record) => ' ' . $record->nik, // Space prefix untuk Excel
+                        'no_kk' => fn($record) => ' ' . $record->no_kk, // Space prefix untuk Excel
+                        'gender' => fn($record) => $record->gender,
+                        'tanggal_lahir' => fn($record) => $record->tanggal_lahir ? date('d/m/Y', strtotime($record->tanggal_lahir)) : '',
+                        'pendidikan' => fn($record) => $record->pendidikan,
+                        'dusun' => fn($record) => $record->dusun,
+                        'rw' => fn($record) => $record->rw,
+                        'rt' => fn($record) => $record->rt,
+                        'telepon' => fn($record) => $record->telepon ? ' ' . $record->telepon : '',
+                        'points_balance' => fn($record) => number_format($record->points_balance ?? 0, 0, ',', '.'),
+                        'no_rek_pegadaian' => fn($record) => $record->status_pegadaian == 1 && $record->no_rek_pegadaian ? ' ' . $record->no_rek_pegadaian : '', // Hanya tampil jika ada tabungan emas
+                        'user.name' => fn($record) => $record->user->name ?? '',
+                        'created_at' => fn($record) => $record->created_at ? date('d/m/Y H:i', strtotime($record->created_at)) : '',
+                        'updated_at' => fn($record) => $record->updated_at ? date('d/m/Y H:i', strtotime($record->updated_at)) : '',
                     ]),
                 Tables\Actions\DeleteBulkAction::make(),
                 Tables\Actions\RestoreBulkAction::make(),
