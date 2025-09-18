@@ -6,7 +6,10 @@ use App\Filament\Resources\RekeningResource;
 use App\Models\Rekening;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Carbon;
-
+use Filament\Notifications\Notification;
+use Filament\Actions;
+use Filament\Support\Str;
+use Filament\Support\Facades\Dialog;
 class CreateRekening extends CreateRecord
 {
     protected static string $resource = RekeningResource::class;
@@ -33,5 +36,19 @@ class CreateRekening extends CreateRecord
         $data['no_rekening'] = $addressPart . $datePart . $sequencePart;
 
         return $data;
+    }
+
+    protected function afterCreate(): void
+    {
+        // Check the status_lengkap field of the record that was just created.
+        // The value was set by the `saving` event in your Rekening model.
+        if (!$this->record->status_lengkap) {
+            Notification::make()
+                ->title('Peringatan Data Belum Lengkap')
+                ->body('Rekening berhasil dibuat, namun datanya belum lengkap. Mohon untuk melengkapinya segera.')
+                ->warning() // Gives the notification a yellow/orange color
+                ->persistent() // Requires the user to dismiss it
+                ->send();
+        }
     }
 }

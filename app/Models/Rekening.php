@@ -97,7 +97,6 @@ class Rekening extends Model
             'no_kk',
             'tanggal_lahir',
             'pendidikan',
-            'alamat',
         ];
 
         foreach ($requiredFields as $field) {
@@ -113,7 +112,7 @@ class Rekening extends Model
                 return;
             }
         } else {
-            $this->status_lengkap = false;
+            $this->status_lengkap = true;
             return;
         }
 

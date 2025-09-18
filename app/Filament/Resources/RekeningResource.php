@@ -117,7 +117,6 @@ class RekeningResource extends Resource
                                 ->columnSpan('full'),
                             TextInput::make('dusun')
                                 ->label('Dusun')
-                                ->required()
                                 ->length(1)
                                 ->minValue(1)
                                 ->numeric()
@@ -131,7 +130,6 @@ class RekeningResource extends Resource
                                 ]),
                             TextInput::make('rw')
                                 ->label('RW')
-                                ->required()
                                 ->maxLength(2)
                                 ->minValue(1)
                                 ->columnSpan(1)
@@ -146,7 +144,6 @@ class RekeningResource extends Resource
                                 ]),
                             TextInput::make('rt')
                                 ->label('RT')
-                                ->required()
                                 ->maxLength(2)
                                 ->minValue(1)
                                 ->visible(fn(Get $get) => $get('status_desa') == false && $get('status_desa') !== null)
