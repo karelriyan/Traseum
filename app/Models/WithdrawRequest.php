@@ -59,25 +59,10 @@ class WithdrawRequest extends Model
                 if ($rekening) {
                     // Update status dan nomor rekening di tabel induk (rekening).
                     $rekening->status_pegadaian = true;
-                    $rekening->no_rek_pegadaian = $withdrawRequest->no_rek_pegadaian;
                     $rekening->save();
                 }
             }
         });
-
-        static::updated(function ($withdrawRequest) {
-            // Cek apakah permintaan ini ditandai sebagai pendaftaran baru DAN nomor rekeningnya ada.
-            if ($withdrawRequest->wasChanged('no_rek_pegadaian')) {
-                $rekening = $withdrawRequest->rekening;
-
-                if ($rekening) {
-                    // Update status dan nomor rekening di tabel induk (rekening).
-                    $rekening->no_rek_pegadaian = $withdrawRequest->no_rek_pegadaian;
-                    $rekening->save();
-                }
-            }
-        });
-
 
         static::restored(function ($withdrawRequest) {
             // Cek apakah permintaan ini ditandai sebagai pendaftaran baru DAN nomor rekeningnya ada.
@@ -87,7 +72,6 @@ class WithdrawRequest extends Model
                 if ($rekening) {
                     // Update status dan nomor rekening di tabel induk (rekening).
                     $rekening->status_pegadaian = true;
-                    $rekening->no_rek_pegadaian = $withdrawRequest->no_rek_pegadaian;
                     $rekening->save();
                 }
             }
@@ -101,7 +85,6 @@ class WithdrawRequest extends Model
                 if ($rekening) {
                     // Update status dan nomor rekening di tabel induk (rekening).
                     $rekening->status_pegadaian = false;
-                    $rekening->no_rek_pegadaian = null;
                     $rekening->save();
                 }
             }

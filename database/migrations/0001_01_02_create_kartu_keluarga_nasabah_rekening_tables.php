@@ -30,7 +30,6 @@ return new class extends Migration {
             $table->bigInteger('points_balance')->default(100);
 
             $table->boolean('status_pegadaian')->default(false);
-            $table->string('no_rek_pegadaian', 16)->unique()->nullable();
 
             $table->boolean('status_lengkap')->default(false);
             $table->boolean('status_desa'); //Nasabah Dalam Desa atau Luar Desa

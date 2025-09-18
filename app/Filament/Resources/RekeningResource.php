@@ -243,9 +243,6 @@ class RekeningResource extends Resource
                 TextColumn::make('rt')->label('RT')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('telepon')->label('No. Telepon')->toggleable(isToggledHiddenByDefault: true),
                 TextColumn::make('points_balance')->label('Poin')->toggleable(isToggledHiddenByDefault: true),
-                TextColumn::make('no_rek_pegadaian')
-                    ->label('No. Rek. Pegadaian')
-                    ->toggleable(isToggledHiddenByDefault: true),
 
                 // Kolom administrasi di paling akhir
                 TextColumn::make('user.name')->label('Pembuat Rekening')->sortable()->searchable()->toggleable(isToggledHiddenByDefault: true),
