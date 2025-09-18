@@ -18,17 +18,21 @@ class RekeningSeeder extends Seeder
         Rekening::updateOrCreate(
             ['no_rekening' => '00000000'],
             [
-                'nama'          => 'Tabungan Bank Sampah',
-                'dusun'         => '-',
-                'rt'            => '-',
-                'rw'            => '-',
-                'gender'        => '-',
-                'no_kk'         => '0000000000000000', // Harus unik
-                'nik'           => '0000000000000000', // Harus unik dan berbeda dari no_kk
+                'nama' => 'Tabungan Bank Sampah',
+                'dusun' => '-',
+                'rt' => '-',
+                'rw' => '-',
+                'gender' => '-',
+                'status_desa' => true, // Asumsikan nasabah dalam desa
+                'alamat' => 'Tabungan Bank Sampah',
+                'status_lengkap' => true, // Karena ini rekening khusus
+                'status_pegadaian' => false, // Tidak terkait pegadaian
+                'no_kk' => '0000000000000000', // Harus unik
+                'nik' => '0000000000000000', // Harus unik dan berbeda dari no_kk
                 'tanggal_lahir' => Carbon::now(),
-                'pendidikan'    => '-',
-                'balance'       => 0, // Saldo awal
-                'points_balance'=> 0, // Poin awal
+                'pendidikan' => '-',
+                'balance' => 0, // Saldo awal
+                'points_balance' => 0, // Poin awal
             ]
         );
     }
