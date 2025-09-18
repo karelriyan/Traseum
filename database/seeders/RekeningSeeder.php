@@ -18,13 +18,13 @@ class RekeningSeeder extends Seeder
         Rekening::updateOrCreate(
             ['no_rekening' => '00000000'],
             [
-                'nama' => 'Tabungan Bank Sampah',
+                'nama' => 'Rekening Bank Sampah',
                 'dusun' => '-',
                 'rt' => '-',
                 'rw' => '-',
                 'gender' => '-',
                 'status_desa' => true, // Asumsikan nasabah dalam desa
-                'alamat' => 'Tabungan Bank Sampah',
+                'alamat' => '-',
                 'status_lengkap' => true, // Karena ini rekening khusus
                 'status_pegadaian' => false, // Tidak terkait pegadaian
                 'no_kk' => '0000000000000000', // Harus unik
