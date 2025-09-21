@@ -32,7 +32,7 @@ class AdminPanelProvider extends PanelProvider
             ->path('admin')
             ->login()
             ->brandName('Cipta Muri')
-            ->brandLogo(fn () => view('filament.admin.brand'))
+            ->brandLogo(fn() => view('filament.admin.brand'))
             ->brandLogoHeight('2.5rem')
             ->favicon(asset('favicon.ico'))
             ->viteTheme('resources/css/filament/admin/theme.css')
@@ -48,6 +48,7 @@ class AdminPanelProvider extends PanelProvider
                     ->url('/')
                     ->icon('heroicon-o-home')
                     ->sort(-1), // Menampilkan di atas menu lainnya
+
             ])
             ->plugin(
                 FilamentSpatieRolesPermissionsPlugin::make()
@@ -57,6 +58,10 @@ class AdminPanelProvider extends PanelProvider
                     ->setTitle('My Profile')
                     ->setNavigationLabel('My Profile')
                     ->setIcon('heroicon-o-user')
+                    ->shouldShowAvatarForm()
+                    ->shouldShowDeleteAccountForm(false)
+                    ->shouldShowBrowserSessionsForm()
+                    ->shouldShowSanctumTokens(false)
             )
             ->discoverResources(in: app_path('Filament/Resources'), for: 'App\\Filament\\Resources')
             ->discoverPages(in: app_path('Filament/Pages'), for: 'App\\Filament\\Pages')
