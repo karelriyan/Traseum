@@ -174,7 +174,7 @@ class SampahKeluarResource extends Resource
                         <td style='padding:6px; text-align:right;'>Rp " . number_format($avgHargaPerKg, 2, ',', '.') . " (Rata-rata)</td>
                         <td style='padding:6px; text-align:right;'>Rp " . number_format($totalHarga, 2, ',', '.') . "</td>
                     </tr>";
-        $header = "<thead><tr style='background:#f3f4f6; text-align:left;'><th style='padding:6px;'>Jenis Sampah</th><th style='padding:6px; text-align:center;'>Berat</th><th style='padding:6px; text-align:right;'>Hasil Jual</th><th style='padding:6px; text-align:right;'>Harga/Kg</th></tr></thead>";
+        $header = "<thead><tr style='background:#f3f4f6; text-align:left;'><th style='padding:6px;'>Jenis Sampah</th><th style='padding:6px; text-align:center;'>Berat</th><th style='padding:6px; text-align:right;'>Harga/Kg</th><th style='padding:6px; text-align:right;'>Hasil Jual</th></tr></thead>";
         return new HtmlString("<table style='width:100%; border-collapse:collapse;'>{$header}<tbody>{$rows}{$totalRow}</tbody></table>");
     }
 
