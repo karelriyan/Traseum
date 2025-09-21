@@ -87,8 +87,8 @@ class AdminPanelProvider extends PanelProvider
             ])
             ->navigationGroups([
                 'Manajemen Pengguna',
-                'Keuangan Bank Sampah',
                 'Operasional Bank Sampah',
+                'Keuangan Bank Sampah',
                 'Pengelolaan Website',
                 'Peran dan Izin',
             ])

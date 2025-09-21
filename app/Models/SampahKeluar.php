@@ -14,6 +14,7 @@ class SampahKeluar extends Model
 
     protected $table = 'sampah_keluar';
 
+
     protected $guarded = [];
 
     public function sampah()

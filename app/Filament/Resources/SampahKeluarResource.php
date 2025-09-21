@@ -24,7 +24,7 @@ class SampahKeluarResource extends Resource
     protected static ?string $model = SampahKeluar::class;
     protected static ?string $navigationIcon = 'heroicon-o-truck';
     protected static ?string $navigationGroup = 'Operasional Bank Sampah';
-    protected static ?int $navigationSort = 2;
+    protected static ?int $navigationSort = 4;
 
     public static function form(Form $form): Form
     {
@@ -67,7 +67,7 @@ class SampahKeluarResource extends Resource
                                 Forms\Components\TextInput::make('harga_jual')
                                     ->label('Uang Hasil Penjualan')
                                     ->prefix('Rp')->numeric()->required()->minValue(0)
-                                    ->hidden(fn (Get $get) => $get('../../jenis_keluar') !== 'jual') // Akses state di luar repeater
+                                    ->hidden(fn(Get $get) => $get('../../jenis_keluar') !== 'jual') // Akses state di luar repeater
                                     ->columnSpan(['md' => 1]),
                             ])
                             ->columns(['md' => 4])
@@ -78,7 +78,7 @@ class SampahKeluarResource extends Resource
 
                 // --- BAGIAN PERHITUNGAN KONDISIONAL ---
                 Section::make('Perhitungan dan Rincian')
-                    ->hidden(fn (Get $get) => $get('jenis_keluar') !== 'jual') // Sembunyikan jika 'bakar'
+                    ->hidden(fn(Get $get) => $get('jenis_keluar') !== 'jual') // Sembunyikan jika 'bakar'
                     ->schema([
                         Forms\Components\Hidden::make('calculation_performed')->default(false)->dehydrated(true),
                         Forms\Components\Hidden::make('total_harga_jual')->default(0),
@@ -97,7 +97,7 @@ class SampahKeluarResource extends Resource
 
                         Forms\Components\Placeholder::make('rincian_penjualan')
                             ->label('Rincian')
-                            ->visible(fn (Get $get) => (bool) $get('calculation_performed'))
+                            ->visible(fn(Get $get) => (bool) $get('calculation_performed'))
                             ->content(function (Get $get) {
                                 $items = $get('details');
                                 $sampahData = Sampah::whereIn('id', array_column($items, 'sampah_id'))->get()->keyBy('id');
@@ -150,7 +150,8 @@ class SampahKeluarResource extends Resource
         $totalBerat = 0;
         $rows = '';
         foreach ($items as $item) {
-            if (empty($item['sampah_id']) || empty($item['berat']) || !is_numeric($item['berat'])) continue;
+            if (empty($item['sampah_id']) || empty($item['berat']) || !is_numeric($item['berat']))
+                continue;
             $sampah = $sampahData->get($item['sampah_id']);
             if ($sampah) {
                 $berat = (float) $item['berat'];
@@ -182,14 +183,14 @@ class SampahKeluarResource extends Resource
         return $table
             ->columns([
                 TextColumn::make('jenis_keluar')->label('Jenis')->sortable()->badge()
-                    ->color(fn (string $state): string => match ($state) {
+                    ->color(fn(string $state): string => match ($state) {
                         'jual' => 'success',
                         'bakar' => 'danger',
                     }),
                 TextColumn::make('tanggal_keluar')->date()->label('Tanggal')->sortable(),
                 TextColumn::make('total_berat')->label('Total Berat (Kg)')->sortable()->weight('bold'),
                 TextColumn::make('total_harga_jual')->label('Total Hasil Jual')->sortable()->money('IDR')
-                    ->formatStateUsing(fn (string $state) => $state > 0 ? "Rp " . number_format($state, 0, ',', '.') : '-'),
+                    ->formatStateUsing(fn(string $state) => $state > 0 ? "Rp " . number_format($state, 0, ',', '.') : '-'),
                 TextColumn::make('user.name')->label('Petugas')->sortable(),
                 TextColumn::make('created_at')->dateTime()->label('Dibuat')->toggleable(isToggledHiddenByDefault: true),
             ])
