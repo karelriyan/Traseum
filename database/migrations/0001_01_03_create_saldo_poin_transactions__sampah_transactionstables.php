@@ -28,7 +28,7 @@ return new class extends Migration {
 
         Schema::create('sampah_transactions', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->ulidMorphs('transactable')->index();
+            $table->ulidMorphs('transactable');
             $table->foreignUlid('sampah_id')
                 ->constrained('sampah')
                 ->index()
