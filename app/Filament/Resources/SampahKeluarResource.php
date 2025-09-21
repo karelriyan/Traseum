@@ -136,8 +136,8 @@ class SampahKeluarResource extends Resource
         $totalBerat = 0;
         if (is_array($items)) {
             foreach ($items as $item) {
-                $totalHarga += (float) ($item['harga_jual'] ?? 0);
                 $totalBerat += (float) ($item['berat'] ?? 0);
+                $totalHarga += (float) ($item['harga_jual'] ?? 0);
             }
         }
         $set('total_harga_jual', $totalHarga);
