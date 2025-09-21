@@ -186,17 +186,6 @@ class RekeningResource extends Resource
                         ->onColor('success')
                         ->offColor('danger')
                         ->live(),
-                    TextInput::make('no_rek_pegadaian')
-                        ->label('Nomor Rekening Pegadaian')
-                        ->numeric()
-                        ->maxLength(16)
-                        ->unique(ignoreRecord: true)
-                        ->visible(fn(Get $get) => $get('status_pegadaian'))
-                        ->nullable()
-                        ->validationMessages([
-                            'required' => 'Nomor rekening pegadaian wajib diisi jika memiliki tabungan emas.',
-                            'unique' => 'Nomor rekening pegadaian sudah terdaftar.',
-                        ]),
                 ])
                 ->columns(1),
         ]);
@@ -269,7 +258,6 @@ class RekeningResource extends Resource
                         TextColumn::make('rt')->label('RT'),
                         TextColumn::make('telepon')->label('No. Telepon'),
                         TextColumn::make('points_balance')->label('Poin'),
-                        TextColumn::make('no_rek_pegadaian')->label('No. Rek. Pegadaian'),
                         TextColumn::make('user.name')->label('Pembuat Rekening'),
                         TextColumn::make('created_at')->label('Waktu Dibuat'),
                         TextColumn::make('updated_at')->label('Terakhir Diubah'),
@@ -289,7 +277,6 @@ class RekeningResource extends Resource
                         'rt' => fn($record) => $record->rt,
                         'telepon' => fn($record) => $record->telepon ? ' ' . $record->telepon : '',
                         'points_balance' => fn($record) => number_format($record->points_balance ?? 0, 0, ',', '.'),
-                        'no_rek_pegadaian' => fn($record) => $record->status_pegadaian == 1 && $record->no_rek_pegadaian ? ' ' . $record->no_rek_pegadaian : '', // Hanya tampil jika ada tabungan emas
                         'user.name' => fn($record) => $record->user->name ?? '',
                         'created_at' => fn($record) => $record->created_at ? date('d/m/Y H:i', strtotime($record->created_at)) : '',
                         'updated_at' => fn($record) => $record->updated_at ? date('d/m/Y H:i', strtotime($record->updated_at)) : '',
@@ -352,7 +339,6 @@ class RekeningResource extends Resource
                         TextColumn::make('rt')->label('RT'),
                         TextColumn::make('telepon')->label('No. Telepon'),
                         TextColumn::make('points_balance')->label('Poin'),
-                        TextColumn::make('no_rek_pegadaian')->label('No. Rek. Pegadaian'),
                         TextColumn::make('user.name')->label('Pembuat Rekening'),
                         TextColumn::make('created_at')->label('Waktu Dibuat'),
                         TextColumn::make('updated_at')->label('Terakhir Diubah'),
@@ -372,7 +358,6 @@ class RekeningResource extends Resource
                         'rt' => fn($record) => $record->rt,
                         'telepon' => fn($record) => $record->telepon ? ' ' . $record->telepon : '',
                         'points_balance' => fn($record) => number_format($record->points_balance ?? 0, 0, ',', '.'),
-                        'no_rek_pegadaian' => fn($record) => $record->status_pegadaian == 1 && $record->no_rek_pegadaian ? ' ' . $record->no_rek_pegadaian : '', // Hanya tampil jika ada tabungan emas
                         'user.name' => fn($record) => $record->user->name ?? '',
                         'created_at' => fn($record) => $record->created_at ? date('d/m/Y H:i', strtotime($record->created_at)) : '',
                         'updated_at' => fn($record) => $record->updated_at ? date('d/m/Y H:i', strtotime($record->updated_at)) : '',
