@@ -160,8 +160,8 @@ class SampahKeluarResource extends Resource
                 $rows .= "<tr>
                             <td style='padding:6px;'>{$sampah->jenis_sampah}</td>
                             <td style='padding:6px; text-align:center;'>{$berat} Kg</td>
-                            <td style='padding:6px; text-align:right;'>Rp " . number_format($harga, 2, ',', '.') . "</td>
                             <td style='padding:6px; text-align:right;'>Rp " . number_format($hargaPerKg, 2, ',', '.') . "</td>
+                            <td style='padding:6px; text-align:right;'>Rp " . number_format($harga, 2, ',', '.') . "</td>
                         </tr>";
                 $totalHarga += $harga;
                 $totalBerat += $berat;
@@ -171,8 +171,8 @@ class SampahKeluarResource extends Resource
         $totalRow = "<tr style='font-weight:bold; border-top:2px solid #333;'>
                         <td style='padding:6px;'>Total</td>
                         <td style='padding:6px; text-align:center;'>" . number_format($totalBerat, 2, ',', '.') . " Kg</td>
-                        <td style='padding:6px; text-align:right;'>Rp " . number_format($totalHarga, 2, ',', '.') . "</td>
                         <td style='padding:6px; text-align:right;'>Rp " . number_format($avgHargaPerKg, 2, ',', '.') . " (Rata-rata)</td>
+                        <td style='padding:6px; text-align:right;'>Rp " . number_format($totalHarga, 2, ',', '.') . "</td>
                     </tr>";
         $header = "<thead><tr style='background:#f3f4f6; text-align:left;'><th style='padding:6px;'>Jenis Sampah</th><th style='padding:6px; text-align:center;'>Berat</th><th style='padding:6px; text-align:right;'>Hasil Jual</th><th style='padding:6px; text-align:right;'>Harga/Kg</th></tr></thead>";
         return new HtmlString("<table style='width:100%; border-collapse:collapse;'>{$header}<tbody>{$rows}{$totalRow}</tbody></table>");
