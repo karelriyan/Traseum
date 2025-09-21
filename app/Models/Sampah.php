@@ -26,7 +26,7 @@ class Sampah extends Model
 
     public function detailSetorSampahs()
     {
-        return $this->hasMany(DetailSetorSampah::class);
+        return $this->hasMany(SampahTransactions::class);
     }
 
     protected static function booted(): void

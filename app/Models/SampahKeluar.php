@@ -21,6 +21,11 @@ class SampahKeluar extends Model
         return $this->belongsTo(Sampah::class);
     }
 
+    public function details()
+    {
+        return $this->morphMany(SampahTransactions::class, 'transactable');
+    }
+
     public function user()
     {
         return $this->belongsTo(User::class);

@@ -7,16 +7,16 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
 
-class DetailSetorSampah extends Model
+class SampahTransactions extends Model
 {
     use SoftDeletes, HasFactory;
 
-    protected $table = 'detail_setor_sampah';
+    protected $table = 'sampah_transactions';
     protected $guarded = [];
 
     public function setorSampah()
     {
-        return $this->belongsTo(SetorSampah::class);
+        return $this->morphTo(SetorSampah::class);
     }
 
     public function sampah()

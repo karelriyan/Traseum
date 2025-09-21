@@ -26,6 +26,20 @@ return new class extends Migration {
             $table->softDeletes();
         });
 
+        Schema::create('sampah_transactions', function (Blueprint $table) {
+            $table->bigIncrements('id');
+            $table->ulidMorphs('transactable')->index();
+            $table->foreignUlid('sampah_id')
+                ->constrained('sampah')
+                ->index()
+                ->name('fk_detail_setor_sampah_sampah');
+            $table->decimal('berat', 10, 4);
+            $table->string('description', 255);
+            $table->foreignUlid(column: 'user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_detail_setor_sampah_user');
+            $table->timestamps();
+            $table->softDeletes();
+        });
+
         Schema::create('poin_transactions', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignUlid('rekening_id')

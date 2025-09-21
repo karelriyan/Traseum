@@ -37,32 +37,18 @@ return new class extends Migration {
             $table->softDeletes();
         });
 
-        Schema::create('detail_setor_sampah', function (Blueprint $table) {
-            $table->bigIncrements('id');
-            $table->foreignUlid('setor_sampah_id')
-                ->constrained('setor_sampah')
-                ->index()
-                ->name('fk_detail_setor_sampah_setor_sampah');
-            $table->foreignUlid('sampah_id')
-                ->constrained('sampah')
-                ->index()
-                ->name('fk_detail_setor_sampah_sampah');
-            $table->decimal('berat', 8, 4);
-            $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_detail_setor_sampah_user');
-            $table->timestamps();
-            $table->softDeletes();
-        });
-
         Schema::create('sampah_keluar', function (Blueprint $table) {
             $table->ulid('id')->primary();
             $table->foreignUlid('sampah_id')
                 ->constrained('sampah')
                 ->index()
                 ->name('fk_sampah_keluar_sampah');
+            $table->string('jenis_keluar'); // 'jual' atau 'bakar'
             $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_sampah_keluar_user');
-            $table->decimal('berat_keluar', 15, 2);
+            $table->decimal('berat_keluar', 15, 4)->default(0);
             $table->date('tanggal_keluar')->index();
-            $table->text('keterangan')->nullable();
+            $table->decimal('total_saldo_dihasilkan', 15, 2)->default(0);
+            $table->boolean('calculation_performed')->default(false);
             $table->timestamps();
             $table->softDeletes();
         });
