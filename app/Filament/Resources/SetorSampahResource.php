@@ -54,7 +54,11 @@ class SetorSampahResource extends Resource
                             ->preload()
                             ->hidden(fn (Get $get) => $get('jenis_setoran') !== 'rekening')
                             ->required(fn (Get $get) => $get('jenis_setoran') === 'rekening'),
-                    ])->columns(2),
+
+                        Forms\Components\DatePicker::make('tanggal_setoran')
+                            ->label('Tanggal Setoran')
+                            ->required(),
+                    ])->columns(1),
 
                 Section::make('Detail Setoran Sampah')
                     ->schema([

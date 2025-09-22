@@ -54,13 +54,27 @@ export default function NewsLayout({ children, showBackButton = true, backUrl = 
             <footer className="mt-16 border-t border-gray-200 bg-white">
                 <div className="mx-auto max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
                     <div className="text-center">
-                        <p className="text-gray-600">© 2024 Bank Sampah Cipta Muri. All rights reserved.</p>
+                        <p className="text-gray-600 transition-colors duration-300 hover:text-gray-800">
+                            © 2025 Bank Sampah Cipta Muri. All rights reserved.
+                        </p>
                         <div className="mt-4 flex justify-center gap-6">
-                            <Link href="/" className="text-sm text-gray-500 transition-colors hover:text-green-600">
-                                Beranda
+                            <Link
+                                href="/"
+                                className="group relative text-sm text-gray-500 transition-all duration-300 hover:translate-y-[-2px] hover:text-green-600"
+                            >
+                                <span className="relative">
+                                    Beranda
+                                    <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-green-600 transition-all duration-300 group-hover:w-full"></span>
+                                </span>
                             </Link>
-                            <Link href="/berita" className="text-sm text-gray-500 transition-colors hover:text-green-600">
-                                Berita
+                            <Link
+                                href="/berita"
+                                className="group relative text-sm text-gray-500 transition-all duration-300 hover:translate-y-[-2px] hover:text-green-600"
+                            >
+                                <span className="relative">
+                                    Berita
+                                    <span className="absolute bottom-0 left-0 h-0.5 w-0 bg-green-600 transition-all duration-300 group-hover:w-full"></span>
+                                </span>
                             </Link>
                         </div>
                     </div>

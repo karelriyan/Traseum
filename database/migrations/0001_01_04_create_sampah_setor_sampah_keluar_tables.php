@@ -23,6 +23,7 @@ return new class extends Migration {
 
         Schema::create('setor_sampah', function (Blueprint $table) {
             $table->ulid('id')->primary();
+            $table->date('tanggal');
             $table->foreignUlid('rekening_id')
                 ->constrained('rekening')
                 ->index()
