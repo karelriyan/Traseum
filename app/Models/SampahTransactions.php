@@ -14,6 +14,12 @@ class SampahTransactions extends Model
     protected $table = 'sampah_transactions';
     protected $guarded = [];
 
+    public function rekening()
+    {
+        return $this->belongsTo(Rekening::class);
+    }
+
+
     public function setorSampah()
     {
         return $this->morphTo(SetorSampah::class);

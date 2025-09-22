@@ -33,6 +33,10 @@ return new class extends Migration {
                 ->constrained('sampah')
                 ->index()
                 ->name('fk_detail_setor_sampah_sampah');
+            $table->foreignUlid('rekening_id')
+                ->constrained('rekening')
+                ->index()
+                ->name('fk_detail_setor_sampah_rekening');
             $table->decimal('berat', 10, 4);
             $table->string('description', 255);
             $table->foreignUlid(column: 'user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_detail_setor_sampah_user');
