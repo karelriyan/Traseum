@@ -107,9 +107,43 @@ class SetorSampahResource extends Resource
                             Forms\Components\Actions\Action::make('hitung')
                                 ->label('Hitung Total')
                                 ->color('success')
+                                ->icon('heroicon-o-calculator')
                                 ->action(function (Get $get, Set $set) {
+                                    // Validasi data sebelum perhitungan
+                                    $items = $get('details');
+                                    
+                                    if (!is_array($items) || empty($items)) {
+                                        Notification::make()
+                                            ->title('Data Belum Lengkap')
+                                            ->body('Silakan tambahkan item sampah terlebih dahulu.')
+                                            ->warning()
+                                            ->send();
+                                        return;
+                                    }
+
+                                    $validItems = array_filter($items, function($item) {
+                                        return !empty($item['sampah_id']) && !empty($item['berat']) && is_numeric($item['berat']);
+                                    });
+
+                                    if (empty($validItems)) {
+                                        Notification::make()
+                                            ->title('Data Tidak Valid')
+                                            ->body('Pastikan jenis sampah dan berat sudah diisi dengan benar.')
+                                            ->danger()
+                                            ->send();
+                                        return;
+                                    }
+
+                                    // Lakukan perhitungan
                                     self::updateTotals($get, $set);
                                     $set('calculation_performed', true); // Set flag bahwa perhitungan sudah dilakukan
+                                    
+                                    // Notifikasi sukses
+                                    Notification::make()
+                                        ->title('Perhitungan Berhasil')
+                                        ->body('Total telah dihitung. Silakan periksa rincian di bawah.')
+                                        ->success()
+                                        ->send();
                                 }),
                         ])->columnSpanFull(),
 
@@ -121,12 +155,34 @@ class SetorSampahResource extends Resource
                                 $items = $get('details');
                                 $jenisSetoran = $get('jenis_setoran');
 
-                                if (!is_array($items) || empty($items[0]['sampah_id']) || empty($items[0]['berat'])) {
-                                    return new HtmlString('<p class="text-sm text-gray-500">Item sampah belum diisi dengan benar.</p>');
+                                // Debug: Log data untuk troubleshooting
+                                \Log::info('Calculation Debug', [
+                                    'items' => $items,
+                                    'calculation_performed' => $get('calculation_performed'),
+                                    'jenis_setoran' => $jenisSetoran
+                                ]);
+
+                                if (!is_array($items) || empty($items)) {
+                                    return new HtmlString('<p class="text-sm text-red-500">Belum ada item sampah yang ditambahkan.</p>');
                                 }
 
-                                $sampahData = Sampah::whereIn('id', array_column($items, 'sampah_id'))->get()->keyBy('id');
-                                return self::generateRincianHtml($items, $sampahData, $jenisSetoran);
+                                // Periksa apakah ada item yang valid
+                                $validItems = array_filter($items, function($item) {
+                                    return !empty($item['sampah_id']) && !empty($item['berat']) && is_numeric($item['berat']);
+                                });
+
+                                if (empty($validItems)) {
+                                    return new HtmlString('<p class="text-sm text-red-500">Item sampah belum diisi dengan benar. Pastikan jenis sampah dan berat sudah diisi.</p>');
+                                }
+
+                                $sampahIds = array_column($validItems, 'sampah_id');
+                                $sampahData = Sampah::whereIn('id', $sampahIds)->get()->keyBy('id');
+                                
+                                if ($sampahData->isEmpty()) {
+                                    return new HtmlString('<p class="text-sm text-red-500">Data sampah tidak ditemukan.</p>');
+                                }
+
+                                return self::generateRincianHtml($validItems, $sampahData, $jenisSetoran);
                             })
                             ->columnSpanFull(),
                     ]),
@@ -191,7 +247,7 @@ class SetorSampahResource extends Resource
                     </tr>";
 
         $header = "<thead>
-                    <tr style='background:#f3f4f6; text-align:left;'>
+                    <tr text-align:left;'>
                         <th style='padding:6px;'>Jenis Sampah</th>
                         <th style='padding:6px; text-align:center;'>Berat</th>
                         " . ($jenisSetoran !== 'donasi' ? "<th style='padding:6px; text-align:right;'>Saldo</th>" : '') . "
@@ -207,7 +263,7 @@ class SetorSampahResource extends Resource
         return new HtmlString($html);
     }
 
-    // Fungsi updateTotals tidak berubah, sudah baik.
+    // Fungsi updateTotals dengan debugging dan validasi yang lebih baik
     public static function updateTotals(Get $get, Set $set): void
     {
         $items = $get('details');
@@ -215,19 +271,46 @@ class SetorSampahResource extends Resource
         $totalPoin = 0;
         $totalBerat = 0;
 
-        if (is_array($items)) {
-            $sampahIds = array_filter(array_column($items, 'sampah_id'));
-            if (!empty($sampahIds)) {
-                $sampahData = Sampah::whereIn('id', $sampahIds)->get()->keyBy('id');
-                foreach ($items as $item) {
-                    if (empty($item['berat']) || !is_numeric($item['berat'])) continue;
+        // Debug: Log data input
+        \Log::info('UpdateTotals Debug', [
+            'items' => $items,
+            'is_array' => is_array($items)
+        ]);
 
+        if (is_array($items) && !empty($items)) {
+            // Filter item yang valid
+            $validItems = array_filter($items, function($item) {
+                return !empty($item['sampah_id']) && !empty($item['berat']) && is_numeric($item['berat']);
+            });
+
+            if (!empty($validItems)) {
+                $sampahIds = array_column($validItems, 'sampah_id');
+                $sampahData = Sampah::whereIn('id', $sampahIds)->get()->keyBy('id');
+                
+                \Log::info('Sampah Data Found', [
+                    'sampah_ids' => $sampahIds,
+                    'sampah_data_count' => $sampahData->count()
+                ]);
+
+                foreach ($validItems as $item) {
                     $sampah = $sampahData->get($item['sampah_id']);
                     if ($sampah) {
                         $berat = (float) $item['berat'];
+                        $saldoItem = $sampah->saldo_per_kg * $berat;
+                        $poinItem = $sampah->poin_per_kg * $berat;
+                        
                         $totalBerat += $berat;
-                        $totalSaldo += $sampah->saldo_per_kg * $berat;
-                        $totalPoin += $sampah->poin_per_kg * $berat;
+                        $totalSaldo += $saldoItem;
+                        $totalPoin += $poinItem;
+
+                        \Log::info('Item Calculation', [
+                            'sampah' => $sampah->jenis_sampah,
+                            'berat' => $berat,
+                            'saldo_per_kg' => $sampah->saldo_per_kg,
+                            'poin_per_kg' => $sampah->poin_per_kg,
+                            'saldo_item' => $saldoItem,
+                            'poin_item' => $poinItem
+                        ]);
                     }
                 }
             }
@@ -236,6 +319,12 @@ class SetorSampahResource extends Resource
         $set('total_saldo_dihasilkan', round($totalSaldo));
         $set('total_poin_dihasilkan', round($totalPoin));
         $set('berat', round($totalBerat, 4));
+
+        \Log::info('Final Totals', [
+            'total_saldo' => $totalSaldo,
+            'total_poin' => $totalPoin,
+            'total_berat' => $totalBerat
+        ]);
     }
 
     // ... sisa dari resource (table, getPages) tidak perlu diubah ...
