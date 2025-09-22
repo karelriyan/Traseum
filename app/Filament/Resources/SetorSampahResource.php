@@ -48,12 +48,12 @@ class SetorSampahResource extends Resource
 
                         Forms\Components\Select::make('rekening_id')
                             ->label('Pilih Rekening Nasabah')
-                            ->relationship('rekening', 'nama', modifyQueryUsing: fn ($query) => $query->where('no_rekening', '!=', '00000000'))
-                            ->getOptionLabelFromRecordUsing(fn (Rekening $record) => "{$record->nama} - {$record->nik}")
+                            ->relationship('rekening', 'nama', modifyQueryUsing: fn($query) => $query->where('no_rekening', '!=', '00000000'))
+                            ->getOptionLabelFromRecordUsing(fn(Rekening $record) => "{$record->nama} - {$record->nik}")
                             ->searchable(['nama', 'nik'])
                             ->preload()
-                            ->hidden(fn (Get $get) => $get('jenis_setoran') !== 'rekening')
-                            ->required(fn (Get $get) => $get('jenis_setoran') === 'rekening'),
+                            ->hidden(fn(Get $get) => $get('jenis_setoran') !== 'rekening')
+                            ->required(fn(Get $get) => $get('jenis_setoran') === 'rekening'),
 
                         Forms\Components\DatePicker::make('tanggal')
                             ->label('Tanggal Setoran')
@@ -83,6 +83,18 @@ class SetorSampahResource extends Resource
                                     ->minValue(0.01)
                                     ->step(0.01)
                                     ->columnSpan(1),
+                                Forms\Components\Hidden::make('rekening_id')
+                                    ->default(function (Get $get) {
+                                        // Jika jenis setoran = donasi, pakai rekening donasi
+                                        if ($get('../../jenis_setoran') === 'donasi') {
+                                            $rekening = Rekening::where('no_rekening', '00000000')->first();
+                                            return $rekening?->id;
+                                        }
+
+                                        // Jika rekening nasabah dipilih, pakai itu
+                                        return $get('../../rekening_id');
+                                    })
+                                    ->dehydrated(),
                             ])
                             ->columns(3)
                             // DIHAPUS: Atribut live() dan afterStateUpdated() untuk mencegah reload otomatis
@@ -111,7 +123,7 @@ class SetorSampahResource extends Resource
                                 ->action(function (Get $get, Set $set) {
                                     // Validasi data sebelum perhitungan
                                     $items = $get('details');
-                                    
+
                                     if (!is_array($items) || empty($items)) {
                                         Notification::make()
                                             ->title('Data Belum Lengkap')
@@ -121,7 +133,7 @@ class SetorSampahResource extends Resource
                                         return;
                                     }
 
-                                    $validItems = array_filter($items, function($item) {
+                                    $validItems = array_filter($items, function ($item) {
                                         return !empty($item['sampah_id']) && !empty($item['berat']) && is_numeric($item['berat']);
                                     });
 
@@ -137,7 +149,7 @@ class SetorSampahResource extends Resource
                                     // Lakukan perhitungan
                                     self::updateTotals($get, $set);
                                     $set('calculation_performed', true); // Set flag bahwa perhitungan sudah dilakukan
-                                    
+                        
                                     // Notifikasi sukses
                                     Notification::make()
                                         ->title('Perhitungan Berhasil')
@@ -150,7 +162,7 @@ class SetorSampahResource extends Resource
                         // Placeholder rincian, hanya muncul SETELAH tombol 'Hitung' ditekan
                         Forms\Components\Placeholder::make('rincian_placeholder')
                             ->label('Rincian')
-                            ->visible(fn (Get $get) => (bool) $get('calculation_performed')) // <-- Hanya tampil jika perhitungan selesai
+                            ->visible(fn(Get $get) => (bool) $get('calculation_performed')) // <-- Hanya tampil jika perhitungan selesai
                             ->content(function (Get $get) {
                                 $items = $get('details');
                                 $jenisSetoran = $get('jenis_setoran');
@@ -167,7 +179,7 @@ class SetorSampahResource extends Resource
                                 }
 
                                 // Periksa apakah ada item yang valid
-                                $validItems = array_filter($items, function($item) {
+                                $validItems = array_filter($items, function ($item) {
                                     return !empty($item['sampah_id']) && !empty($item['berat']) && is_numeric($item['berat']);
                                 });
 
@@ -177,7 +189,7 @@ class SetorSampahResource extends Resource
 
                                 $sampahIds = array_column($validItems, 'sampah_id');
                                 $sampahData = Sampah::whereIn('id', $sampahIds)->get()->keyBy('id');
-                                
+
                                 if ($sampahData->isEmpty()) {
                                     return new HtmlString('<p class="text-sm text-red-500">Data sampah tidak ditemukan.</p>');
                                 }
@@ -224,7 +236,8 @@ class SetorSampahResource extends Resource
         $rows = '';
 
         foreach ($items as $item) {
-            if (empty($item['sampah_id']) || empty($item['berat']) || !is_numeric($item['berat'])) continue;
+            if (empty($item['sampah_id']) || empty($item['berat']) || !is_numeric($item['berat']))
+                continue;
 
             $sampah = $sampahData->get($item['sampah_id']);
             if ($sampah) {
@@ -279,14 +292,14 @@ class SetorSampahResource extends Resource
 
         if (is_array($items) && !empty($items)) {
             // Filter item yang valid
-            $validItems = array_filter($items, function($item) {
+            $validItems = array_filter($items, function ($item) {
                 return !empty($item['sampah_id']) && !empty($item['berat']) && is_numeric($item['berat']);
             });
 
             if (!empty($validItems)) {
                 $sampahIds = array_column($validItems, 'sampah_id');
                 $sampahData = Sampah::whereIn('id', $sampahIds)->get()->keyBy('id');
-                
+
                 \Log::info('Sampah Data Found', [
                     'sampah_ids' => $sampahIds,
                     'sampah_data_count' => $sampahData->count()
@@ -298,7 +311,7 @@ class SetorSampahResource extends Resource
                         $berat = (float) $item['berat'];
                         $saldoItem = $sampah->saldo_per_kg * $berat;
                         $poinItem = $sampah->poin_per_kg * $berat;
-                        
+
                         $totalBerat += $berat;
                         $totalSaldo += $saldoItem;
                         $totalPoin += $poinItem;
@@ -336,9 +349,9 @@ class SetorSampahResource extends Resource
                     ->label('Nasabah / Jenis')
                     ->sortable()
                     ->searchable()
-                    ->formatStateUsing(fn ($state, $record) => $record->isDonation() ? 'Donasi' : $state)
+                    ->formatStateUsing(fn($state, $record) => $record->isDonation() ? 'Donasi' : $state)
                     ->badge()
-                    ->color(fn ($record) => $record->isDonation() ? 'success' : 'gray'),
+                    ->color(fn($record) => $record->isDonation() ? 'success' : 'gray'),
 
                 TextColumn::make('details.sampah.jenis_sampah')
                     ->label('Item Sampah')
