@@ -24,7 +24,7 @@ class Sampah extends Model
         return $this->belongsTo(User::class);
     }
 
-    public function detailSetorSampahs()
+    public function details()
     {
         return $this->hasMany(SampahTransactions::class);
     }
