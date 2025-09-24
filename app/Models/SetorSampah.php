@@ -90,28 +90,20 @@ class SetorSampah extends Model
 
         // Event ini berjalan SETELAH data disimpan
         static::created(function ($setorSampah) {
-            if ($setorSampah->rekening) {
-                $rekening = $setorSampah->rekening;
+            // Hanya jalankan jika bukan donasi dan ada saldo yang dihasilkan
+            if (!$setorSampah->isDonation() && $setorSampah->total_saldo_dihasilkan > 0) {
+                if ($setorSampah->rekening) {
+                    $rekening = $setorSampah->rekening;
 
-                // Untuk donasi, nilai increment adalah 0, jadi tidak ada perubahan saldo.
-                $rekening->increment('balance', $setorSampah->total_saldo_dihasilkan);
-                $rekening->increment('points_balance', $setorSampah->total_poin_dihasilkan);
+                    // Update saldo rekening
+                    $rekening->increment('balance', $setorSampah->total_saldo_dihasilkan);
 
-                // Tetap buat transaksi saldo untuk jejak audit, meskipun nominalnya 0 untuk donasi.
-                SaldoTransaction::create([
-                    'rekening_id' => $rekening->id,
-                    'amount' => $setorSampah->total_saldo_dihasilkan,
-                    'type' => 'credit',
-                    'description' => $setorSampah->isDonation() ? 'Donasi sampah' : 'Penambahan saldo dari setor sampah',
-                    'transactable_id' => $setorSampah->id,
-                    'transactable_type' => self::class,
-                ]);
-
-                if ($setorSampah->total_poin_dihasilkan > 0) {
-                    PoinTransaction::create([
+                    // Buat transaksi saldo untuk jejak audit
+                    SaldoTransaction::create([
                         'rekening_id' => $rekening->id,
-                        'amount' => $setorSampah->total_poin_dihasilkan,
-                        'description' => 'Penambahan poin dari setor sampah',
+                        'amount' => $setorSampah->total_saldo_dihasilkan,
+                        'type' => 'credit',
+                        'description' => 'Penambahan saldo dari setor sampah',
                         'transactable_id' => $setorSampah->id,
                         'transactable_type' => self::class,
                     ]);
@@ -120,15 +112,10 @@ class SetorSampah extends Model
         });
 
         static::updated(function ($setorSampah) {
-            if ($setorSampah->wasChanged('total_saldo_dihasilkan') || $setorSampah->wasChanged('total_poin_dihasilkan')) {
+            if ($setorSampah->wasChanged('total_saldo_dihasilkan')) {
                 if ($setorSampah->rekening) {
                     $saldoLama = $setorSampah->getOriginal('total_saldo_dihasilkan') ?? 0;
                     $perubahanSaldo = $setorSampah->total_saldo_dihasilkan - $saldoLama;
-                    $setorSampah->rekening->increment('balance', $perubahanSaldo);
-
-                    $poinLama = $setorSampah->getOriginal('total_poin_dihasilkan') ?? 0;
-                    $perubahanPoin = $setorSampah->total_poin_dihasilkan - $poinLama;
-                    $setorSampah->rekening->increment('points_balance', $perubahanPoin);
 
                     // Log transaksi koreksi jika ada perubahan
                     if ($perubahanSaldo != 0) {
@@ -146,38 +133,37 @@ class SetorSampah extends Model
         });
 
         static::deleting(function ($setorSampah) {
-            if ($setorSampah->rekening) {
-                // Untuk donasi, nilai decrement adalah 0.
-                $setorSampah->rekening->decrement('balance', $setorSampah->total_saldo_dihasilkan);
-                $setorSampah->rekening->decrement('points_balance', $setorSampah->total_poin_dihasilkan);
+            if (!$setorSampah->isDonation() && $setorSampah->total_saldo_dihasilkan > 0) {
+                if ($setorSampah->rekening) {
+                    $setorSampah->rekening->decrement('balance', $setorSampah->total_saldo_dihasilkan);
 
-                SaldoTransaction::create([
-                    'rekening_id' => $setorSampah->rekening_id,
-                    'amount' => $setorSampah->total_saldo_dihasilkan,
-                    'type' => 'debit',
-                    'description' => 'Pembatalan setor sampah',
-                    'transactable_id' => $setorSampah->id,
-                    'transactable_type' => self::class,
-                ]);
+                    SaldoTransaction::create([
+                        'rekening_id' => $setorSampah->rekening_id,
+                        'amount' => $setorSampah->total_saldo_dihasilkan,
+                        'type' => 'debit',
+                        'description' => 'Pembatalan setor sampah',
+                        'transactable_id' => $setorSampah->id,
+                        'transactable_type' => self::class,
+                    ]);
+                }
             }
         });
 
         static::restored(function ($setorSampah) {
-            if ($setorSampah->rekening) {
-                // Untuk donasi, nilai increment adalah 0.
-                $setorSampah->rekening->increment('balance', $setorSampah->total_saldo_dihasilkan);
-                $setorSampah->rekening->increment('points_balance', $setorSampah->total_poin_dihasilkan);
+            if (!$setorSampah->isDonation() && $setorSampah->total_saldo_dihasilkan > 0) {
+                if ($setorSampah->rekening) {
+                    $setorSampah->rekening->increment('balance', $setorSampah->total_saldo_dihasilkan);
 
-                SaldoTransaction::create([
-                    'rekening_id' => $setorSampah->rekening_id,
-                    'amount' => $setorSampah->total_saldo_dihasilkan,
-                    'type' => 'credit',
-                    'description' => 'Pemulihan data setor sampah',
-                    'transactable_id' => $setorSampah->id,
-                    'transactable_type' => self::class,
-                ]);
+                    SaldoTransaction::create([
+                        'rekening_id' => $setorSampah->rekening_id,
+                        'amount' => $setorSampah->total_saldo_dihasilkan,
+                        'type' => 'credit',
+                        'description' => 'Pemulihan data setor sampah',
+                        'transactable_id' => $setorSampah->id,
+                        'transactable_type' => self::class,
+                    ]);
+                }
             }
         });
     }
 }
-

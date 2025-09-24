@@ -83,18 +83,6 @@ class SetorSampahResource extends Resource
                                     ->minValue(0.01)
                                     ->step(0.01)
                                     ->columnSpan(1),
-                                Forms\Components\Hidden::make('rekening_id')
-                                    ->default(function (Get $get) {
-                                        // Jika jenis setoran = donasi, pakai rekening donasi
-                                        if ($get('../../jenis_setoran') === 'donasi') {
-                                            $rekening = Rekening::where('no_rekening', '00000000')->first();
-                                            return $rekening?->id;
-                                        }
-
-                                        // Jika rekening nasabah dipilih, pakai itu
-                                        return $get('../../rekening_id');
-                                    })
-                                    ->dehydrated(),
                             ])
                             ->columns(3)
                             // DIHAPUS: Atribut live() dan afterStateUpdated() untuk mencegah reload otomatis
@@ -102,7 +90,16 @@ class SetorSampahResource extends Resource
                             ->addActionLabel('Tambah Jenis Sampah')
                             ->defaultItems(1)
                             ->minItems(1)
-                            ->required(),
+                            ->required()
+                            ->mutateRelationshipDataBeforeCreate(function (array $data, Get $get): array {
+                                if ($get('jenis_setoran') === 'donasi') {
+                                    $rekeningDonasi = Rekening::where('no_rekening', '00000000')->first();
+                                    $data['rekening_id'] = $rekeningDonasi?->id;
+                                } else {
+                                    $data['rekening_id'] = $get('rekening_id');
+                                }
+                                return $data;
+                            }),
                     ]),
 
                 Section::make('Perhitungan dan Rincian')
@@ -391,4 +388,3 @@ class SetorSampahResource extends Resource
         ];
     }
 }
-
