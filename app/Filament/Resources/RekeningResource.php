@@ -179,6 +179,23 @@ class RekeningResource extends Resource
                 ])
                 ->columns(1),
 
+            Section::make('Saldo Awal')
+                ->description('Saldo awal hanya dapat diisi saat pembuatan rekening baru. Setelah rekening dibuat, saldo awal tidak dapat diubah.')
+                ->schema([
+                    TextInput::make('saldo_awal')
+                        ->label('Saldo Awal (Rp)')
+                        ->numeric()
+                        ->default(0)
+                        ->minValue(0)
+                        ->prefix('Rp')
+                        ->placeholder('0')
+                        ->validationMessages([
+                            'min_value' => 'Saldo awal tidak boleh kurang dari 0',
+                        ]),
+                ])
+                ->columns(1)
+                ->visible(fn(string $context): bool => $context === 'create'),
+
             Section::make('Informasi Tabungan Emas Pegadaian')
                 ->schema([
                     Toggle::make('status_pegadaian')

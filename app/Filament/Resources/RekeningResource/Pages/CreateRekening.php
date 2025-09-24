@@ -4,6 +4,7 @@ namespace App\Filament\Resources\RekeningResource\Pages;
 
 use App\Filament\Resources\RekeningResource;
 use App\Models\Rekening;
+use App\Models\SaldoTransaction;
 use Filament\Resources\Pages\CreateRecord;
 use Illuminate\Support\Carbon;
 use Filament\Notifications\Notification;
@@ -40,6 +41,18 @@ class CreateRekening extends CreateRecord
 
     protected function afterCreate(): void
     {
+        // Create initial balance transaction if saldo_awal > 0
+        if ($this->record->saldo_awal && $this->record->saldo_awal > 0) {
+            SaldoTransaction::create([
+                'rekening_id' => $this->record->id,
+                'type' => 'credit',
+                'amount' => $this->record->saldo_awal,
+                'description' => 'Saldo awal rekening',
+                'transactable_type' => null,
+                'transactable_id' => null,
+            ]);
+        }
+
         // Check the status_lengkap field of the record that was just created.
         // The value was set by the `saving` event in your Rekening model.
         if (!$this->record->status_lengkap) {
