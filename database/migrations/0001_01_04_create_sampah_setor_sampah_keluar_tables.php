@@ -40,10 +40,6 @@ return new class extends Migration {
 
         Schema::create('sampah_keluar', function (Blueprint $table) {
             $table->ulid('id')->primary();
-            $table->foreignUlid('sampah_id')
-                ->constrained('sampah')
-                ->index()
-                ->name('fk_sampah_keluar_sampah');
             $table->string('jenis_keluar'); // 'jual' atau 'bakar'
             $table->foreignUlid('user_id')->nullable()->constrained('users')->nullOnDelete()->index()->name('fk_sampah_keluar_user');
             $table->decimal('berat_keluar', 15, 4)->default(0);
