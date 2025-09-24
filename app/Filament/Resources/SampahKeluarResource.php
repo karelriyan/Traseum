@@ -58,9 +58,17 @@ class SampahKeluarResource extends Resource
                                     ->label('Jenis Sampah')
                                     ->required()->preload()->searchable()->distinct()
                                     ->disableOptionsWhenSelectedInSiblingRepeaterItems()
+                                    ->afterStateHydrated(function (Forms\Components\Select $component, $state) {
+                                        // Simpan nilai awal untuk validasi di langkah selanjutnya
+                                        $component->state($state);
+                                    })
                                     ->columnSpan(['md' => 2]),
                                 Forms\Components\TextInput::make('berat')
                                     ->label('Berat')
+                                    ->helperText(function (Get $get, $state) {
+                                        $sampahId = $get('sampah_id');
+                                        return $sampahId ? 'Total berat terkumpul: ' . number_format(\App\Models\Sampah::find($sampahId)?->total_berat_terkumpul ?? 0, 2) . ' Kg' : 'Pilih jenis sampah terlebih dahulu.';
+                                    })
                                     ->postfix('Kg')->numeric()->required()->minValue(0.01)
                                     ->columnSpan(['md' => 1]),
                                 // --- INPUT HARGA KONDISIONAL ---
@@ -142,6 +150,21 @@ class SampahKeluarResource extends Resource
         }
         $set('total_harga_jual', $totalHarga);
         $set('total_berat', $totalBerat);
+    }
+
+    public static function mutateRelationshipDataBeforeCreate(array $data): array
+    {
+        $sampah = Sampah::find($data['sampah_id']);
+        if ($sampah && isset($data['berat'])) {
+            // Pastikan berat yang dimasukkan tidak melebihi total berat terkumpul
+            if ($data['berat'] > $sampah->total_berat_terkumpul) {
+                Notification::make()
+                    ->title('Berat Melebihi Batas')
+                    ->body('Berat yang dimasukkan melebihi total berat terkumpul untuk jenis sampah ini.')
+                    ->danger()->send();
+            }
+        }
+        return $data;
     }
 
     public static function generateRincianHtmlJual(array $items, Collection $sampahData): HtmlString
