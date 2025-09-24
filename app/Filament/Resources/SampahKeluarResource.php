@@ -64,7 +64,7 @@ class SampahKeluarResource extends Resource
                                     ->label('Berat')
                                     ->helperText(function (Get $get, $state) {
                                         $sampahId = $get('sampah_id');
-                                        return $sampahId ? 'Total berat terkumpul: ' . number_format(\App\Models\Sampah::find($sampahId)?->total_berat_terkumpul ?? 0, 2) . ' Kg' : 'Pilih jenis sampah terlebih dahulu.';
+                                        return $sampahId ? 'Total berat terkumpul: ' . number_format(\App\Models\Sampah::find($sampahId)?->berat_keluar_terkumpul ?? 0, 2) . ' Kg' : 'Pilih jenis sampah terlebih dahulu.';
                                     })
                                     ->postfix('Kg')->numeric()->required()->minValue(0.01)
                                     ->columnSpan(['md' => 1]),
@@ -86,8 +86,8 @@ class SampahKeluarResource extends Resource
                     ->hidden(fn(Get $get) => $get('jenis_keluar') !== 'jual') // Sembunyikan jika 'bakar'
                     ->schema([
                         Forms\Components\Hidden::make('calculation_performed')->default(false)->dehydrated(true),
-                        Forms\Components\Hidden::make('total_harga_jual')->default(0),
-                        Forms\Components\Hidden::make('total_berat')->default(0),
+                        Forms\Components\Hidden::make('total_saldo_dihasilkan')->default(0),
+                        Forms\Components\Hidden::make('berat_keluar')->default(0),
                         Forms\Components\Hidden::make('user_id')->default(auth()->id()),
 
                         Forms\Components\Actions::make([
@@ -120,7 +120,7 @@ class SampahKeluarResource extends Resource
         foreach ($items as $item) {
             $totalBerat += (float) ($item['berat'] ?? 0);
         }
-        $data['total_berat'] = $totalBerat;
+        $data['berat_keluar'] = $totalBerat;
         $data['user_id'] = auth()->id();
 
         if ($data['jenis_keluar'] === 'jual') {
@@ -129,7 +129,7 @@ class SampahKeluarResource extends Resource
                 throw \Illuminate\Validation\ValidationException::withMessages(['hitung_jual' => 'Tombol hitung harus ditekan.']);
             }
         } else { // jenis_keluar === 'bakar'
-            $data['total_harga_jual'] = 0;
+            $data['total_saldo_dihasilkan'] = 0;
         }
         return $data;
     }
@@ -145,8 +145,8 @@ class SampahKeluarResource extends Resource
                 $totalHarga += (float) ($item['harga_jual'] ?? 0);
             }
         }
-        $set('total_harga_jual', $totalHarga);
-        $set('total_berat', $totalBerat);
+        $set('total_saldo_dihasilkan', $totalHarga);
+        $set('berat_keluar', $totalBerat);
     }
 
     public static function mutateRelationshipDataBeforeCreate(array $data): array
@@ -154,7 +154,7 @@ class SampahKeluarResource extends Resource
         $sampah = Sampah::find($data['sampah_id']);
         if ($sampah && isset($data['berat'])) {
             // Pastikan berat yang dimasukkan tidak melebihi total berat terkumpul
-            if ($data['berat'] > $sampah->total_berat_terkumpul) {
+            if ($data['berat'] > $sampah->berat_keluar_terkumpul) {
                 Notification::make()
                     ->title('Berat Melebihi Batas')
                     ->body('Berat yang dimasukkan melebihi total berat terkumpul untuk jenis sampah ini.')
@@ -208,8 +208,8 @@ class SampahKeluarResource extends Resource
                         'bakar' => 'danger',
                     }),
                 TextColumn::make('tanggal_keluar')->date()->label('Tanggal')->sortable(),
-                TextColumn::make('total_berat')->label('Total Berat (Kg)')->sortable()->weight('bold'),
-                TextColumn::make('total_harga_jual')->label('Total Hasil Jual')->sortable()->money('IDR')
+                TextColumn::make('berat_keluar')->label('Total Berat (Kg)')->sortable()->weight('bold'),
+                TextColumn::make('total_saldo_dihasilkan')->label('Total Hasil Jual')->sortable()->money('IDR')
                     ->formatStateUsing(fn(string $state) => $state > 0 ? "Rp " . number_format($state, 0, ',', '.') : '-'),
                 TextColumn::make('user.name')->label('Petugas')->sortable(),
                 TextColumn::make('created_at')->dateTime()->label('Dibuat')->toggleable(isToggledHiddenByDefault: true),
