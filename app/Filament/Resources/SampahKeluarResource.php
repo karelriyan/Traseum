@@ -42,9 +42,6 @@ class SampahKeluarResource extends Resource
                             ->label('Tanggal Keluar')
                             ->default(now())
                             ->required(),
-                        Forms\Components\Textarea::make('keterangan')
-                            ->label('Keterangan (misal: dijual ke Pengepul A)')
-                            ->columnSpanFull(),
                     ])->columns(2),
 
                 Section::make('Detail Sampah')
