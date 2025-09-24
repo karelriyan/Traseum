@@ -81,7 +81,7 @@ class SampahResource extends Resource
     public static function getRelations(): array
     {
         return [
-            RelationManagers\DetailSetorSampahRelationManager::class,
+            RelationManagers\SampahTransactionsRelationManager::class,
         ];
     }
 
