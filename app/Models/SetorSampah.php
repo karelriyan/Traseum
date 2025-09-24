@@ -90,24 +90,22 @@ class SetorSampah extends Model
 
         // Event ini berjalan SETELAH data disimpan
         static::created(function ($setorSampah) {
-            // Hanya jalankan jika bukan donasi dan ada saldo yang dihasilkan
-            if (!$setorSampah->isDonation() && $setorSampah->total_saldo_dihasilkan > 0) {
-                if ($setorSampah->rekening) {
-                    $rekening = $setorSampah->rekening;
+            // Hanya jalankan jika BUKAN donasi, ada saldo yang dihasilkan, DAN relasi rekening ada.
+            if (!$setorSampah->isDonation() && $setorSampah->total_saldo_dihasilkan > 0 && $setorSampah->rekening) {
+                $rekening = $setorSampah->rekening;
 
-                    // Update saldo rekening
-                    $rekening->increment('balance', $setorSampah->total_saldo_dihasilkan);
+                // Update saldo rekening (sudah tidak diperlukan karena dihitung dari transaksi)
+                // $rekening->increment('balance', $setorSampah->total_saldo_dihasilkan);
 
-                    // Buat transaksi saldo untuk jejak audit
-                    SaldoTransaction::create([
-                        'rekening_id' => $rekening->id,
-                        'amount' => $setorSampah->total_saldo_dihasilkan,
-                        'type' => 'credit',
-                        'description' => 'Penambahan saldo dari setor sampah',
-                        'transactable_id' => $setorSampah->id,
-                        'transactable_type' => self::class,
-                    ]);
-                }
+                // Buat transaksi saldo untuk jejak audit
+                SaldoTransaction::create([
+                    'rekening_id' => $rekening->id,
+                    'amount' => $setorSampah->total_saldo_dihasilkan,
+                    'type' => 'credit',
+                    'description' => 'Penambahan saldo dari setor sampah',
+                    'transactable_id' => $setorSampah->id,
+                    'transactable_type' => self::class,
+                ]);
             }
         });
 
