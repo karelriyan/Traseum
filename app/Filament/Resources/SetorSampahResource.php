@@ -91,15 +91,7 @@ class SetorSampahResource extends Resource
                             ->defaultItems(1)
                             ->minItems(1)
                             ->required()
-                            ->mutateRelationshipDataBeforeCreate(function (array $data, Get $get): array {
-                                if ($get('jenis_setoran') === 'donasi') {
-                                    $rekeningDonasi = Rekening::where('no_rekening', '00000000')->first();
-                                    $data['rekening_id'] = $rekeningDonasi?->id;
-                                } else {
-                                    $data['rekening_id'] = $get('rekening_id');
-                                }
-                                return $data;
-                            }),
+                        , // Hapus ->mutateRelationshipDataBeforeCreate dari sini
                     ]),
 
                 Section::make('Perhitungan dan Rincian')
@@ -220,6 +212,22 @@ class SetorSampahResource extends Resource
             throw \Illuminate\Validation\ValidationException::withMessages([
                 'hitung' => 'Tombol "Hitung Total" harus ditekan terlebih dahulu.',
             ]);
+        }
+
+        return $data;
+    }
+
+    // DIKEMBALIKAN: Lifecycle hook untuk memodifikasi data relasi sebelum dibuat
+    public static function mutateRelationshipDataBeforeCreate(array $data): array
+    {
+        // Karena hook ini tidak memiliki akses ke state form, kita perlu mengambilnya dari request.
+        $formData = request('components.0.data');
+
+        if (isset($formData['jenis_setoran']) && $formData['jenis_setoran'] === 'donasi') {
+            $rekeningDonasi = Rekening::where('no_rekening', '00000000')->first();
+            $data['rekening_id'] = $rekeningDonasi?->id;
+        } else {
+            $data['rekening_id'] = $formData['rekening_id'] ?? null;
         }
 
         return $data;
