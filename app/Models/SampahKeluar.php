@@ -34,16 +34,6 @@ class SampahKeluar extends Model
 
     protected static function booted(): void
     {
-        static::creating(function ($SampahKeluar) {
-            if (!$SampahKeluar->user_id && Auth::check()) {
-                $SampahKeluar->user_id = Auth::id();
-            }
-
-            if (!$SampahKeluar->rekening_id) {
-                $SampahKeluar->rekening_id = Rekening::where('no_rekening', '00000000')->value('id');
-            }
-        });
-
-
+        // All logic is moved to SampahKeluarObserver
     }
 }

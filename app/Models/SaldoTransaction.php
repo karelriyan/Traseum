@@ -14,6 +14,10 @@ class SaldoTransaction extends Model
 
     protected $table = 'saldo_transactions';
 
+    protected $casts = [
+        'amount' => 'decimal:2',
+    ];
+
     protected $guarded = [];
 
     public function rekening()

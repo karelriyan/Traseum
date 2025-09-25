@@ -24,7 +24,7 @@ class Rekening extends Model
     /**
      * The accessors to append to the model's array form.
      */
-    protected $appends = ['current_balance', 'points_balance', 'formatted_balance'];
+    protected $appends = ['points_balance', 'formatted_balance'];
 
     public function saldoTransactions()
     {
@@ -47,20 +47,19 @@ class Rekening extends Model
     }
 
     /**
-     * Menghitung saldo saat ini berdasarkan transaksi
+     * Menghitung ulang total saldo dari transaksi dan menyimpannya.
+     * Ini akan dipanggil oleh SaldoTransactionObserver.
      */
-    public function getCurrentBalanceAttribute()
+    public function recalculateBalance(): void
     {
-        $credits = $this->saldoTransactions()
-            ->where('type', 'credit')
-            ->sum('amount');
-
-        $debits = $this->saldoTransactions()
-            ->where('type', 'debit')
-            ->sum('amount');
-
-        return $credits - $debits;
+        $credits = $this->saldoTransactions()->where('type', 'credit')->sum('amount');
+        $debits = $this->saldoTransactions()->where('type', 'debit')->sum('amount');
+        $this->balance = $credits - $debits;
+        $this->saveQuietly(); // Simpan tanpa memicu event lain
     }
+
+    // Hapus accessor `getCurrentBalanceAttribute` karena saldo sekarang disimpan di kolom `balance`.
+    // Kita akan menggunakan nilai dari kolom `balance` secara langsung.
 
     /**
      * Menghitung saldo poin saat ini berdasarkan transaksi
@@ -77,7 +76,7 @@ class Rekening extends Model
      */
     public function hasSufficientBalance($amount)
     {
-        return $this->current_balance >= $amount;
+        return $this->balance >= $amount;
     }
 
     /**
@@ -85,7 +84,7 @@ class Rekening extends Model
      */
     public function getFormattedBalanceAttribute()
     {
-        return 'Rp ' . number_format($this->current_balance, 0, ',', '.');
+        return 'Rp ' . number_format($this->balance, 0, ',', '.');
     }
 
 

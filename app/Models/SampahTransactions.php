@@ -14,6 +14,10 @@ class SampahTransactions extends Model
     protected $table = 'sampah_transactions';
     protected $guarded = [];
 
+    protected $casts = [
+        'berat' => 'decimal:2',
+    ];
+
     public function rekening()
     {
         return $this->belongsTo(Rekening::class);
@@ -40,34 +44,6 @@ class SampahTransactions extends Model
         static::creating(function ($detail) {
             if (!$detail->user_id && Auth::check()) {
                 $detail->user_id = Auth::id();
-            }
-        });
-
-        static::created(function ($detail) {
-            if ($detail->sampah) {
-                $detail->sampah->increment('total_berat_terkumpul', $detail->berat);
-            }
-        });
-
-        static::updating(function ($detail) {
-            if ($detail->isDirty('berat') && $detail->sampah) {
-                $originalBerat = $detail->getOriginal('berat') ?? 0;
-                $newBerat = $detail->berat;
-                $diff = $newBerat - $originalBerat;
-                $detail->sampah->increment('total_berat_terkumpul', $diff);
-            }
-        });
-
-        static::deleted(function ($detail) {
-            // This also handles soft deletes
-            if ($detail->sampah) {
-                $detail->sampah->decrement('total_berat_terkumpul', $detail->berat);
-            }
-        });
-
-        static::restored(function ($detail) {
-            if ($detail->sampah) {
-                $detail->sampah->increment('total_berat_terkumpul', $detail->berat);
             }
         });
     }
