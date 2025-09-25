@@ -225,7 +225,7 @@ class RekeningResource extends Resource
                     ->sortable(),
                 TextColumn::make('no_rekening')->label('No. Rekening')->sortable()->searchable(),
                 TextColumn::make('nama')->label('Nama Nasabah')->sortable()->searchable(),
-                TextColumn::make('current_balance')->label('Saldo')->sortable()->money('IDR'),
+                TextColumn::make('balance')->label('Saldo')->sortable()->money('IDR'),
                 IconColumn::make('status_pegadaian')
                     ->label('Tab. Emas')
                     ->boolean()
