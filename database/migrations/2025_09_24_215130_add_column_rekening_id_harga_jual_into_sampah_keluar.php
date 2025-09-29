@@ -15,7 +15,6 @@ return new class extends Migration {
                 ->constrained('rekening')
                 ->name('fk_sampah_keluar_rekening')
                 ->after('user_id');
-            $table->decimal('harga_jual', 15, 2)->after('berat_keluar');
         });
     }
 

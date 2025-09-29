@@ -44,6 +44,33 @@ class SampahKeluarResource extends Resource
                             ->required(),
                     ])->columns(2),
 
+                Section::make('Stok Sampah Tersedia')
+                    ->schema([
+                        Forms\Components\Placeholder::make('stok_sampah')
+                            ->label('Daftar Stok Sampah Saat Ini')
+                            ->content(function () {
+                                $sampahItems = Sampah::where('total_berat_terkumpul', '>', 0)->orderBy('jenis_sampah')->get();
+
+                                if ($sampahItems->isEmpty()) {
+                                    return new HtmlString('<p class="text-gray-500">Tidak ada stok sampah yang tersedia saat ini.</p>');
+                                }
+
+                                $table = '<table style="width: 100%; border-collapse: collapse; table-layout: fixed;">';
+                                $table .= '<thead><tr style="background-color: #f3f4f6;"><th style="padding: 8px; border: 1px solid #ddd; text-align: left;">Jenis Sampah</th><th style="padding: 8px; border: 1px solid #ddd; text-align: right;">Berat Tersedia (Kg)</th></tr></thead>';
+                                $table .= '<tbody>';
+
+                                foreach ($sampahItems as $item) {
+                                    $table .= '<tr>';
+                                    $table .= '<td style="padding: 8px; border: 1px solid #ddd;">' . e($item->jenis_sampah) . '</td>';
+                                    $table .= '<td style="padding: 8px; border: 1px solid #ddd; text-align: right;">' . number_format($item->total_berat_terkumpul, 2, ',', '.') . '</td>';
+                                    $table .= '</tr>';
+                                }
+
+                                $table .= '</tbody></table>';
+                                return new HtmlString($table);
+                            })->columnSpanFull(),
+                    ]),
+
                 Section::make('Detail Sampah')
                     ->schema([
                         Repeater::make('details')
@@ -62,29 +89,80 @@ class SampahKeluarResource extends Resource
                                     ->columnSpan(['md' => 2]),
                                 Forms\Components\TextInput::make('berat')
                                     ->label('Berat')
-                                    ->helperText(function (Get $get, $state) {
+                                    ->helperText(function (Get $get) {
                                         $sampahId = $get('sampah_id');
-                                        return $sampahId ? 'Total berat terkumpul: ' . number_format(\App\Models\Sampah::find($sampahId)?->berat_keluar_terkumpul ?? 0, 2) . ' Kg' : 'Pilih jenis sampah terlebih dahulu.';
+                                        if (!$sampahId) {
+                                            return 'Pilih jenis sampah terlebih dahulu.';
+                                        }
+                                        $beratTersedia = \App\Models\Sampah::find($sampahId)?->total_berat_terkumpul ?? 0;
+                                        return 'Tidak boleh lebih dari: ' . number_format($beratTersedia, 2, ',', '.') . ' Kg';
                                     })
                                     ->postfix('Kg')->numeric()->required()->minValue(0.01)
                                     ->columnSpan(['md' => 1]),
                                 // --- INPUT HARGA KONDISIONAL ---
+                                Forms\Components\Hidden::make('description')
+                                    ->default('Sampah Keluar')
+                                    ->dehydrated(true),
+                                Forms\Components\Hidden::make('type')
+                                    ->default('keluar')
+                                    ->dehydrated(true),
                                 Forms\Components\TextInput::make('harga_jual')
                                     ->label('Uang Hasil Penjualan')
                                     ->prefix('Rp')->numeric()->required()->minValue(0)
                                     ->hidden(fn(Get $get) => $get('../../jenis_keluar') !== 'jual') // Akses state di luar repeater
-                                    ->columnSpan(['md' => 1]),
+                                    ->columnSpan(['md' => 1])
+                                    ->dehydrated(false),
                             ])
                             ->columns(['md' => 4])
                             ->reorderable(false)
                             ->addActionLabel('Tambah Jenis Sampah')
-                            ->defaultItems(1)->minItems(1)->required(),
+                            ->defaultItems(1)->minItems(1)
+                            ->required()
+                            ->mutateRelationshipDataBeforeCreateUsing(function (array $data, Get $get): array {
+                                $rekeningId = $get('rekening_id');
+
+
+                                // Deteksi apakah $data adalah list/array of items atau single associative array
+                                $isList = array_keys($data) === range(0, count($data) - 1);
+
+                                if ($isList) {
+                                    foreach ($data as &$item) {
+                                        $item['rekening_id'] = $rekeningId;
+
+                                        if (empty($item['description'])) {
+                                            $item['description'] = 'Sampah Keluar';
+                                        }
+                                    }
+                                    unset($item); // good practice setelah foreach by-ref
+                    
+                                    return $data;
+                                }
+
+                                // Single item case
+                                $data['rekening_id'] = $rekeningId;
+
+                                if (empty($data['description'])) {
+                                    $data['description'] = 'Sampah Keluar';
+                                }
+
+                                if (empty($data['type'])) {
+                                    $data['type'] = 'keluar';
+                                }
+
+                                return $data;
+                            })
+                        ,
                     ]),
 
                 // --- BAGIAN PERHITUNGAN KONDISIONAL ---
                 Section::make('Perhitungan dan Rincian')
                     ->hidden(fn(Get $get) => $get('jenis_keluar') !== 'jual') // Sembunyikan jika 'bakar'
                     ->schema([
+                        Forms\Components\Hidden::make('rekening_id')
+                            ->default(function () {
+                                $rekening = \App\Models\Rekening::where('no_rekening', '00000000')->first();
+                                return $rekening?->id;
+                            }), // Tidak perlu disimpan di DB
                         Forms\Components\Hidden::make('calculation_performed')->default(false)->dehydrated(true),
                         Forms\Components\Hidden::make('total_saldo_dihasilkan')->default(0),
                         Forms\Components\Hidden::make('berat_keluar')->default(0),

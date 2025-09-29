@@ -112,18 +112,6 @@ class WithdrawRequestResource extends Resource
                             }),
 
                         // DITAMBAHKAN: Input untuk nomor rekening baru
-                        TextInput::make('no_rek_pegadaian')
-                            ->label('Nomor Rekening Pegadaian Baru')
-                            ->numeric()
-                            ->maxLength(16)
-                            ->unique(table: Rekening::class, column: 'no_rek_pegadaian')
-                            ->visible(fn(Get $get) => (bool) $get('is_new_pegadaian_registration'))
-                            ->nullable()
-                            ->validationMessages([
-                                'required' => 'Nomor rekening baru wajib diisi jika mendaftar.',
-                                'unique' => 'Nomor rekening ini sudah terdaftar di nasabah lain.'
-                            ]),
-
                         TextInput::make('amount')
                             ->label('Jumlah Penarikan')
                             ->numeric()->required()->prefix('Rp')->mask(RawJs::make('$money($input)'))

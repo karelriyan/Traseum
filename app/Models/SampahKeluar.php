@@ -17,9 +17,21 @@ class SampahKeluar extends Model
 
     protected $guarded = [];
 
-    public function sampah()
+    protected $fillable = [
+        'rekening_id',
+        'jenis_keluar',
+        'total_berat_keluar',
+        'total_saldo_dihasilkan',
+        'status',
+        'tanggal_keluar',
+        'user_id',
+        'description',
+        'berat_keluar',
+    ];  
+
+    public function rekening()
     {
-        return $this->belongsTo(Sampah::class);
+        return $this->belongsTo(Rekening::class);
     }
 
     public function details()

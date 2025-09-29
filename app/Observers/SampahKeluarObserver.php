@@ -4,6 +4,7 @@ namespace App\Observers;
 
 use App\Models\SampahKeluar;
 use App\Models\Rekening;
+use APP\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 class SampahKeluarObserver
@@ -23,39 +24,15 @@ class SampahKeluarObserver
      */
     public function created(SampahKeluar $sampahKeluar): void
     {
-        // 1. Kurangi berat sampah terkait
-        $sampahKeluar->sampah->details()->create([
-            'type' => 'debit',
-            'berat' => $sampahKeluar->berat,
-            'transactable_id' => $sampahKeluar->id,
-            'transactable_type' => SampahKeluar::class,
-            'user_id' => $sampahKeluar->user_id,
-        ]);
-        // 1. Kurangi berat sampah terkait untuk setiap item detail
-        // Asumsi SampahKeluarResource menggunakan Repeater dengan relasi 'details'
-        foreach ($sampahKeluar->details as $detail) {
-            $detail->sampah->details()->create([
-                'type' => 'debit',
-                'berat' => $detail->berat,
+        if ($sampahKeluar->total_saldo_dihasilkan > 0) {
+            $sampahKeluar->rekening->saldoTransactions()->create([
+                'amount' => $sampahKeluar->total_saldo_dihasilkan,
+                'type' => 'credit',
+                'description' => 'Penjualan Sampah Keluar',
                 'transactable_id' => $sampahKeluar->id,
-                'transactable_type' => SampahKeluar::class,
+                'transactable_type' => sampahKeluar::class,
                 'user_id' => $sampahKeluar->user_id,
             ]);
-        }
-
-        // 2. Tambah saldo ke rekening bank sampah jika dijual (bukan dibakar)
-        if (strtolower($sampahKeluar->jenis_keluar) !== 'dibakar' && $sampahKeluar->total_harga > 0) {
-            $rekeningBankSampah = Rekening::where('no_rekening', '00000000')->first();
-            if ($rekeningBankSampah) {
-                $rekeningBankSampah->saldoTransactions()->create([
-                    'amount' => $sampahKeluar->total_harga,
-                    'type' => 'credit',
-                    'description' => 'Penjualan Sampah: ' . $sampahKeluar->sampah->jenis_sampah,
-                    'transactable_id' => $sampahKeluar->id,
-                    'transactable_type' => SampahKeluar::class,
-                    'user_id' => $sampahKeluar->user_id,
-                ]);
-            }
         }
     }
 
@@ -64,20 +41,9 @@ class SampahKeluarObserver
      */
     public function deleted(SampahKeluar $sampahKeluar): void
     {
-        // Hapus transaksi berat
-        $sampahKeluar->sampah->details()->where('transactable_id', $sampahKeluar->id)->delete();
-        // PERBAIKAN: Hapus satu per satu untuk memicu observer
-        // Hapus transaksi berat (SampahTransactions)
+        // Hapus (soft delete) semua transaksi terkait satu per satu untuk memicu observer mereka.
         $sampahKeluar->details()->get()->each->delete();
-
-        // Hapus transaksi saldo jika ada
-        $rekeningBankSampah = Rekening::where('no_rekening', '00000000')->first();
-        if ($rekeningBankSampah) {
-            $rekeningBankSampah->saldoTransactions()->where('transactable_id', $sampahKeluar->id)->delete();
-            $rekeningBankSampah->saldoTransactions()
-                ->where('transactable_id', $sampahKeluar->id)
-                ->get()->each->delete();
-        }
+        $sampahKeluar->rekening->saldoTransactions()->where('transactable_id', $sampahKeluar->id)->get()->each->delete();
     }
 
     /**
@@ -85,19 +51,16 @@ class SampahKeluarObserver
      */
     public function restored(SampahKeluar $sampahKeluar): void
     {
-        // Logika pemulihan: hapus sisa transaksi lama (jika ada) dan buat ulang
-        $this->deleted($sampahKeluar);
-        $this->created($sampahKeluar);
-        // PERBAIKAN: Pulihkan transaksi terkait satu per satu
-        // Pulihkan transaksi berat
-        $sampahKeluar->details()->onlyTrashed()->get()->each->restore();
+        // Pulihkan (restore) semua transaksi terkait satu per satu untuk memicu observer mereka.
+        $sampahKeluar->details()->onlyTrashed()->where('transactable_id', $sampahKeluar->id)->get()->each->restore();
+        $sampahKeluar->rekening->saldoTransactions()->onlyTrashed()->where('transactable_id', $sampahKeluar->id)->get()->each->restore();
 
-        // Pulihkan transaksi saldo
-        $rekeningBankSampah = Rekening::where('no_rekening', '00000000')->first();
-        if ($rekeningBankSampah) {
-            $rekeningBankSampah->saldoTransactions()
-                ->where('transactable_id', $sampahKeluar->id)
-                ->onlyTrashed()->get()->each->restore();
-        }
+    }
+
+    public function forceDeleted(SampahKeluar $sampahKeluar): void
+    {
+        // Hapus permanen semua transaksi terkait
+        $sampahKeluar->details()->withTrashed()->where('transactable_id', $sampahKeluar->id)->get()->each->forceDelete();
+        $sampahKeluar->rekening->saldoTransactions()->withTrashed()->where('transactable_id', $sampahKeluar->id)->get()->each->forceDelete();
     }
 }
