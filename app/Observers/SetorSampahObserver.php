@@ -45,7 +45,6 @@ class SetorSampahObserver
      */
     public function created(SetorSampah $setorSampah): void
     {
-
         // Buat transaksi saldo hanya jika bukan donasi dan ada saldo
         if (!$setorSampah->isDonation() && $setorSampah->total_saldo_dihasilkan > 0) {
             $setorSampah->rekening->saldoTransactions()->create([

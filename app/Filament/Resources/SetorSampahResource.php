@@ -88,6 +88,9 @@ class SetorSampahResource extends Resource
                                 Forms\Components\Hidden::make('description')
                                     ->default('Setoran Sampah')
                                     ->dehydrated(true),
+                                Forms\Components\Hidden::make('type')
+                                    ->default('masuk')
+                                    ->dehydrated(true),
 
 
                             ])
@@ -133,6 +136,10 @@ class SetorSampahResource extends Resource
 
                                 if (empty($data['description'])) {
                                     $data['description'] = 'Setoran Sampah';
+                                }
+
+                                if (empty($data['type'])) {
+                                    $data['type'] = 'masuk';
                                 }
 
                                 return $data;

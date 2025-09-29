@@ -57,5 +57,21 @@ class SampahTransactions extends Model
                 $detail->user_id = Auth::id();
             }
         });
+
+        static::saved(function ($detail) {
+            $detail->sampah?->updateBerat();
+        });
+
+        static::deleted(function ($detail) {
+            $detail->sampah?->refresh()->updateBerat();
+        });
+
+        static::restored(function ($detail) {
+            $detail->sampah?->updateBerat();
+        });
+
+        static::forceDeleted(function ($detail) {
+            $detail->sampah?->updateBerat();
+        });
     }
 }

@@ -33,12 +33,36 @@ class Sampah extends Model
      * Menghitung ulang total berat terkumpul dari transaksi dan menyimpannya.
      * Ini akan dipanggil oleh SampahTransactionsObserver.
      */
+    public function updateBerat(): void
+    {
+        $masuk = $this->details()
+            ->where('deleted_at', null)
+            ->where('type', 'masuk')
+            ->sum('berat');
+
+        $keluar = $this->details()
+            ->where('deleted_at', null)
+            ->where('type', 'keluar')
+            ->sum('berat');
+
+        $this->total_berat_terkumpul = $masuk - $keluar;
+        $this->saveQuietly();
+    }
+
     public function recalculateTotalBerat(): void
     {
-        $credits = $this->details()->where('type', 'credit')->sum('berat');
-        $debits = $this->details()->where('type', 'debit')->sum('berat');
-        $this->total_berat_terkumpul = $credits - $debits;
-        $this->saveQuietly(); // Simpan tanpa memicu event lain
+        $masuk = $this->details()
+            ->where('deleted_at', null) // hanya yang aktif
+            ->where('type', 'masuk')
+            ->sum('berat');
+
+        $keluar = $this->details()
+            ->where('deleted_at', null)
+            ->where('type', 'keluar')
+            ->sum('berat');
+
+        $this->total_berat_terkumpul = $masuk - $keluar;
+        $this->saveQuietly();
     }
 
     protected static function booted(): void

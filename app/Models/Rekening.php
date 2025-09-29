@@ -46,6 +46,23 @@ class Rekening extends Model
         return $this->belongsTo(User::class);
     }
 
+    public function updateBalance(): void
+    {
+        $credit = $this->saldoTransactions()
+            ->where('deleted_at', null)
+            ->where('type', 'credit')
+            ->sum('amount');
+
+        $debit = $this->saldoTransactions()
+            ->where('deleted_at', null)
+            ->where('type', 'debit')
+            ->sum('amount');
+
+        $this->balance = $credit - $debit;
+        $this->saveQuietly(); // biar tidak trigger event save lagi
+    }
+
+
     /**
      * Menghitung ulang total saldo dari transaksi dan menyimpannya.
      * Ini akan dipanggil oleh SaldoTransactionObserver.

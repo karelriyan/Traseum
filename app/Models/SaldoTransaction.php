@@ -42,5 +42,21 @@ class SaldoTransaction extends Model
                 $SaldoTransaction->user_id = Auth::id();
             }
         });
+
+        static::saved(function ($transaction) {
+            $transaction->rekening?->updateBalance();
+        });
+
+        static::deleted(function ($transaction) {
+            $transaction->rekening?->refresh()->updateBalance();
+        });
+
+        static::restored(function ($transaction) {
+            $transaction->rekening?->updateBalance();
+        });
+
+        static::forceDeleted(function ($transaction) {
+            $transaction->rekening?->updateBalance();
+        });
     }
 }
