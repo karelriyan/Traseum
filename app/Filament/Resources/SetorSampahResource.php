@@ -43,6 +43,7 @@ class SetorSampahResource extends Resource
                                 'donasi' => 'Donasi',
                             ])
                             ->required()
+                            ->disabled(fn(string $context): bool => $context !== 'create') // Nonaktifkan jika sudah donasi
                             ->default('rekening')
                             ->live(), // Live di sini aman karena hanya mengontrol satu field lain
 
@@ -57,7 +58,8 @@ class SetorSampahResource extends Resource
 
                         Forms\Components\DatePicker::make('tanggal')
                             ->label('Tanggal Setoran')
-                            ->required(),
+                            ->required()
+                            ->dehydrated(true),
                     ])->columns(1),
 
                 Section::make('Detail Setoran Sampah')
@@ -83,6 +85,11 @@ class SetorSampahResource extends Resource
                                     ->minValue(0.01)
                                     ->step(0.01)
                                     ->columnSpan(1),
+                                Forms\Components\Hidden::make('description')
+                                    ->default('Setoran Sampah')
+                                    ->dehydrated(true),
+
+
                             ])
                             ->columns(3)
                             // DIHAPUS: Atribut live() dan afterStateUpdated() untuk mencegah reload otomatis
@@ -91,7 +98,46 @@ class SetorSampahResource extends Resource
                             ->defaultItems(1)
                             ->minItems(1)
                             ->required()
-                        , // Hapus ->mutateRelationshipDataBeforeCreate dari sini
+                            ->mutateRelationshipDataBeforeCreateUsing(function (array $data, Get $get): array {
+                                $rekeningId = $get('rekening_id');
+                                $jenisSetoran = $get('jenis_setoran');
+
+                                // Deteksi apakah $data adalah list/array of items atau single associative array
+                                $isList = array_keys($data) === range(0, count($data) - 1);
+
+                                if ($isList) {
+                                    foreach ($data as &$item) {
+                                        if ($jenisSetoran === 'donasi') {
+                                            $rekeningDonasi = Rekening::where('no_rekening', '00000000')->first();
+                                            $item['rekening_id'] = $rekeningDonasi?->id;
+                                        } else {
+                                            $item['rekening_id'] = $rekeningId;
+                                        }
+
+                                        if (empty($item['description'])) {
+                                            $item['description'] = 'Setoran Sampah';
+                                        }
+                                    }
+                                    unset($item); // good practice setelah foreach by-ref
+                    
+                                    return $data;
+                                }
+
+                                // Single item case
+                                if ($jenisSetoran === 'donasi') {
+                                    $rekeningDonasi = Rekening::where('no_rekening', '00000000')->first();
+                                    $data['rekening_id'] = $rekeningDonasi?->id;
+                                } else {
+                                    $data['rekening_id'] = $rekeningId;
+                                }
+
+                                if (empty($data['description'])) {
+                                    $data['description'] = 'Setoran Sampah';
+                                }
+
+                                return $data;
+                            })
+
                     ]),
 
                 Section::make('Perhitungan dan Rincian')
@@ -215,25 +261,11 @@ class SetorSampahResource extends Resource
         }
 
         return $data;
+
+
     }
 
-    // DIKEMBALIKAN: Lifecycle hook untuk memodifikasi data relasi sebelum dibuat
-    public static function mutateRelationshipDataBeforeCreate(array $data): array
-    {
-        // Karena hook ini tidak memiliki akses ke state form, kita perlu mengambilnya dari request.
-        $formData = request('components.0.data');
-
-        if (isset($formData['jenis_setoran']) && $formData['jenis_setoran'] === 'donasi') {
-            $rekeningDonasi = Rekening::where('no_rekening', '00000000')->first();
-            $data['rekening_id'] = $rekeningDonasi?->id;
-        } else {
-            $data['rekening_id'] = $formData['rekening_id'] ?? null;
-        }
-
-        return $data;
-    }
-
-    // Fungsi generateRincianHtml tidak berubah, sudah baik.
+    // ungsi generateRincianHtml tidak berubah, sudah baik.
     public static function generateRincianHtml(array $items, Collection $sampahData, string $jenisSetoran): HtmlString
     {
         $totalSaldo = 0;

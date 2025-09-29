@@ -16,6 +16,18 @@ class SetorSampah extends Model
 
     protected $guarded = [];
 
+    protected $fillable = [
+        'rekening_id',
+        'total_berat',
+        'total_saldo_dihasilkan',
+        'status',
+        'jenis_setoran',
+        'tanggal',
+        'user_id',
+        'description',
+        'berat',
+    ];
+
     public function rekening()
     {
         return $this->belongsTo(Rekening::class);

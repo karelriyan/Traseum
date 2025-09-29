@@ -14,6 +14,17 @@ class SampahTransactions extends Model
     protected $table = 'sampah_transactions';
     protected $guarded = [];
 
+    protected $fillable = [
+        'rekening_id',
+        'sampah_id',
+        'berat',
+        'user_id',
+        'description',
+        'type',
+        'transactable_id',
+        'transactable_type',
+    ];
+
     protected $casts = [
         'berat' => 'decimal:2',
     ];

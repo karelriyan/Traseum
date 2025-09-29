@@ -29,24 +29,23 @@ class SampahTransactionsRelationManager extends RelationManager
         return $table
             ->recordTitleAttribute('berat')
             ->columns([
-                Tables\Columns\TextColumn::make('berat'),
                 Tables\Columns\TextColumn::make('created_at')->dateTime()->label('Tanggal Transaksi'),
+                Tables\Columns\TextColumn::make('rekening.nama'),
+                Tables\Columns\TextColumn::make('berat'),
+                Tables\Columns\TextColumn::make('description'),
             ])
 
             ->filters([
                 //
             ])
             ->headerActions([
-                Tables\Actions\CreateAction::make(),
+                //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                //
             ])
             ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
-                ]),
+                //
             ]);
     }
 }
