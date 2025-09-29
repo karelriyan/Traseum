@@ -63,9 +63,11 @@ class SetorSampahObserver
      */
     public function deleted(SetorSampah $setorSampah): void
     {
-        // Hapus semua transaksi terkait
-        $setorSampah->details()->where('transactable_id', $setorSampah->id)->delete();
-        $setorSampah->rekening->saldoTransactions()->where('transactable_id', $setorSampah->id)->delete();
+        // Hapus (soft delete) semua transaksi terkait satu per satu untuk memicu observer mereka.
+        $setorSampah->details()->get()->each->delete();
+        if (!$setorSampah->isDonation()) {
+            $setorSampah->rekening->saldoTransactions()->where('transactable_id', $setorSampah->id)->get()->each->delete();
+        }
     }
 
     /**
@@ -73,8 +75,11 @@ class SetorSampahObserver
      */
     public function restored(SetorSampah $setorSampah): void
     {
-        $setorSampah->details()->withTrashed()->where('transactable_id', $setorSampah->id)->get()->each->restore();
-        $setorSampah->rekening->saldoTransactions()->withTrashed()->where('transactable_id', $setorSampah->id)->get()->each->restore();
+        // Pulihkan (restore) semua transaksi terkait satu per satu untuk memicu observer mereka.
+        $setorSampah->details()->onlyTrashed()->where('transactable_id', $setorSampah->id)->get()->each->restore();
+        if (!$setorSampah->isDonation()) {
+            $setorSampah->rekening->saldoTransactions()->onlyTrashed()->where('transactable_id', $setorSampah->id)->get()->each->restore();
+        }
     }
 
     public function forceDeleted(SetorSampah $setorSampah): void
