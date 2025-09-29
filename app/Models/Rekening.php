@@ -110,6 +110,11 @@ class Rekening extends Model
                 $this->status_lengkap = false;
                 return;
             }
+        } elseif ($this->status_desa === true) {
+            if (empty($this->alamat)) {
+                $this->status_lengkap = false;
+                return;
+            }
         } else {
             $this->status_lengkap = true;
             return;
@@ -123,6 +128,17 @@ class Rekening extends Model
         static::creating(function ($Rekening) {
             if (!$Rekening->user_id && Auth::check()) {
                 $Rekening->user_id = Auth::id();
+            }
+
+            if ($Rekening->balance > 0) {
+                $Rekening->saldoTransactions()->create([
+                    'amount' => $Rekening->balance,
+                    'type' => 'credit',
+                    'description' => 'Saldo Awal',
+                    'transactable_id' => $Rekening->id,
+                    'transactable_type' => '-',
+                    'user_id' => $Rekening->user_id,
+                ]);
             }
         });
 

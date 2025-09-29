@@ -18,7 +18,7 @@ return new class extends Migration {
             $table->string('dusun', 3)->nullable();
             $table->string('rt', 3)->nullable();
             $table->string('rw', 3)->nullable();
-            $table->string('alamat');
+            $table->string('alamat')->nullable();
             $table->string('gender');
             $table->string('no_kk', 16)->unique()->nullable();
             $table->string('nik', 16)->unique()->nullable();

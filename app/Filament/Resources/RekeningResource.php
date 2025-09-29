@@ -114,7 +114,8 @@ class RekeningResource extends Resource
                                     true => 'Penduduk Luar Desa',
                                 ])
                                 ->required()
-                                ->columnSpan('full'),
+                                ->columnSpan('full')
+                                ->disabled(fn(string $context): bool => $context !== 'create'),
                             TextInput::make('dusun')
                                 ->label('Dusun')
                                 ->length(1)
@@ -158,12 +159,8 @@ class RekeningResource extends Resource
                                 ]),
                             TextInput::make('alamat')
                                 ->label('Alamat Domisili')
-                                ->required()
                                 ->columnSpan('full')
-                                ->visible(fn(Get $get) => $get('status_desa') !== null)
-                                ->validationMessages([
-                                    'required' => 'Alamat tidak boleh kosong',
-                                ]),
+                                ->visible(fn(Get $get) => $get('status_desa') !== null && $get('status_desa') == true),
                         ])
                 ]),
             Section::make('Informasi Kontak')
@@ -182,13 +179,14 @@ class RekeningResource extends Resource
             Section::make('Saldo Awal')
                 ->description('Saldo awal hanya dapat diisi saat pembuatan rekening baru. Setelah rekening dibuat, saldo awal tidak dapat diubah.')
                 ->schema([
-                    TextInput::make('saldo_awal')
+                    TextInput::make('balance')
                         ->label('Saldo Awal (Rp)')
                         ->numeric()
                         ->default(0)
                         ->minValue(0)
                         ->prefix('Rp')
                         ->placeholder('0')
+                        ->visible(fn(string $context): bool => $context === 'create')
                         ->validationMessages([
                             'min_value' => 'Saldo awal tidak boleh kurang dari 0',
                         ]),
