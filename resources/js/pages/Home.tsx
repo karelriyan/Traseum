@@ -754,10 +754,9 @@ export default function Home({ stats, programs, testimonials, latestNews }: Home
                     >
                         <div className="rounded-lg bg-white p-6 shadow-md">
                             <h3 className="mb-4 text-xl font-semibold text-gray-800">Bank Sampah "Sampah Sahabatku"</h3>
-                            <p className="text-gray-600">Jl. Raya Cilacap, Jawa Tengah, Indonesia</p>
+                            <p className="text-gray-600">Rt. 08, Rw. 03, Desa Muntang, Kec. Kemangkon, Kab. Purbalingga, Jawa Tengah 53381</p>
                             <div className="mt-4 flex justify-center gap-6 text-sm text-gray-500">
-                                <span>📞 (021) 1234-5678</span>
-                                <span>📱 +62 812-3456-7890</span>
+                                <span>📞 (+62) 81513214364</span>
                                 <span>📧 info@ciptamuri.co.id</span>
                             </div>
                         </div>
@@ -766,14 +765,14 @@ export default function Home({ stats, programs, testimonials, latestNews }: Home
             </section>
 
             {/* CTA Section */}
-            <section id="kontak" className="section-padding relative overflow-hidden bg-gradient-to-r from-green-600 to-green-700 text-white">
+            {/* <section id="kontak" className="section-padding relative overflow-hidden bg-gradient-to-r from-green-600 to-green-700 text-white"> */}
                 {/* Background Pattern */}
-                <div className="absolute inset-0 opacity-10">
+                {/* <div className="absolute inset-0 opacity-10">
                     <div className="absolute left-0 top-0 h-72 w-72 rounded-full bg-white mix-blend-multiply blur-xl filter"></div>
                     <div className="absolute bottom-0 right-0 h-72 w-72 rounded-full bg-yellow-300 mix-blend-multiply blur-xl filter"></div>
-                </div>
+                </div> */}
 
-                <div className="container-custom relative z-10">
+                {/* <div className="container-custom relative z-10">
                     <div className="mx-auto max-w-4xl text-center">
                         <motion.h2
                             className="mb-6 text-4xl font-bold md:text-5xl"
@@ -815,10 +814,10 @@ export default function Home({ stats, programs, testimonials, latestNews }: Home
                                     <span>📱 +62 812-3456-7890</span>
                                 </div>
                             </div>
-                        </motion.div>
+                        </motion.div> */}
 
                         {/* Feature highlights */}
-                        <motion.div
+                        {/* <motion.div
                             className="mt-16 grid grid-cols-2 gap-6 border-t border-green-500 pt-8 md:grid-cols-4"
                             initial={{ opacity: 0 }}
                             whileInView={{ opacity: 1 }}
@@ -844,7 +843,7 @@ export default function Home({ stats, programs, testimonials, latestNews }: Home
                         </motion.div>
                     </div>
                 </div>
-            </section>
+            </section> */}
         </MainLayout>
     );
 }

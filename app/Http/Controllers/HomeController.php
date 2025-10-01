@@ -20,9 +20,9 @@ class HomeController extends Controller
     {
         // Mock stats data untuk development
         $stats = [
-            'members' => 1250,
-            'recycled_tons' => 15.8,
-            'savings_total' => 45750000,
+            'members' => 176, // Ubah sesuai kebutuhan
+            'recycled_tons' => 1, // Ubah sesuai kebutuhan
+            'savings_total' => 2500000, // Ubah sesuai kebutuhan
         ];
         
 
@@ -77,38 +77,38 @@ class HomeController extends Controller
         // Mock data untuk testimonials
         $testimonials = [
             [
-                'name' => 'Ibu Sari Wijaya',
+                'name' => 'Ibu Harlina',
                 'role' => 'Anggota Bank Sampah',
                 'content' => 'Dengan Bank Sampah Cipta Muri, sampah rumah tangga saya bisa jadi tabungan. Sangat membantu ekonomi keluarga.',
-                'avatar' => 'https://images.unsplash.com/photo-1494790108755-2616c4f55d16?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=250&q=80',
+                'avatar' => 'https://limbahpustaka.com/storage/public/01JXW9ENT3KQK1A2YVKDGZGRF4.jpeg',
                 'rating' => 5
             ],
             [
-                'name' => 'Bapak Ahmad Fauzi',
-                'role' => 'Kepala RT 03',
-                'content' => 'Lingkungan RT kami jadi lebih bersih sejak ada Bank Sampah. Warga juga lebih sadar pentingnya daur ulang.',
-                'avatar' => 'https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=250&q=80',
+                'name' => 'Bapak Moh. Arif Budiato, S.Pt',
+                'role' => 'Kepala Desa Muntang',
+                'content' => 'Program Bank Sampah Cipta Muri telah meningkatkan kesadaran warga akan pentingnya pengelolaan sampah. Desa kami menjadi lebih bersih dan mandiri.',
+                'avatar' => 'https://www.muntang.berdesa.id/desa/upload/user_pict/c1dHz_1751856355757708.png',
                 'rating' => 5
             ],
             [
-                'name' => 'Ibu Maya Sinta',
+                'name' => 'Ibu Puji Rahayu',
                 'role' => 'Pengusaha UMKM',
                 'content' => 'Kemitraan dengan Bank Sampah membantu saya mendapat bahan baku berkualitas untuk kerajinan daur ulang.',
-                'avatar' => 'https://images.unsplash.com/photo-1438761681033-6461ffad8d80?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=250&q=80',
+                'avatar' => 'https://limbahpustaka.com/storage/public/01JXW97KZZVDWNAVDTABWPJZ6Y.jpeg',
                 'rating' => 5
             ],
             [
-                'name' => 'Bapak Joko Susanto',
-                'role' => 'Petugas Pengangkut',
-                'content' => 'Sistem digital Bank Sampah memudahkan saya dalam mencatat setiap setoran sampah dari warga. Sangat efisien!',
-                'avatar' => 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=250&q=80',
+                'name' => 'Bapak Agustinus Suryanto, S.Sos',
+                'role' => 'Ketua RT.8',
+                'content' => 'Sebagai ketua RT, saya melihat langsung bagaimana Bank Sampah Cipta Muri mengubah perilaku warga. Lingkungan jadi lebih bersih dan warga termotivasi!',
+                'avatar' => 'https://limbahpustaka.com/storage/public/01JXW8H6Y6ARTT04J6K9137W3F.jpeg',
                 'rating' => 5
             ],
             [
-                'name' => 'Ibu Fitri Handayani',
+                'name' => 'Ibu Adimah',
                 'role' => 'Ibu Rumah Tangga',
                 'content' => 'Anak-anak jadi lebih peduli lingkungan sejak ikut program Bank Sampah. Kebiasaan baik untuk masa depan.',
-                'avatar' => 'https://images.unsplash.com/photo-1487412720507-e7ab37603c6f?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=250&q=80',
+                'avatar' => 'https://limbahpustaka.com/storage/public/01JXW8V949DJ70AA7DHCQBZ18C.jpeg',
                 'rating' => 5
             ],
             [

@@ -192,7 +192,7 @@ export default function MainLayout({ children }: MainLayoutProps) {
             <main>{children}</main>
 
             {/* Footer */}
-            <footer className="bg-gray-900 text-white">
+            <footer className="bg-gray-900 text-white" style={{ backgroundColor: '#111827', color: '#ffffff' }}>
                 <div className="container-custom py-12">
                     <div className="grid gap-8 md:grid-cols-4">
                         {/* Brand */}
