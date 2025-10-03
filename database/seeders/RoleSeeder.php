@@ -3,8 +3,7 @@
 namespace Database\Seeders;
 
 use Illuminate\Database\Seeder;
-use Spatie\Permission\Models\Role;
-use Spatie\Permission\Models\Permission;
+use Hexters\HexaLite\Models\HexaRole;
 
 class RoleSeeder extends Seeder
 {
@@ -21,28 +20,29 @@ class RoleSeeder extends Seeder
         ];
 
         // Update role admin yang lowercase menjadi Admin
-        $adminRole = Role::where('name', 'admin')->first();
+        $adminRole = HexaRole::where('name', 'admin')->first();
         if ($adminRole) {
             $adminRole->name = 'Admin';
+            $adminRole->guard = hexa()->guard();
             $adminRole->save();
             $this->command->info("✅ Role 'admin' diupdate menjadi 'Admin'");
         } else {
             // Jika tidak ada, cek apakah sudah ada Admin
-            if (!Role::where('name', 'Admin')->exists()) {
-                $role = new Role();
+            if (!HexaRole::where('name', 'Admin')->where('guard', hexa()->guard())->exists()) {
+                $role = new HexaRole();
                 $role->name = 'Admin';
-                $role->guard_name = 'web';
+                $role->guard = hexa()->guard();
                 $role->save();
                 $this->command->info("✅ Role 'Admin' berhasil dibuat");
             }
         }
 
         foreach ($roles as $roleName) {
-            $existingRole = Role::where('name', $roleName)->first();
+            $existingRole = HexaRole::where('name', $roleName)->where('guard', hexa()->guard())->first();
             if (!$existingRole) {
-                $role = new Role();
+                $role = new HexaRole();
                 $role->name = $roleName;
-                $role->guard_name = 'web';
+                $role->guard = hexa()->guard();
                 $role->save();
                 $this->command->info("✅ Role '{$roleName}' berhasil dibuat");
             } else {

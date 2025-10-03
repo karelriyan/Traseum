@@ -6,7 +6,7 @@ use App\Models\User;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Str;
 use Illuminate\Support\Facades\Hash;
-use App\Models\Role;
+use Hexters\HexaLite\Models\HexaRole;
 
 
 class UserSeeder extends Seeder
@@ -17,19 +17,19 @@ class UserSeeder extends Seeder
     public function run(): void
     {
         // 1) Buat role jika belum ada
-        $adminRole = Role::where('name', 'Admin')->first();
+        $adminRole = HexaRole::where('name', 'Admin')->first();
         if (!$adminRole) {
-            $adminRole = new Role();
+            $adminRole = new HexaRole();
             $adminRole->name = 'Admin';
-            $adminRole->guard_name = 'web';
+            $adminRole->guard = 'web';
             $adminRole->save();
         }
 
-        $superRole = Role::where('name', 'Super Admin')->first();
+        $superRole = HexaRole::where('name', 'Super Admin')->first();
         if (!$superRole) {
-            $superRole = new Role();
+            $superRole = new HexaRole();
             $superRole->name = 'Super Admin';
-            $superRole->guard_name = 'web';
+            $superRole->guard = 'web';
             $superRole->save();
         }
 
@@ -45,10 +45,10 @@ class UserSeeder extends Seeder
 
         // 3) Assign role Super Admin
         if (!$superUser->hasRole('Super Admin')) {
-            $superUser->assignRole($superRole);
+            $superUser->roles()->syncWithoutDetaching([$superRole->id]);
         }
         if (!$superUser->hasRole('Admin')) {
-            $superUser->assignRole($adminRole);
+            $superUser->roles()->syncWithoutDetaching([$adminRole->id]);
         }
 
         // 4) Buat user admin biasa untuk testing
@@ -63,7 +63,7 @@ class UserSeeder extends Seeder
 
         // 5) Assign role Admin saja
         if (!$adminUser->hasRole('Admin')) {
-            $adminUser->assignRole($adminRole);
+            $adminUser->roles()->syncWithoutDetaching([$adminRole->id]);
         }
 
         $names = [
@@ -117,12 +117,12 @@ class UserSeeder extends Seeder
 
             // Assign role Admin untuk semua user selain super admin
             if (!$user->hasRole('Admin')) {
-                $user->assignRole($adminRole);
+                $user->roles()->syncWithoutDetaching([$adminRole->id]);
             }
 
             // Pastikan tidak ada role Super Admin untuk user biasa
             if ($user->hasRole('Super Admin') && $user->email !== 'superadmin@ciptamuri.com') {
-                $user->removeRole($superRole);
+                $user->roles()->detach($superRole->id);
             }
         }
     }

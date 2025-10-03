@@ -18,7 +18,7 @@ use Illuminate\Foundation\Http\Middleware\VerifyCsrfToken;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
-use Althinect\FilamentSpatieRolesPermissions\FilamentSpatieRolesPermissionsPlugin;
+use Hexters\HexaLite\HexaLite;
 use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
 
 
@@ -51,7 +51,7 @@ class AdminPanelProvider extends PanelProvider
 
             ])
             ->plugin(
-                FilamentSpatieRolesPermissionsPlugin::make()
+                HexaLite::make()
             )
             ->plugin(
                 FilamentEditProfilePlugin::make()

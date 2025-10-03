@@ -10,15 +10,14 @@ use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
-use Althinect\FilamentSpatieRolesPermissions\Concerns\HasSuperAdmin;
-use Spatie\Permission\Traits\HasRoles;
+use Hexters\HexaLite\HexaLiteRolePermission;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
 
 class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasUlids, HasRoles, HasSuperAdmin;
+    use HasFactory, Notifiable, HasUlids, HexaLiteRolePermission;
 
     /**
      * The attributes that are mass assignable.
@@ -123,17 +122,27 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function getCachedRoles(): \Illuminate\Database\Eloquent\Collection
     {
         return Cache::remember("user_roles_{$this->id}", 3600, function () {
-            return $this->roles;
+            return $this->roles()->get();
         });
     }
 
     /**
      * Get user permissions with caching.
      */
-    public function getCachedPermissions(): \Illuminate\Database\Eloquent\Collection
+    public function getCachedPermissions(): array
     {
         return Cache::remember("user_permissions_{$this->id}", 3600, function () {
-            return $this->getAllPermissions();
+            $gates = [];
+            // Aggregate gates from roles' access arrays
+            $roles = $this->roles()->get();
+            foreach ($roles as $role) {
+                if (is_array($role->access)) {
+                    foreach ($role->access as $access) {
+                        $gates[$access] = true; // use associative array for uniqueness
+                    }
+                }
+            }
+            return array_keys($gates);
         });
     }
 
@@ -145,11 +154,21 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function getAvatarUrlFullAttribute(): ?string
     {
         $avatarPath = $this->attributes['avatar_url'] ?? null;
-        
-        if ($avatarPath && Storage::disk('public')->exists($avatarPath)) {
-            return Storage::disk('public')->url($avatarPath);
+
+        if (!$avatarPath) {
+            return null;
         }
-        
+
+        // If already a full URL, return as is
+        if (filter_var($avatarPath, FILTER_VALIDATE_URL)) {
+            return $avatarPath;
+        }
+
+        // If it's a relative path and the file exists on the public disk, build the asset URL
+        if (Storage::disk('public')->exists($avatarPath)) {
+            return asset('storage/' . ltrim($avatarPath, '/'));
+        }
+
         return null;
     }
 
@@ -202,6 +221,18 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     }
 
     /**
+     * Check if user has a specific role (Hexa Lite compatible).
+     */
+    public function hasRole(string|array $role): bool
+    {
+        if (is_array($role)) {
+            return $this->roles()->whereIn('name', $role)->exists();
+        }
+        
+        return $this->roles()->where('name', $role)->exists();
+    }
+
+    /**
      * Check if user has a specific role (with caching).
      */
     public function hasRoleCached(string $role): bool
@@ -225,7 +256,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function hasPermissionCached(string $permission): bool
     {
         $permissions = $this->getCachedPermissions();
-        return $permissions->contains('name', $permission);
+        return in_array($permission, $permissions, true);
     }
 
     /**
@@ -248,5 +279,14 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function getCacheKey(string $attribute): string
     {
         return "user_{$attribute}_{$this->id}";
+    }
+
+    /**
+     * Compatibility method: check permission using Hexa Lite gates.
+     * Mirrors Spatie's checkPermissionTo but delegates to hexa()->can().
+     */
+    public function checkPermissionTo(array|string $permissions): bool
+    {
+        return hexa()->user($this)->can($permissions);
     }
 }
