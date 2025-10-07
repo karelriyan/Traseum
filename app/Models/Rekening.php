@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Auth;
 
 class Rekening extends Model
 {
-    use HasUlids, SoftDeletes, HasFactory;
+    use HasUlids, SoftDeletes, HasFactory, HasApiTokens;
 
     protected $table = 'rekening';
     protected $guarded = [];
