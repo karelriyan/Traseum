@@ -27,7 +27,7 @@ class Rekening extends Authenticatable
         'no_kk',
         'telepon',
         'balance',
-        'tanggal_lahir'
+        'tanggal_lahir',
         'points_balance',
         'status_pegadaian',
         'status_lengkap',
