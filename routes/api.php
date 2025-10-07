@@ -4,6 +4,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Models\Rekening;
 use Illuminate\Support\Facades\Hash;
+use App\Http\Controllers\Api\AuthController;
+
 
 /*
 |--------------------------------------------------------------------------
