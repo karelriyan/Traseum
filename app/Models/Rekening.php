@@ -6,14 +6,38 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Foundation\Auth\User as Authenticatable; 
 
-class Rekening extends Model
+class Rekening extends Authenticatable
 {
     use HasUlids, SoftDeletes, HasFactory, HasApiTokens;
 
     protected $table = 'rekening';
-    protected $guarded = [];
+
+     protected $primaryKey = 'id';
+    public $incrementing = false;
+    protected $keyType = 'string';
+
+     protected $fillable = [
+        'no_rekening',
+        'nama',
+        'nik',
+        'no_kk',
+        'telepon',
+        'balance',
+        'tanggal_lahir'
+        'points_balance',
+        'status_pegadaian',
+        'status_lengkap',
+        'status_desa',
+        'user_id',
+    ];
+
+    protected $hidden = [
+        'remember_token', // kalau nanti ditambah
+    ];
 
     protected $casts = [
         'status_desa' => 'boolean', // <-- TAMBAHKAN BARIS INI

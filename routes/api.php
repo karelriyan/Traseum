@@ -17,32 +17,8 @@ use Illuminate\Support\Facades\Hash;
 */
 
 // LOGIN NASABAH
-Route::post('/nasabah/login', function (Request $request) {
-    $request->validate([
-        'nik' => 'required',
-        'pin' => 'required',
-    ]);
+Route::post('/nasabah/login', [AuthController::class, 'login']);
 
-    $nasabah = Rekening::where('nik', $request->nik)->first();
-
-    if (! $nasabah || ! Hash::check($request->pin, $nasabah->pin)) {
-        return response()->json([
-            'success' => false,
-            'message' => 'NIK atau PIN salah',
-        ], 401);
-    }
-
-    $token = $nasabah->createToken('mobile-token')->plainTextToken;
-
-    return response()->json([
-        'success' => true,
-        'message' => 'Login berhasil',
-        'data' => [
-            'token' => $token,
-            'nasabah' => $nasabah,
-        ]
-    ]);
-});
 
 // ROUTE TERPROTEKSI
 Route::middleware('auth:rekening')->group(function () {
