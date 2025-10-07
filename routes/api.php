@@ -66,4 +66,6 @@ Route::middleware('auth:rekening')->group(function () {
 
 });
 
-
+Route::get('/tes-api', function () {
+    return response()->json(['message' => 'API aktif ✅']);
+    });
