@@ -80,6 +80,7 @@ class RekeningResource extends Resource
                         ->label('Jenis Kelamin')
                         ->options(['Laki‑laki' => 'Laki‑laki', 'Perempuan' => 'Perempuan'])
                         ->required()
+                        ->dehydrated(true)
                         ->validationMessages([
                             'required' => 'Jenis Kelamin tidak boleh kosong'
                         ]),

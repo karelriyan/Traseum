@@ -51,7 +51,7 @@ class AdminPanelProvider extends PanelProvider
 
             ])
             ->plugin(
-                HexaLite::make()
+                \App\Plugins\HexaLite::make()
             )
             ->plugin(
                 FilamentEditProfilePlugin::make()
