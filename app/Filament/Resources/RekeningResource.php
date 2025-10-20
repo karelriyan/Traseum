@@ -34,14 +34,28 @@ use Filament\Notifications\Notification;
 use Illuminate\Support\Str;
 use Filament\Tables;
 use App\Filament\Resources\RekeningResource\RelationManagers;
+use Hexters\HexaLite\HasHexaLite;
 
 class RekeningResource extends Resource
 {
+    use HasHexaLite;
+
+    public $hexaSort = 3;
     protected static ?string $model = Rekening::class;
     protected static ?string $navigationIcon = 'heroicon-o-currency-dollar';
     protected static ?string $navigationGroup = 'Manajemen Pengguna';
     protected static ?string $navigationLabel = 'Rekening Nasabah';
     protected static ?int $navigationSort = 3;
+
+    public function defineGates()
+    {
+        return [
+            'rekening.index'  => __('Lihat Rekening Nasabah'),
+            'rekening.create' => __('Buat Rekening Nasabah Baru'),
+            'rekening.update' => __('Ubah Rekening Nasabah'),
+            'rekening.delete' => __('Hapus Rekening Nasabah'),
+        ];
+    }
 
     public static function form(Form $form): Form
     {
@@ -328,7 +342,8 @@ class RekeningResource extends Resource
             ])
             ->actions([
                 EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                ->visible(fn() => hexa()->can('rekening.delete')),
                 Tables\Actions\RestoreAction::make(),
                 Tables\Actions\ForceDeleteAction::make(),
             ])
@@ -378,7 +393,8 @@ class RekeningResource extends Resource
                         'created_at' => fn($record) => $record->created_at ? date('d/m/Y H:i', strtotime($record->created_at)) : '',
                         'updated_at' => fn($record) => $record->updated_at ? date('d/m/Y H:i', strtotime($record->updated_at)) : '',
                     ]),
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make()
+                ->visible(fn() => hexa()->can('rekening.delete')),
                 Tables\Actions\RestoreBulkAction::make(),
                 Tables\Actions\ForceDeleteBulkAction::make(),
             ]);
@@ -387,7 +403,8 @@ class RekeningResource extends Resource
     protected function getActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+            ->visible(fn() => hexa()->can('rekening.delete')),
             Actions\ForceDeleteAction::make(),
             Actions\RestoreAction::make(),
         ];

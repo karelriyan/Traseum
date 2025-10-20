@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\Hash;
 class UserResource extends Resource
 {
     use HasHexaLite;
+
+    protected static ?int $hexaSort = 1;
     
     protected static ?string $model = User::class;
 
@@ -24,9 +26,19 @@ class UserResource extends Resource
 
     protected static bool $shouldRegisterNavigation = true;
 
-    protected static ?string $navigationLabel = 'Kelola Admin';
+    protected static ?string $navigationLabel = 'Pengelolaan Admin';
 
     protected static ?int $navigationSort = 1;
+
+    public function defineGates()
+    {
+        return [
+            'user.index'  => __('Lihat Pengelolaan Admin'),
+            'user.create' => __('Buat Admin Baru'),
+            'user.update' => __('Ubah Admin'),
+            'user.delete' => __('Hapus Admin'),
+        ];
+    }
 
     public static function form(Form $form): Form
     {
@@ -117,12 +129,15 @@ class UserResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn() => hexa()->can('user.update')),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn() => hexa()->can('user.delete')),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                    ->visible(fn() => hexa()->can('user.delete')),
                 ]),
             ]);
     }

@@ -13,7 +13,8 @@ class ListPengeluarans extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+            ->visible(fn() => hexa()->can('pengeluaran.create')),
         ];
     }
 }

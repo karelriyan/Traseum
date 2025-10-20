@@ -19,9 +19,11 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Support\HtmlString;
 use Illuminate\Database\Eloquent\Collection;
+use Hexters\HexaLite\HasHexaLite;
 
 class SetorSampahResource extends Resource
 {
+    use HasHexaLite;
     protected static ?string $model = SetorSampah::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-archive-box';
@@ -29,6 +31,18 @@ class SetorSampahResource extends Resource
     protected static ?string $navigationGroup = 'Operasional Bank Sampah';
 
     protected static ?int $navigationSort = 1;
+
+    public $hexaSort = 4;
+
+    public function defineGates()
+    {
+        return [
+            'setor_sampah.index' => __('Lihat Data Setoran Sampah'),
+            'setor_sampah.create' => __('Buat Setoran Sampah Baru'),
+            'setor_sampah.update' => __('Ubah Data Setoran Sampah'),
+            'setor_sampah.delete' => __('Hapus Data Setoran Sampah'),
+        ];
+    }
 
     public static function form(Form $form): Form
     {
@@ -412,12 +426,15 @@ class SetorSampahResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                    ->visible(fn() => hexa()->can('setor_sampah.update')),
+                Tables\Actions\DeleteAction::make()
+                    ->visible(fn() => hexa()->can('setor_sampah.delete')),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn() => hexa()->can('setor_sampah.delete')),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),

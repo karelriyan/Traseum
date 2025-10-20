@@ -33,15 +33,15 @@ class RoleResource extends Resource
 
     protected static bool $shouldRegisterNavigation = true;
 
-    public $hexaSort = 1;
+    public $hexaSort = 2;
 
     public function defineGates()
     {
         return [
-            'role.index' => __('Access Roles & Permissions'),
-            'role.create' => __('Create New Role and Permission'),
-            'role.update' => __('Update Existing Role and Permission'),
-            'role.delete' => __('Delete Role and Permission'),
+            'role.index' => __('Lihat Jabatan Admin dan Izin Akses'),
+            'role.create' => __('Buat Jabatan Admin dan Izin Akses Baru'),
+            'role.update' => __('Ubah Jabatan Admin dan Izin Akses'),
+            'role.delete' => __('Hapus Jabatan Admin dan Izin Akses'),
         ];
     }
 

@@ -26,9 +26,11 @@ use Filament\Forms\Get;
 use Filament\Forms\Set;
 use Filament\Tables\Actions\Action;
 use Illuminate\Support\Facades\DB;
+use Hexters\HexaLite\HasHexaLite;
 
 class WithdrawRequestResource extends Resource
 {
+    use HasHexaLite;
     protected static ?string $model = WithdrawRequest::class;
     protected static ?string $title = 'Penarikan Saldo';
     protected static ?string $pluralModelLabel = 'Penarikan Saldo';
@@ -39,6 +41,18 @@ class WithdrawRequestResource extends Resource
     protected static ?string $navigationGroup = 'Operasional Bank Sampah';
 
     protected static ?int $navigationSort = 2;
+
+    public $hexaSort = 5;
+
+    public function defineGates()
+    {
+        return [
+            'withdraw_request.index' => __('Lihat Penarikan Saldo Nasabah'),
+            'withdraw_request.create' => __('Buat Permintaan Penarikan Saldo Nasabah'),
+            'withdraw_request.update' => __('Ubah Permintaan Penarikan Saldo Nasabah'),
+            'withdraw_request.delete' => __('Hapus Permintaan Penarikan Saldo Nasabah'),
+        ];
+    }
 
     public static function form(Form $form): Form
     {
@@ -169,11 +183,12 @@ class WithdrawRequestResource extends Resource
             ->defaultSort('created_at', 'desc')
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                ->visible(fn() => hexa()->can('withdraw_request.delete')),
                 Tables\Actions\RestoreAction::make(),
                 Tables\Actions\ForceDeleteAction::make(),
             ])
-            ->bulkActions([Tables\Actions\BulkActionGroup::make([Tables\Actions\DeleteBulkAction::make()])]);
+            ->bulkActions([Tables\Actions\BulkActionGroup::make([Tables\Actions\DeleteBulkAction::make()->visible(fn() => hexa()->can('withdraw_request.delete')),]),]);
     }
 
     public static function getRelations(): array

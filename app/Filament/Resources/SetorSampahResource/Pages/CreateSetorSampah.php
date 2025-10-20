@@ -10,6 +10,11 @@ class CreateSetorSampah extends CreateRecord
 {
     protected static string $resource = SetorSampahResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return hexa()->can('setor_sampah.create');
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Validasi bahwa perhitungan sudah dilakukan

@@ -28,9 +28,11 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
 use App\Services\ImageOptimizationService;
+use Hexters\HexaLite\HasHexaLite;
 
 class NewsResource extends Resource
 {
+    use HasHexaLite;
     protected static ?string $model = News::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-newspaper';
@@ -43,6 +45,18 @@ class NewsResource extends Resource
     protected static ?string $pluralModelLabel = 'Berita';
 
     protected static ?int $navigationSort = 2;
+
+    public $hexaSort = 10;
+
+    public function defineGates()
+    {
+        return [
+            'berita.index' => __('Lihat Berita'),
+            'berita.create' => __('Buat Berita Baru'),
+            'berita.update' => __('Ubah Berita'),
+            'berita.delete' => __('Hapus Berita'),
+        ];
+    }
 
     public static function form(Form $form): Form
     {
@@ -214,7 +228,8 @@ class NewsResource extends Resource
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                ->visible(fn()=>hexa()->can('berita.update')),
                 Tables\Actions\Action::make('view_image')
                     ->label('Lihat Gambar')
                     ->icon('heroicon-o-eye')
@@ -250,12 +265,14 @@ class NewsResource extends Resource
                             ->color('secondary')
                     )
                     ->visible(fn(News $record) => $record->featured_image),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\DeleteAction::make()
+                ->visible(fn()=>hexa()->can('berita.delete')),
                 Tables\Actions\RestoreAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                    ->visible(fn()=>hexa()->can('berita.delete')),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
                     Tables\Actions\BulkAction::make('optimize_images')

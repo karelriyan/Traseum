@@ -10,10 +10,16 @@ class EditPengeluaran extends EditRecord
 {
     protected static string $resource = PengeluaranResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return hexa()->can('pengeluaran.update');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->visible(fn() => hexa()->can('pengeluaran.delete')),
         ];
     }
 }

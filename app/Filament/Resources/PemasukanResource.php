@@ -13,9 +13,11 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use App\Models\Rekening;
+use Hexters\HexaLite\HasHexaLite;
 
 class PemasukanResource extends Resource
 {
+    use HasHexaLite;
     protected static ?string $model = Pemasukan::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-banknotes';
@@ -24,6 +26,16 @@ class PemasukanResource extends Resource
 
     protected static ?int $navigationSort = 1;
 
+    public $hexaSort = 8;
+
+    public function defineGates(){
+        return [
+            'pemasukan.index' => __('Lihat Pemasukan'),
+            'pemasukan.create' => __('Buat Pemasukan Baru'),
+            'pemasukan.update' => __('Ubah Pemasukan'),
+            'pemasukan.delete' => __('Hapus Pemasukan'),
+        ];
+    }
     public static function form(Form $form): Form
     {
         return $form
@@ -109,14 +121,17 @@ class PemasukanResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                ->visible(fn() => hexa()->can('pemasukan.update')),
+                Tables\Actions\DeleteAction::make()
+                ->visible(fn() => hexa()->can('pemasukan.delete')),
                 Tables\Actions\RestoreAction::make(),
                 Tables\Actions\ForceDeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                    ->visible(fn() => hexa()->can('pemasukan.delete')),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),

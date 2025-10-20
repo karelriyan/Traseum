@@ -10,10 +10,15 @@ class ViewSetorSampah extends ViewRecord
 {
     protected static string $resource = SetorSampahResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return hexa()->can('setor_sampah.view');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\EditAction::make(),
+            Actions\EditAction::make()->visible(fn() => hexa()->can('setor_sampah.update')),
         ];
     }
 }

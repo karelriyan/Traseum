@@ -12,9 +12,11 @@ use App\Filament\Resources\SampahResource\RelationManagers;
 use Filament\Resources\Tables\Table;
 use Filament\Tables;
 use Filament\Tables\Columns\TextColumn;
+use Hexters\HexaLite\HasHexaLite;
 
 class SampahResource extends Resource
 {
+    use HasHexaLite;
     protected static ?string $model = Sampah::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-trash';
@@ -24,6 +26,19 @@ class SampahResource extends Resource
     protected static ?string $navigationGroup = 'Operasional Bank Sampah';
 
     protected static ?int $navigationSort = 3;
+
+    public $hexaSort = 6;
+
+    public function defineGates()
+    {
+        return [
+            'sampah.index' => __('Lihat Pendataan Sampah'),
+            'sampah.create' => __('Buat Pendataan Sampah Baru'),
+            'sampah.update' => __('Ubah Pendataan Sampah'),
+            'sampah.delete' => __('Hapus Pendataan Sampah'),
+        ];
+    }
+
 
     public static function form(Forms\Form $form): Forms\Form
     {
@@ -70,11 +85,14 @@ class SampahResource extends Resource
                 //
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                ->visible(fn() => hexa()->can('sampah.update')),
+                Tables\Actions\DeleteAction::make()
+                ->visible(fn() => hexa()->can('sampah.delete')),
             ])
             ->bulkActions([
-                Tables\Actions\DeleteBulkAction::make(),
+                Tables\Actions\DeleteBulkAction::make()
+                ->visible(fn() => hexa()->can('sampah.delete')),
             ]);
     }
 

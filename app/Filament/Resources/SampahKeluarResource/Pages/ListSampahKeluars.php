@@ -13,7 +13,8 @@ class ListSampahKeluars extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()
+            ->visible(fn() => hexa()->can('sampah_keluar.create')),
         ];
     }
 }

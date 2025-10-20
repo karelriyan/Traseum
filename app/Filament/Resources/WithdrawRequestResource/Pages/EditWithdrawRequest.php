@@ -10,10 +10,15 @@ class EditWithdrawRequest extends EditRecord
 {
     protected static string $resource = WithdrawRequestResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return hexa()->can('withdraw_request.update');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()->visible(fn() => hexa()->can('withdraw_request.delete')),
         ];
     }
 

@@ -10,10 +10,15 @@ class EditSampah extends EditRecord
 {
     protected static string $resource = SampahResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return hexa()->can('sampah.update');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()->visible(fn() => hexa()->can('sampah.delete')),
         ];
     }
 }

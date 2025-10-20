@@ -14,10 +14,16 @@ class EditRekening extends EditRecord
 {
     protected static string $resource = RekeningResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return hexa()->can('rekening.update');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()
+                ->visible(fn() => hexa()->can('rekening.delete')),
             Actions\RestoreAction::make(),
             Actions\ForceDeleteAction::make(),
         ];

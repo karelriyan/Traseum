@@ -13,7 +13,12 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()->visible(fn () => hexa()->can('user.delete')),
         ];
+    }
+
+    public static function canAccess(array $parameters = []): bool
+    {
+        return hexa()->can('user.update');
     }
 }

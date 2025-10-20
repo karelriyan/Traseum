@@ -14,9 +14,11 @@ use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Number;
+use Hexters\HexaLite\HasHexaLite;
 
 class PengeluaranResource extends Resource
 {
+    use HasHexaLite;
     protected static ?string $model = Pengeluaran::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-shopping-bag';
@@ -24,6 +26,19 @@ class PengeluaranResource extends Resource
     protected static ?string $navigationGroup = 'Keuangan Bank Sampah';
 
     protected static ?int $navigationSort = 2;
+
+    public $hexaSort = 9;
+
+    public function defineGates()
+    {
+        return [
+            'pengeluaran.index' => __('Lihat Pengeluaran'),
+            'pengeluaran.create' => __('Buat Pengeluaran Baru'),
+            'pengeluaran.update' => __('Ubah Pengeluaran'),
+            'pengeluaran.delete' => __('Hapus Pengeluaran'),
+        ];
+
+    }
 
     public static function form(Form $form): Form
     {
@@ -127,14 +142,17 @@ class PengeluaranResource extends Resource
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
-                Tables\Actions\EditAction::make(),
-                Tables\Actions\DeleteAction::make(),
+                Tables\Actions\EditAction::make()
+                ->visible(fn() => hexa()->can('pengeluaran.update')),
+                Tables\Actions\DeleteAction::make()
+                ->visible(fn() =>hexa()->can('pengeluaran.delete')),
                 Tables\Actions\RestoreAction::make(),
                 Tables\Actions\ForceDeleteAction::make(),
             ])
             ->bulkActions([
                 Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make(),
+                    Tables\Actions\DeleteBulkAction::make()
+                        ->visible(fn() => hexa()->can('pengeluaran.delete')),
                     Tables\Actions\RestoreBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),
                 ]),

@@ -18,13 +18,27 @@ use Filament\Tables\Table;
 use Filament\Tables\Columns\TextColumn;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Support\HtmlString;
+use Hexters\HexaLite\HasHexaLite;
 
 class SampahKeluarResource extends Resource
 {
+    use HasHexaLite;
     protected static ?string $model = SampahKeluar::class;
     protected static ?string $navigationIcon = 'heroicon-o-truck';
     protected static ?string $navigationGroup = 'Operasional Bank Sampah';
     protected static ?int $navigationSort = 4;
+
+    public $hexaSort = 7;
+    
+     public function defineGates()
+    {
+        return [
+            'sampah_keluar.index' => __('Lihat Pendataan Sampah Keluar'),
+            'sampah_keluar.create' => __('Buat Pendataan Sampah Keluar Baru'),
+            'sampah_keluar.update' => __('Ubah Pendataan Sampah Keluar'),
+            'sampah_keluar.delete' => __('Hapus Pendataan Sampah Keluar'),
+        ];
+    }
 
     public static function form(Form $form): Form
     {
@@ -293,8 +307,18 @@ class SampahKeluarResource extends Resource
                 TextColumn::make('created_at')->dateTime()->label('Dibuat')->toggleable(isToggledHiddenByDefault: true),
             ])
             ->defaultSort('tanggal_keluar', 'desc')
-            ->actions([Tables\Actions\EditAction::make(), Tables\Actions\DeleteAction::make()])
-            ->bulkActions([Tables\Actions\BulkActionGroup::make([Tables\Actions\DeleteBulkAction::make()])]);
+            ->actions([
+                Tables\Actions\EditAction::make()
+                ->visible(fn() => hexa()->can('sampah_keluar.update')),
+                Tables\Actions\DeleteAction::make()
+                ->visible(fn() => hexa()->can('sampah_keluar.delete')),
+                ])
+            ->bulkActions([
+                Tables\Actions\BulkActionGroup::make([
+                    Tables\Actions\DeleteBulkAction::make()
+                    ->visible(fn() => hexa()->can('sampah_keluar.delete')),
+                    ])
+                ]);
     }
 
     public static function getPages(): array

@@ -10,10 +10,15 @@ class EditSetorSampah extends EditRecord
 {
     protected static string $resource = SetorSampahResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return hexa()->can('setor_sampah.update');
+    }
+
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make(),
+            Actions\DeleteAction::make()->visible(fn() => hexa()->can('setor_sampah.delete')),
         ];
     }
 }

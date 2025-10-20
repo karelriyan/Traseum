@@ -15,6 +15,11 @@ class CreateRekening extends CreateRecord
 {
     protected static string $resource = RekeningResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return hexa()->can('rekening.create');
+    }
+
     protected function mutateFormDataBeforeCreate(array $data): array
     {
         // Struktur Nomor Rekening: 1 (status desa) + 4 (tanggal pembuatan) + 3 (urut) = 8 digit

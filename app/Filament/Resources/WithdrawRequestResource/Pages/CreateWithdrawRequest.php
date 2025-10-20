@@ -12,6 +12,10 @@ class CreateWithdrawRequest extends CreateRecord
 {
     protected static string $resource = WithdrawRequestResource::class;
 
+    public static function canAccess(array $parameters = []): bool
+    {
+        return hexa()->can('withdraw_request.create');
+    }
     protected function getRedirectUrl(): string
     {
         return $this->getResource()::getUrl('index');

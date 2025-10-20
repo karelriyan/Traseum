@@ -15,7 +15,8 @@ class ListWithdrawRequests extends ListRecords
         return [
             Actions\CreateAction::make()
                 ->label('Tambah Penarikan Saldo')
-                ->icon('heroicon-o-plus'),
+                ->icon('heroicon-o-plus')
+                ->visible(fn() => hexa()->can('withdraw_request.create')),
         ];
     }
 }

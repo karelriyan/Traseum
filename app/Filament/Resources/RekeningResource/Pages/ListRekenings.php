@@ -14,7 +14,7 @@ class ListRekenings extends ListRecords
     protected function getHeaderActions(): array
     {
         return [
-            Actions\CreateAction::make(),
+            Actions\CreateAction::make()->visible(fn() => hexa()->can('rekening.create')),
         ];
     }
 
