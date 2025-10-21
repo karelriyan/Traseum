@@ -80,9 +80,6 @@ class RoleResource extends Resource
                     ->maxLength(100)
                     ->placeholder(__('Supervisor'))
                     ->required(),
-                ViewField::make('checkall')
-                    ->label(__('Check / Uncheck all'))
-                    ->view('hexa::role.toggle-button'),
                 ...$permissions,
             ]);
     }
