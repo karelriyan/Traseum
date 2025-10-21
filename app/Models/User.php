@@ -293,6 +293,52 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      */
     public function checkPermissionTo(array|string $permissions): bool
     {
+        // Accept either Hexa gate keys (e.g. 'rekening.update') or
+        // Filament/Policy-style strings like 'update Rekening'.
+        $normalize = function (string $perm): string {
+            // If looks like a Hexa gate already, pass through
+            if (str_contains($perm, '.')) {
+                return $perm;
+            }
+
+            // Convert 'delete-any FooBar' / 'view-any FooBar' / 'update FooBar' to hexa keys
+            $parts = explode(' ', trim($perm), 2);
+            if (count($parts) === 2) {
+                [$action, $model] = $parts;
+
+                $action = strtolower($action);
+                $modelSnake = \Illuminate\Support\Str::snake($model);
+
+                // Map policy actions to Hexa Lite gates
+                $map = [
+                    'view' => 'index',
+                    'view-any' => 'index',
+                    'create' => 'create',
+                    'update' => 'update',
+                    'delete' => 'delete',
+                    'delete-any' => 'delete',
+                    'restore' => 'delete',
+                    'restore-any' => 'delete',
+                    'force-delete' => 'delete',
+                    'force-delete-any' => 'delete',
+                    'replicate' => 'update',
+                    'reorder' => 'update',
+                ];
+
+                $action = $map[$action] ?? $action;
+                return $modelSnake . '.' . $action;
+            }
+
+            // Fallback: return as-is
+            return $perm;
+        };
+
+        if (is_array($permissions)) {
+            $permissions = array_map($normalize, $permissions);
+        } else {
+            $permissions = $normalize($permissions);
+        }
+
         return hexa()->user($this)->can($permissions);
     }
 }
