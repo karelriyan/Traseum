@@ -36,4 +36,10 @@ class EditUser extends EditRecord
     {
         return hexa()->can('user.update');
     }
+
+    protected function afterSave(): void
+    {
+        // Ensure cached roles/permissions/panel access are refreshed after edits (including role changes)
+        $this->record->refreshCache();
+    }
 }

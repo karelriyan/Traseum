@@ -17,4 +17,10 @@ class CreateUser extends CreateRecord
     {
         return hexa()->can('user.create');
     }
+
+    protected function afterCreate(): void
+    {
+        // Warm caches for the created user to avoid stale permission issues immediately after creation
+        $this->record->refreshCache();
+    }
 }

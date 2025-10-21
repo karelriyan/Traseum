@@ -116,9 +116,9 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      */
     public function canAccessPanel(Panel $panel): bool
     {
-        return Cache::remember("user_can_access_panel_{$this->id}", 3600, function () {
-            // Allow access to admin panel for users with specific roles
-            return $this->hasRole(['Super Admin', 'Admin']) || $this->isSuperAdmin();
+        return Cache::remember("user_can_access_panel_{$this->id}", 3600, function () use ($panel) {
+            // Allow access to the panel for any user that has at least one registered role
+            return $this->roles()->exists();
         });
     }
 
