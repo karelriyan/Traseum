@@ -87,7 +87,12 @@ class RoleResource extends Resource
     public static function table(Table $table): Table
     {
         return $table
-            ->modifyQueryUsing(fn($query) => $query->where('guard', hexa()->guard()))
+            ->modifyQueryUsing(
+                fn($query) =>
+                $query
+                    ->where('guard', hexa()->guard())
+                    ->where('name', '!=', 'Super Admin')
+            )
             ->columns([
                 TextColumn::make('name')
                     ->searchable()

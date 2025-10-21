@@ -64,8 +64,11 @@ class UserResource extends Resource
                             ->unique(ignoreRecord: true),
 
                         Forms\Components\Select::make('roles')
-                            // ->multiple()
-                            ->relationship('roles', 'name')
+                            ->relationship(
+                                'roles',
+                                'name',
+                                fn($query) => $query->where('name', '!=', 'Super Admin')
+                            )
                             ->preload()
                             ->required()
                             ->validationMessages([
@@ -131,7 +134,13 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                //
+                Tables\Filters\SelectFilter::make('roles.name')
+                    ->label('Jabatan')
+                    ->options(function () {
+                        return \App\Models\Role::where('name', '!=', 'Super Admin')
+                            ->pluck('name', 'name')
+                            ->toArray();
+                    }),
             ])
             ->actions([
                 Tables\Actions\EditAction::make()
