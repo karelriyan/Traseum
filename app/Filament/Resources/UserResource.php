@@ -176,7 +176,11 @@ class UserResource extends Resource
 
             ->actions([
                 Tables\Actions\EditAction::make()
-                    ->visible(fn() => hexa()->can('user.update')),
+                    ->visible(
+                        fn($record) =>
+                        hexa()->can('user.update') &&
+                        !$record->roles()->where('name', 'Super Admin')->exists()
+                    ),
                 Tables\Actions\DeleteAction::make()
                     ->visible(
                         fn($record) =>
