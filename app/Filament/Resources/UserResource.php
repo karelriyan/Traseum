@@ -26,7 +26,7 @@ class UserResource extends Resource
 
     protected static bool $shouldRegisterNavigation = true;
 
-    protected static ?string $navigationLabel = 'Pengelolaan Admin';
+    protected static ?string $navigationLabel = 'Daftar Admin';
 
     protected static ?int $navigationSort = 1;
 
