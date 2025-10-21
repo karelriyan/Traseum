@@ -8,16 +8,20 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Str;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class News extends Model
 {
-    use HasFactory, SoftDeletes, HasUlids;
+    use HasFactory, SoftDeletes, HasUlids, LogsActivity;
 
     protected $fillable = [
+        'name',
+        'text',
         'title',
         'slug',
         'excerpt',
-        'content', 
+        'content',
         'featured_image',
         'status',
         'published_at',
@@ -41,64 +45,72 @@ class News extends Model
 
     protected $dates = ['deleted_at'];
 
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('news')
+            ->logAll()
+            ->setDescriptionForEvent(fn(string $eventName) => "Berita has been {$eventName}");
+    }
+
     // Auto-generate fields
     protected static function boot()
     {
         parent::boot();
-        
+
         static::creating(function ($news) {
             // Auto-set author to current logged in user
             if (empty($news->author_id)) {
                 $news->author_id = auth()->id();
             }
-            
+
             // Auto-generate unique slug if not provided
             if (empty($news->slug)) {
                 $slug = Str::slug($news->title);
                 $originalSlug = $slug;
                 $counter = 1;
-                
+
                 // Check if slug exists
                 while (static::where('slug', $slug)->exists()) {
                     $slug = $originalSlug . '-' . $counter;
                     $counter++;
                 }
-                
+
                 $news->slug = $slug;
             }
-            
+
             // Auto-generate meta_title if not provided
             if (empty($news->meta_title)) {
                 $news->meta_title = Str::limit($news->title, 60);
             }
-            
+
             // Auto-generate meta_description if not provided
             if (empty($news->meta_description)) {
                 $news->meta_description = Str::limit($news->excerpt, 160);
             }
         });
-        
+
         static::updating(function ($news) {
             // Auto-generate unique slug if not provided or title changed
             if (empty($news->slug) || $news->isDirty('title')) {
                 $slug = Str::slug($news->title);
                 $originalSlug = $slug;
                 $counter = 1;
-                
+
                 // Check if slug exists (excluding current record)
                 while (static::where('slug', $slug)->where('id', '!=', $news->id)->exists()) {
                     $slug = $originalSlug . '-' . $counter;
                     $counter++;
                 }
-                
+
                 $news->slug = $slug;
             }
-            
+
             // Auto-generate meta_title if not provided
             if (empty($news->meta_title)) {
                 $news->meta_title = Str::limit($news->title, 60);
             }
-            
+
             // Auto-generate meta_description if not provided
             if (empty($news->meta_description)) {
                 $news->meta_description = Str::limit($news->excerpt, 160);
@@ -121,7 +133,7 @@ class News extends Model
     public function scopePublished($query)
     {
         return $query->where('status', self::STATUS_PUBLISHED)
-                    ->where('published_at', '<=', now());
+            ->where('published_at', '<=', now());
     }
 
     public function scopeDraft($query)
@@ -196,7 +208,7 @@ class News extends Model
         if (!$this->featured_image) {
             return null;
         }
-        
+
         // Use relative URL to avoid CORS issues
         return url('storage/' . $this->featured_image);
     }

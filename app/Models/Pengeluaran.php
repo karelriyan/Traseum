@@ -7,10 +7,23 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Concerns\HasUlids;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Auth;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Pengeluaran extends Model
 {
-    use HasUlids, SoftDeletes, HasFactory;
+    use HasUlids, SoftDeletes, HasFactory, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('pengeluaran')
+            ->logAll()
+            ->setDescriptionForEvent(fn(string $eventName) => "Pengeluaran has been {$eventName}");
+    }
+
+    protected $fillable = ['name','text'];
+
     protected $table = 'pengeluaran';
     protected $guarded = ['id'];
     protected $casts = [

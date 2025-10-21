@@ -20,6 +20,7 @@ use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
 use Hexters\HexaLite\HexaLite;
 use Joaopaulolndev\FilamentEditProfile\FilamentEditProfilePlugin;
+use Rmsramos\Activitylog\ActivitylogPlugin; 
 
 
 class AdminPanelProvider extends PanelProvider
@@ -50,6 +51,10 @@ class AdminPanelProvider extends PanelProvider
                     ->sort(-1), // Menampilkan di atas menu lainnya
 
             ])
+            ->plugins([
+                ActivitylogPlugin::make()
+                    ->resource(\App\Filament\Resources\ActivitylogResource::class)
+                ])
             ->plugin(
                 \App\Plugins\HexaLite::make()
             )

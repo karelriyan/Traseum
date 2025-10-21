@@ -33,6 +33,7 @@ use Hexters\HexaLite\HasHexaLite;
 class NewsResource extends Resource
 {
     use HasHexaLite;
+
     protected static ?string $model = News::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-newspaper';

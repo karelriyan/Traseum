@@ -9,10 +9,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Sanctum\HasApiTokens;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Foundation\Auth\User as Authenticatable; 
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
 
 class Rekening extends Authenticatable
 {
-    use HasUlids, SoftDeletes, HasFactory, HasApiTokens;
+    use HasUlids, SoftDeletes, HasFactory, HasApiTokens, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('rekening')
+            ->logAll()
+            ->setDescriptionForEvent(fn(string $eventName) => "Rekening has been {$eventName}");
+    }
 
     protected $table = 'rekening';
 
@@ -21,7 +31,15 @@ class Rekening extends Authenticatable
     protected $keyType = 'string';
 
      protected $fillable = [
+        'name',
+        'text',
         'no_rekening',
+        'gender',
+        'alamat',
+        'dusun',
+        'rt',
+        'rw',
+        'pendidikan',
         'nama',
         'nik',
         'no_kk',

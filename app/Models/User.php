@@ -13,11 +13,23 @@ use Illuminate\Notifications\Notifiable;
 use Hexters\HexaLite\HexaLiteRolePermission;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Cache;
+use Spatie\Activitylog\Traits\LogsActivity;
+use Spatie\Activitylog\LogOptions;
+
 
 class User extends Authenticatable implements FilamentUser, HasAvatar
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory, Notifiable, HasUlids, HexaLiteRolePermission;
+    use HasFactory, Notifiable, HasUlids, HexaLiteRolePermission, LogsActivity;
+
+    public function getActivitylogOptions(): LogOptions
+    {
+        return LogOptions::defaults()
+            ->useLogName('user')
+            ->logAll()
+            ->setDescriptionForEvent(fn(string $eventName) => "Daftar Admin has been {$eventName}");
+    }
+
 
     /**
      * The attributes that are mass assignable.
@@ -26,6 +38,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
      */
     protected $fillable = [
         'name',
+        'text',
         'email',
         'password',
         'avatar_url',
