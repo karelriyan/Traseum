@@ -54,6 +54,11 @@ class WithdrawRequestResource extends Resource
         ];
     }
 
+    public static function canAccess(): bool
+    {
+        return hexa()->can('withdraw_request.index');
+    }
+
     public static function form(Form $form): Form
     {
         return $form

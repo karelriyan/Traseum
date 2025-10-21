@@ -57,6 +57,11 @@ class RekeningResource extends Resource
         ];
     }
 
+    public static function canAccess(): bool
+    {
+        return hexa()->can('rekening.index');
+    }
+
     public static function form(Form $form): Form
     {
         return $form->schema([

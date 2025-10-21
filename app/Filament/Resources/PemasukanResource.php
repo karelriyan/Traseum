@@ -36,6 +36,12 @@ class PemasukanResource extends Resource
             'pemasukan.delete' => __('Hapus Pemasukan'),
         ];
     }
+
+    public static function canAccess(): bool
+    {
+        return hexa()->can('pemasukan.index');
+    }
+
     public static function form(Form $form): Form
     {
         return $form

@@ -40,6 +40,11 @@ class SampahKeluarResource extends Resource
         ];
     }
 
+    public static function canAccess(): bool
+    {
+        return hexa()->can('sampah_keluar.index');
+    }
+
     public static function form(Form $form): Form
     {
         return $form

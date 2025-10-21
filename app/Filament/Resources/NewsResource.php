@@ -57,6 +57,11 @@ class NewsResource extends Resource
             'berita.delete' => __('Hapus Berita'),
         ];
     }
+    
+    public static function canAccess(): bool
+    {
+        return hexa()->can('berita.index');
+    }
 
     public static function form(Form $form): Form
     {

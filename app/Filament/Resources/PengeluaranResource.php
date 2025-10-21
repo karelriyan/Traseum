@@ -40,6 +40,11 @@ class PengeluaranResource extends Resource
 
     }
 
+    public static function canAccess(): bool
+    {
+        return hexa()->can('pengeluaran.index');
+    }
+
     public static function form(Form $form): Form
     {
         // Ambil saldo rekening donasi/kas untuk validasi dan tampilan

@@ -44,6 +44,11 @@ class SetorSampahResource extends Resource
         ];
     }
 
+    public static function canAccess(): bool
+    {
+        return hexa()->can('setor_sampah.index');
+    }
+
     public static function form(Form $form): Form
     {
         return $form

@@ -40,6 +40,11 @@ class UserResource extends Resource
         ];
     }
 
+    public static function canAccess(): bool
+    {
+        return hexa()->can('user.index');
+    }
+
     public static function form(Form $form): Form
     {
         return $form

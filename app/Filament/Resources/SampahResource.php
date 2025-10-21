@@ -39,6 +39,11 @@ class SampahResource extends Resource
         ];
     }
 
+    public static function canAccess(): bool
+    {
+        return hexa()->can('sampah.index');
+    }
+
 
     public static function form(Forms\Form $form): Forms\Form
     {
