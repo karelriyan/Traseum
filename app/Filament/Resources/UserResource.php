@@ -105,6 +105,15 @@ class UserResource extends Resource
     {
         return $table
             ->columns([
+                Tables\Columns\ImageColumn::make('avatar_url')
+                    ->label('Foto')
+                    ->getStateUsing(function ($record) {
+                        return $record->avatar_url ?: null; // kalau kosong, null
+                    })
+                    ->default(fn($record) => "https://ui-avatars.com/api/?name=" . urlencode($record->name) . "&background=random")
+                    ->circular()
+                    ->size(40),
+
                 Tables\Columns\TextColumn::make('name')
                     ->label('Nama')
                     ->searchable()
