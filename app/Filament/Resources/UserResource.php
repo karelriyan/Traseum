@@ -118,8 +118,38 @@ class UserResource extends Resource
                 Tables\Columns\TextColumn::make('roles.name')
                     ->label('Jabatan')
                     ->badge()
+                    ->color(function ($state) {
+                        // $state bisa array, Collection, atau string "Admin, Operator"
+                        if ($state instanceof \Illuminate\Support\Collection) {
+                            $roles = $state->toArray();
+                        } elseif (is_array($state)) {
+                            $roles = $state;
+                        } else {
+                            // string -> pecah jadi array
+                            $roles = array_map('trim', explode(',', (string) $state));
+                        }
+
+                        if (in_array('Super Admin', $roles, true)) {
+                            return 'danger';   // 🔴 merah
+                        }
+                        if (in_array('Admin', $roles, true)) {
+                            return 'info';  // 🔵 biru
+                        }
+                        return 'success';       // 🟢 hijau (lainnya)
+                    })
+                    ->formatStateUsing(function ($state) {
+                        // rapikan tampilan bila array/collection
+                        if ($state instanceof \Illuminate\Support\Collection) {
+                            return $state->implode(', ');
+                        }
+                        if (is_array($state)) {
+                            return implode(', ', $state);
+                        }
+                        return $state;
+                    })
                     ->searchable()
                     ->sortable(),
+
 
                 Tables\Columns\TextColumn::make('created_at')
                     ->label('Dibuat')
@@ -134,14 +164,16 @@ class UserResource extends Resource
                     ->toggleable(isToggledHiddenByDefault: true),
             ])
             ->filters([
-                Tables\Filters\SelectFilter::make('roles.name')
+                Tables\Filters\SelectFilter::make('roles')
                     ->label('Jabatan')
-                    ->options(function () {
-                        return \App\Models\Role::where('name', '!=', 'Super Admin')
-                            ->pluck('name', 'name')
-                            ->toArray();
-                    }),
+                    ->relationship(
+                        'roles',
+                        'name',
+                        fn($query) => $query->where('name', '!=', 'Super Admin')
+                    )
+                    ->preload(),
             ])
+
             ->actions([
                 Tables\Actions\EditAction::make()
                     ->visible(fn() => hexa()->can('user.update')),
