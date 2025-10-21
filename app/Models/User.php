@@ -71,6 +71,12 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
             $user->clearUserCache();
         });
 
+        static::deleting(function ($user) {
+            if ($user->roles()->where('name', 'Super Admin')->exists()) {
+                throw new \Exception('Super Admin tidak dapat dihapus.');
+            }
+        });
+
         // Clear cache when user roles are updated
         static::saved(function (User $user) {
             if ($user->wasRecentlyCreated || $user->isDirty(['name', 'email', 'avatar_url'])) {
@@ -187,17 +193,17 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     {
         return Cache::remember("user_avatar_{$this->id}", 3600, function () {
             $avatarPath = $this->attributes['avatar_url'] ?? null;
-            
+
             if (!$avatarPath) {
                 // Return a consistent placeholder instead of null to prevent flickering
                 return 'https://ui-avatars.com/api/?name=' . urlencode($this->name) . '&background=10b981&color=ffffff';
             }
-            
+
             // If it's already a full URL, return as is
             if (filter_var($avatarPath, FILTER_VALIDATE_URL)) {
                 return $avatarPath;
             }
-            
+
             // If it's a relative path, construct full URL
             return asset('storage/' . $avatarPath);
         });
@@ -228,7 +234,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
         if (is_array($role)) {
             return $this->roles()->whereIn('name', $role)->exists();
         }
-        
+
         return $this->roles()->where('name', $role)->exists();
     }
 
@@ -265,7 +271,7 @@ class User extends Authenticatable implements FilamentUser, HasAvatar
     public function refreshCache(): void
     {
         $this->clearUserCache();
-        
+
         // Preload commonly used cache entries
         $this->getFilamentAvatarUrl();
         $this->getCachedRoles();

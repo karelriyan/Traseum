@@ -13,7 +13,22 @@ class EditUser extends EditRecord
     protected function getHeaderActions(): array
     {
         return [
-            Actions\DeleteAction::make()->visible(fn () => hexa()->can('user.delete')),
+            Actions\DeleteAction::make()
+                ->visible(
+                    fn($record) =>
+                    hexa()->can('user.delete') &&
+                    !$record->roles()->where('name', 'Super Admin')->exists()
+                )
+                ->before(function ($record, $action) {
+                    if ($record->roles()->where('name', 'Super Admin')->exists()) {
+                        $action->halt();
+                        \Filament\Notifications\Notification::make()
+                            ->title('Gagal Menghapus')
+                            ->body('Akun Super Admin tidak dapat dihapus.')
+                            ->danger()
+                            ->send();
+                    }
+                }),
         ];
     }
 

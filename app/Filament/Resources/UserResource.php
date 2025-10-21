@@ -17,7 +17,7 @@ class UserResource extends Resource
     use HasHexaLite;
 
     protected static ?int $hexaSort = 1;
-    
+
     protected static ?string $model = User::class;
 
     protected static ?string $navigationIcon = 'heroicon-o-users';
@@ -33,7 +33,7 @@ class UserResource extends Resource
     public function defineGates()
     {
         return [
-            'user.index'  => __('Lihat Pengelolaan Admin'),
+            'user.index' => __('Lihat Pengelolaan Admin'),
             'user.create' => __('Buat Admin Baru'),
             'user.update' => __('Ubah Admin'),
             'user.delete' => __('Hapus Admin'),
@@ -137,13 +137,21 @@ class UserResource extends Resource
                 Tables\Actions\EditAction::make()
                     ->visible(fn() => hexa()->can('user.update')),
                 Tables\Actions\DeleteAction::make()
-                    ->visible(fn() => hexa()->can('user.delete')),
-            ])
-            ->bulkActions([
-                Tables\Actions\BulkActionGroup::make([
-                    Tables\Actions\DeleteBulkAction::make()
-                    ->visible(fn() => hexa()->can('user.delete')),
-                ]),
+                    ->visible(
+                        fn($record) =>
+                        hexa()->can('user.delete') &&
+                        !$record->roles()->where('name', 'Super Admin')->exists()
+                    )
+                    ->before(function ($record, $action) {
+                        if ($record->roles()->where('name', 'Super Admin')->exists()) {
+                            $action->halt();
+                            \Filament\Notifications\Notification::make()
+                                ->title('Gagal Menghapus')
+                                ->body('Akun Super Admin tidak dapat dihapus.')
+                                ->danger()
+                                ->send();
+                        }
+                    }),
             ]);
     }
 
